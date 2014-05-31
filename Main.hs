@@ -1,6 +1,6 @@
 module Main (main) where
 import qualified Data.List as List
-import qualified Language.Haskell.Exts.Annotated as Annotated
+import qualified Language.Haskell.Exts.Annotated as Exts
 import qualified System.Environment as Environment
 import qualified System.IO as IO
 
@@ -23,22 +23,21 @@ readFormatWrite read maybeSourceName write
 
 formatSource :: Maybe String -> String -> Either String String
 formatSource maybeSourceName
-  = checkToFormat . Annotated.parseFileContentsWithComments parseMode
-  where checkToFormat (Annotated.ParseFailed location message)
+  = checkToFormat . Exts.parseFileContentsWithComments parseMode
+  where checkToFormat (Exts.ParseFailed location message)
           = Left $ showSourceLocation location message
-        checkToFormat (Annotated.ParseOk parseTree)
+        checkToFormat (Exts.ParseOk parseTree)
           = Right . show . format $ parseToSourceTree parseTree
         parseMode
           = case maybeSourceName of
-                Nothing -> Annotated.defaultParseMode
-                Just
-                  sourceName -> Annotated.defaultParseMode{Annotated.parseFilename =
-                                                             sourceName}
+                Nothing -> Exts.defaultParseMode
+                Just sourceName -> Exts.defaultParseMode{Exts.parseFilename =
+                                                           sourceName}
 
-showSourceLocation :: Annotated.SrcLoc -> String -> String
+showSourceLocation :: Exts.SrcLoc -> String -> String
 showSourceLocation location message
   = showLocation location ++ majorSeparator ++ message
-  where showLocation (Annotated.SrcLoc filename line column)
+  where showLocation (Exts.SrcLoc filename line column)
           = List.intercalate minorSeparator $
               filename : map show [line, column]
         minorSeparator = ":"
@@ -49,20 +48,19 @@ format SourceTree{sourceElement = element}
   = SourceTree{sourceElement = formattedElement,
                sourceComments = formattedComments}
   where formattedElement
-          = Annotated.fromParseResult . Annotated.parseFileContents $
-              Annotated.prettyPrint element
+          = Exts.fromParseResult . Exts.parseFileContents $
+              Exts.prettyPrint element
         formattedComments = []
 
 data SourceTree = SourceTree{sourceElement ::
-                             Annotated.Module Annotated.SrcSpanInfo,
-                             sourceComments :: [Annotated.Comment]}
+                             Exts.Module Exts.SrcSpanInfo,
+                             sourceComments :: [Exts.Comment]}
 
 instance Show SourceTree where
         show SourceTree{sourceElement = element, sourceComments = comments}
-          = Annotated.exactPrint element comments
+          = Exts.exactPrint element comments
 
 parseToSourceTree ::
-                  (Annotated.Module Annotated.SrcSpanInfo, [Annotated.Comment]) ->
-                    SourceTree
+                  (Exts.Module Exts.SrcSpanInfo, [Exts.Comment]) -> SourceTree
 parseToSourceTree (element, comments)
   = SourceTree{sourceElement = element, sourceComments = comments}
