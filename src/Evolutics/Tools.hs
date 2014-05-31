@@ -8,8 +8,7 @@ transformFilesOrStandardStreams ::
                                 (Maybe FilePath -> String -> Either String String) ->
                                   [FilePath] -> IO ()
 transformFilesOrStandardStreams transform []
-  = transformFileUnlessFailure getContents (transform Nothing)
-      putStrLn
+  = transformFileUnlessFailure getContents (transform Nothing) putStr
 transformFilesOrStandardStreams transform files
   = mapM_ transform' files
   where transform' file
