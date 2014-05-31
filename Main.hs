@@ -1,6 +1,5 @@
 module Main (main) where
 import qualified Data.List as List
-import qualified Language.Haskell.Exts as Exts
 import qualified Language.Haskell.Parser as Parser
 import qualified Language.Haskell.Pretty as Pretty
 import qualified Language.Haskell.Syntax as Syntax
