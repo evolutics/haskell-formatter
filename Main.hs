@@ -39,7 +39,7 @@ showSourceLocation :: Annotated.SrcLoc -> String -> String
 showSourceLocation location message
   = showLocation location ++ majorSeparator ++ message
   where showLocation (Annotated.SrcLoc filename line column)
-          = List.intercalate minorSeparator $ filename :
-              map show [line, column]
+          = List.intercalate minorSeparator $
+              filename : map show [line, column]
         minorSeparator = ":"
         majorSeparator = ": "
