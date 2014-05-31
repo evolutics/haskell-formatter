@@ -1,8 +1,6 @@
 module Main (main) where
 import qualified Data.List as List
-import qualified Language.Haskell.Parser as Parser
-import qualified Language.Haskell.Pretty as Pretty
-import qualified Language.Haskell.Syntax as Syntax
+import qualified Language.Haskell.Exts.Annotated as Annotated
 import qualified System.Environment as Environment
 import qualified System.IO as IO
  
@@ -17,7 +15,7 @@ main
                          (writeFile filename)
  
 readFormatWrite ::
-                  IO String -> Maybe String -> (String -> IO ()) -> IO ()
+                IO String -> Maybe String -> (String -> IO ()) -> IO ()
 readFormatWrite read maybeSourceName write
   = do source <- read
        let formattedSource = formatSource maybeSourceName source in
@@ -25,18 +23,22 @@ readFormatWrite read maybeSourceName write
  
 formatSource :: Maybe String -> String -> Either String String
 formatSource maybeSourceName
-  = format . Parser.parseModuleWithMode parseMode
-  where format (Parser.ParseFailed location message)
+  = format . Annotated.parseModuleWithMode parseMode
+  where format (Annotated.ParseFailed location message)
           = Left $ showSourceLocation location message
-        format (Parser.ParseOk syntaxTree)
-          = Right $ Pretty.prettyPrint syntaxTree
+        format (Annotated.ParseOk syntaxTree)
+          = Right $ Annotated.prettyPrint syntaxTree
         parseMode
-          = maybe Parser.defaultParseMode Parser.ParseMode maybeSourceName
+          = case maybeSourceName of
+                Nothing -> Annotated.defaultParseMode
+                Just
+                  sourceName -> Annotated.defaultParseMode{Annotated.parseFilename =
+                                                             sourceName}
  
-showSourceLocation :: Syntax.SrcLoc -> String -> String
+showSourceLocation :: Annotated.SrcLoc -> String -> String
 showSourceLocation location message
   = showLocation location ++ majorSeparator ++ message
-  where showLocation (Syntax.SrcLoc filename line column)
+  where showLocation (Annotated.SrcLoc filename line column)
           = List.intercalate minorSeparator $ filename :
               map show [line, column]
         minorSeparator = ":"
