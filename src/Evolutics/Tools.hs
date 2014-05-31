@@ -1,5 +1,5 @@
 module Evolutics.Tools
-       (transformFilesOrStandardStreams, showSourceLocation) where
+       (transformFilesOrStandardStreams, formatSourceMessage) where
 import qualified Data.List as List
 import qualified System.IO as IO
 import qualified Language.Haskell.Exts.Annotated as Exts
@@ -25,10 +25,12 @@ transformFileUnlessFailure read transform write
            Left message -> IO.hPutStrLn IO.stderr message
            Right string' -> write string'
 
-showSourceLocation :: Exts.SrcLoc -> String -> String
-showSourceLocation location message
-  = showLocation location ++ majorSeparator ++ message
-  where showLocation (Exts.SrcLoc file line column)
-          = List.intercalate minorSeparator $ file : map show [line, column]
-        minorSeparator = ":"
-        majorSeparator = ": "
+formatSourceMessage :: Exts.SrcLoc -> String -> String
+formatSourceMessage location message
+  = formatSourceLocation location ++ separator ++ message
+  where separator = ": "
+
+formatSourceLocation :: Exts.SrcLoc -> String
+formatSourceLocation (Exts.SrcLoc file line column)
+  = List.intercalate separator $ file : map show [line, column]
+  where separator = ":"

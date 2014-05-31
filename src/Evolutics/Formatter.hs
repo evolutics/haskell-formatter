@@ -7,7 +7,7 @@ formatSource :: Maybe FilePath -> String -> Either String String
 formatSource maybeFile
   = format . Exts.parseFileContentsWithComments parseMode
   where format (Exts.ParseFailed location message)
-          = Left $ Tools.showSourceLocation location message
+          = Left $ Tools.formatSourceMessage location message
         format (Exts.ParseOk (element, comments))
           = Right . show . formatTree $
               SourceTree.createSourceTree element comments
