@@ -23,10 +23,10 @@ readFormatWrite read maybeSourceName write
  
 formatSource :: Maybe String -> String -> Either String String
 formatSource maybeSourceName
-  = format . Annotated.parseFileContentsWithMode parseMode
+  = format . Annotated.parseFileContentsWithComments parseMode
   where format (Annotated.ParseFailed location message)
           = Left $ showSourceLocation location message
-        format (Annotated.ParseOk syntaxTree)
+        format (Annotated.ParseOk (syntaxTree, comments))
           = Right $ Annotated.prettyPrint syntaxTree
         parseMode
           = case maybeSourceName of
