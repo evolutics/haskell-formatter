@@ -3,8 +3,8 @@ import qualified Language.Haskell.Exts.Annotated as Exts
 import qualified Evolutics.SourceTree as SourceTree
 import qualified Evolutics.Tools as Tools
 
-formatSource :: Maybe String -> String -> Either String String
-formatSource maybeSourceName
+formatSource :: Maybe FilePath -> String -> Either String String
+formatSource maybeFilename
   = checkToFormat . Exts.parseFileContentsWithComments parseMode
   where checkToFormat (Exts.ParseFailed location message)
           = Left $ Tools.showSourceLocation location message
@@ -12,10 +12,10 @@ formatSource maybeSourceName
           = Right . show . format $
               SourceTree.createSourceTree element comments
         parseMode
-          = case maybeSourceName of
+          = case maybeFilename of
                 Nothing -> Exts.defaultParseMode
-                Just sourceName -> Exts.defaultParseMode{Exts.parseFilename =
-                                                           sourceName}
+                Just filename -> Exts.defaultParseMode{Exts.parseFilename =
+                                                         filename}
 
 format :: SourceTree.SourceTree -> SourceTree.SourceTree
 format sourceTree = SourceTree.createSourceTree element comments

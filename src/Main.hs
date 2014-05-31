@@ -14,8 +14,8 @@ main
                          (writeFile filename)
 
 readFormatWrite ::
-                IO String -> Maybe String -> (String -> IO ()) -> IO ()
-readFormatWrite read maybeSourceName write
+                IO String -> Maybe FilePath -> (String -> IO ()) -> IO ()
+readFormatWrite read maybeFilename write
   = do source <- read
-       let formattedSource = Formatter.formatSource maybeSourceName source
+       let formattedSource = Formatter.formatSource maybeFilename source
          in either (IO.hPutStrLn IO.stderr) write formattedSource
