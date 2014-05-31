@@ -4,21 +4,21 @@ import qualified Evolutics.SourceTree as SourceTree
 import qualified Evolutics.Tools as Tools
 
 formatSource :: Maybe FilePath -> String -> Either String String
-formatSource maybeFilename
-  = checkToFormat . Exts.parseFileContentsWithComments parseMode
-  where checkToFormat (Exts.ParseFailed location message)
+formatSource maybeFile
+  = format . Exts.parseFileContentsWithComments parseMode
+  where format (Exts.ParseFailed location message)
           = Left $ Tools.showSourceLocation location message
-        checkToFormat (Exts.ParseOk (element, comments))
-          = Right . show . format $
+        format (Exts.ParseOk (element, comments))
+          = Right . show . formatTree $
               SourceTree.createSourceTree element comments
         parseMode
-          = case maybeFilename of
+          = case maybeFile of
                 Nothing -> Exts.defaultParseMode
-                Just filename -> Exts.defaultParseMode{Exts.parseFilename =
-                                                         filename}
+                Just file -> Exts.defaultParseMode{Exts.parseFilename = file}
 
-format :: SourceTree.SourceTree -> SourceTree.SourceTree
-format sourceTree = SourceTree.createSourceTree element comments
+formatTree :: SourceTree.SourceTree -> SourceTree.SourceTree
+formatTree sourceTree
+  = SourceTree.createSourceTree element comments
   where element
           = Exts.fromParseResult . Exts.parseFileContents . Exts.prettyPrint
               $ SourceTree.element sourceTree
