@@ -1,16 +1,12 @@
-module Evolutics.SourceTree
-       (SourceTree(element, comments), createSourceTree) where
+module Evolutics.SourceTree (SourceTree(..), toElementOnly) where
 import qualified Language.Haskell.Exts.Annotated as Exts
+import qualified Evolutics.AttachedComment as AttachedComment
 
-data SourceTree = SourceTree{element ::
-                             Exts.Module Exts.SrcSpanInfo,
-                             comments :: [Exts.Comment]}
+data SourceTree = SourceTree (Exts.Module
+                                (Exts.SrcSpanInfo, [AttachedComment.AttachedComment]))
 
 instance Show SourceTree where
-        show SourceTree{element = element, comments = comments}
-          = Exts.exactPrint element comments
+        show sourceTree = Exts.exactPrint (toElementOnly sourceTree) []
 
-createSourceTree ::
-                 Exts.Module Exts.SrcSpanInfo -> [Exts.Comment] -> SourceTree
-createSourceTree element comments
-  = SourceTree{element = element, comments = comments}
+toElementOnly :: SourceTree -> Exts.Module Exts.SrcSpanInfo
+toElementOnly (SourceTree element) = fmap fst element

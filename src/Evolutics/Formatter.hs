@@ -13,8 +13,7 @@ formatSource maybeFile
   where format (Exts.ParseFailed location message)
           = Left $ Tools.formatSourceMessage location message
         format (Exts.ParseOk (element, comments))
-          = Right . show . formatTree $
-              SourceTree.createSourceTree element' comments
+          = Right . show . formatTree $ attachComments element' comments
           where element' = Trace.trace (show $ visit element) element
         parseMode
           = case maybeFile of
@@ -22,12 +21,20 @@ formatSource maybeFile
                 Just file -> Exts.defaultParseMode{Exts.parseFilename = file}
 
 formatTree :: SourceTree.SourceTree -> SourceTree.SourceTree
-formatTree sourceTree
-  = SourceTree.createSourceTree element comments
+formatTree sourceTree = fromElementOnly element
   where element
           = Exts.fromParseResult . Exts.parseFileContents . Exts.prettyPrint
-              $ SourceTree.element sourceTree
-        comments = []
+              $ SourceTree.toElementOnly sourceTree
+
+fromElementOnly ::
+                Exts.Module Exts.SrcSpanInfo -> SourceTree.SourceTree
+fromElementOnly element
+  = SourceTree.SourceTree $ fmap (flip (,) []) element
+
+attachComments ::
+               Exts.Module Exts.SrcSpanInfo ->
+                 [Exts.Comment] -> SourceTree.SourceTree
+attachComments element _ = fromElementOnly element
 
 visit :: (Data.Data a) => a -> [String]
 visit = Generics.everything (++) query
