@@ -1,4 +1,4 @@
-module Evolutics.Formatter (formatSource) where
+module Evolutics.Formatting (formatSource) where
 import qualified Language.Haskell.Exts.Annotated as Exts
 import qualified Evolutics.Code.Abstract as Abstract
 import qualified Evolutics.Code.ConcreteCommented
