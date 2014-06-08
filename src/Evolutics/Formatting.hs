@@ -2,8 +2,6 @@ module Evolutics.Formatting (formatSource) where
 import qualified Language.Haskell.Exts.Annotated as Exts
 import qualified Evolutics.Code.ConcreteCommented
        as ConcreteCommented
-import qualified Evolutics.Code.ConcreteCommentless
-       as ConcreteCommentless
 import qualified Evolutics.Tools as Tools
 import qualified Evolutics.Transformations.CommentAssignment
        as CommentAssignment
@@ -33,9 +31,4 @@ formatCode concreteCommented
   where abstract = CommentAssignment.assignComments concreteCommented
         concreteCommentless
           = ElementArrangement.arrangeElements $
-              dropComments concreteCommented
-
-dropComments ::
-             ConcreteCommented.ConcreteCommented ->
-               ConcreteCommentless.ConcreteCommentless
-dropComments = ConcreteCommentless.create . ConcreteCommented.root
+              ConcreteCommented.dropComments concreteCommented

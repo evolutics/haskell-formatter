@@ -1,6 +1,8 @@
 module Evolutics.Code.ConcreteCommented
-       (ConcreteCommented, root, comments, create) where
+       (ConcreteCommented, root, comments, create, dropComments) where
 import qualified Language.Haskell.Exts.Annotated as Exts
+import qualified Evolutics.Code.ConcreteCommentless
+       as ConcreteCommentless
 
 data ConcreteCommented = ConcreteCommented{root ::
                                            Exts.Module Exts.SrcSpanInfo,
@@ -14,3 +16,8 @@ create ::
        Exts.Module Exts.SrcSpanInfo -> [Exts.Comment] -> ConcreteCommented
 create root comments
   = ConcreteCommented{root = root, comments = comments}
+
+dropComments ::
+             ConcreteCommented -> ConcreteCommentless.ConcreteCommentless
+dropComments ConcreteCommented{root = root}
+  = ConcreteCommentless.create root
