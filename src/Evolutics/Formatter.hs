@@ -13,17 +13,12 @@ formatSource maybeFile
   where format (Exts.ParseFailed location message)
           = Left $ Tools.formatSourceMessage location message
         format (Exts.ParseOk (root, comments))
-          = Right . rawFormat $ ConcreteCommented.create root comments
+          = Right . show . formatCode $
+              ConcreteCommented.create root comments
         parseMode
           = case maybeFile of
                 Nothing -> Exts.defaultParseMode
                 Just file -> Exts.defaultParseMode{Exts.parseFilename = file}
-
-rawFormat :: ConcreteCommented.ConcreteCommented -> String
-rawFormat code = Exts.exactPrint root comments
-  where root = ConcreteCommented.root code'
-        code' = formatCode code
-        comments = ConcreteCommented.comments code'
 
 formatCode ::
            ConcreteCommented.ConcreteCommented ->
