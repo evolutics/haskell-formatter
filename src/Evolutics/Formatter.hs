@@ -44,7 +44,7 @@ integrateComments _ (ConcreteCommentless.ConcreteCommentless root)
 assignComments ::
                ConcreteCommented.ConcreteCommented -> Abstract.Abstract
 assignComments (ConcreteCommented.ConcreteCommented root _)
-  = Abstract.Abstract $ fmap (const []) root
+  = Abstract.create $ fmap (const []) root
 
 arrangeElements ::
                 ConcreteCommentless.ConcreteCommentless ->

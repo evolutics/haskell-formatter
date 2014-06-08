@@ -1,9 +1,14 @@
-module Evolutics.Code.Abstract (Abstract(..)) where
+module Evolutics.Code.Abstract (Abstract, create) where
 import qualified Language.Haskell.Exts.Annotated as Exts
 
-data Abstract = Abstract (Exts.Module [AbstractComment])
+data Abstract = Abstract{root :: Exts.Module [AbstractComment]}
 
-data AbstractComment = AbstractComment Displacement Bool String
+data AbstractComment = AbstractComment{displacement ::
+                                       Displacement,
+                                       isMultiLine :: Bool, content :: String}
 
 data Displacement = Before
                   | After
+
+create :: Exts.Module [AbstractComment] -> Abstract
+create root = Abstract{root = root}
