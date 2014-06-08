@@ -1,4 +1,4 @@
-module Evolutics.Code.Abstract (Abstract, create) where
+module Evolutics.Code.Abstract.Abstract (Abstract, create) where
 import qualified Language.Haskell.Exts.Annotated as Exts
 
 data Abstract = Abstract{root :: Exts.Module [AbstractComment]}

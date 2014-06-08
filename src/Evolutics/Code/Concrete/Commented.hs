@@ -1,23 +1,18 @@
-module Evolutics.Code.ConcreteCommented
-       (ConcreteCommented, root, comments, create, dropComments) where
+module Evolutics.Code.Concrete.Commented
+       (Commented, root, comments, create, dropComments) where
 import qualified Language.Haskell.Exts.Annotated as Exts
-import qualified Evolutics.Code.ConcreteCommentless
-       as ConcreteCommentless
+import qualified Evolutics.Code.Concrete.Commentless as Commentless
 
-data ConcreteCommented = ConcreteCommented{root ::
-                                           Exts.Module Exts.SrcSpanInfo,
-                                           comments :: [Exts.Comment]}
+data Commented = Commented{root :: Exts.Module Exts.SrcSpanInfo,
+                           comments :: [Exts.Comment]}
 
-instance Show ConcreteCommented where
-        show ConcreteCommented{root = root, comments = comments}
+instance Show Commented where
+        show Commented{root = root, comments = comments}
           = Exts.exactPrint root comments
 
 create ::
-       Exts.Module Exts.SrcSpanInfo -> [Exts.Comment] -> ConcreteCommented
-create root comments
-  = ConcreteCommented{root = root, comments = comments}
+       Exts.Module Exts.SrcSpanInfo -> [Exts.Comment] -> Commented
+create root comments = Commented{root = root, comments = comments}
 
-dropComments ::
-             ConcreteCommented -> ConcreteCommentless.ConcreteCommentless
-dropComments ConcreteCommented{root = root}
-  = ConcreteCommentless.create root
+dropComments :: Commented -> Commentless.Commentless
+dropComments Commented{root = root} = Commentless.create root

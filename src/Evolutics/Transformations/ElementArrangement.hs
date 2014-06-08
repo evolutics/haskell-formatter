@@ -1,14 +1,11 @@
 module Evolutics.Transformations.ElementArrangement
        (arrangeElements) where
 import qualified Language.Haskell.Exts.Annotated as Exts
-import qualified Evolutics.Code.ConcreteCommentless
-       as ConcreteCommentless
+import qualified Evolutics.Code.Concrete.Commentless as Commentless
 
 arrangeElements ::
-                ConcreteCommentless.ConcreteCommentless ->
-                  ConcreteCommentless.ConcreteCommentless
+                Commentless.Commentless -> Commentless.Commentless
 arrangeElements
-  = ConcreteCommentless.create .
+  = Commentless.create .
       Exts.fromParseResult .
-        Exts.parseFileContents .
-          Exts.prettyPrint . ConcreteCommentless.root
+        Exts.parseFileContents . Exts.prettyPrint . Commentless.root
