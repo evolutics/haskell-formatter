@@ -38,8 +38,10 @@ integrateComments ::
                   Abstract.Abstract ->
                     ConcreteCommentless.ConcreteCommentless ->
                       ConcreteCommented.ConcreteCommented
-integrateComments _ (ConcreteCommentless.ConcreteCommentless root)
-  = ConcreteCommented.create root []
+integrateComments _ concreteCommentless
+  = ConcreteCommented.create
+      (ConcreteCommentless.root concreteCommentless)
+      []
 
 assignComments ::
                ConcreteCommented.ConcreteCommented -> Abstract.Abstract
@@ -49,13 +51,13 @@ assignComments
 arrangeElements ::
                 ConcreteCommentless.ConcreteCommentless ->
                   ConcreteCommentless.ConcreteCommentless
-arrangeElements (ConcreteCommentless.ConcreteCommentless root)
-  = ConcreteCommentless.ConcreteCommentless .
-      Exts.fromParseResult . Exts.parseFileContents
-      $ Exts.prettyPrint root
+arrangeElements
+  = ConcreteCommentless.create .
+      Exts.fromParseResult .
+        Exts.parseFileContents .
+          Exts.prettyPrint . ConcreteCommentless.root
 
 dropComments ::
              ConcreteCommented.ConcreteCommented ->
                ConcreteCommentless.ConcreteCommentless
-dropComments
-  = ConcreteCommentless.ConcreteCommentless . ConcreteCommented.root
+dropComments = ConcreteCommentless.create . ConcreteCommented.root
