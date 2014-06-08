@@ -13,8 +13,7 @@ formatSource maybeFile
   where format (Exts.ParseFailed location message)
           = Left $ Tools.formatSourceMessage location message
         format (Exts.ParseOk (root, comments))
-          = Right . rawFormat $
-              ConcreteCommented.ConcreteCommented root comments
+          = Right . rawFormat $ ConcreteCommented.create root comments
         parseMode
           = case maybeFile of
                 Nothing -> Exts.defaultParseMode
@@ -22,8 +21,9 @@ formatSource maybeFile
 
 rawFormat :: ConcreteCommented.ConcreteCommented -> String
 rawFormat code = Exts.exactPrint root comments
-  where ConcreteCommented.ConcreteCommented root comments
-          = formatCode code
+  where root = ConcreteCommented.root code'
+        code' = formatCode code
+        comments = ConcreteCommented.comments code'
 
 formatCode ::
            ConcreteCommented.ConcreteCommented ->
@@ -39,12 +39,12 @@ integrateComments ::
                     ConcreteCommentless.ConcreteCommentless ->
                       ConcreteCommented.ConcreteCommented
 integrateComments _ (ConcreteCommentless.ConcreteCommentless root)
-  = ConcreteCommented.ConcreteCommented root []
+  = ConcreteCommented.create root []
 
 assignComments ::
                ConcreteCommented.ConcreteCommented -> Abstract.Abstract
-assignComments (ConcreteCommented.ConcreteCommented root _)
-  = Abstract.create $ fmap (const []) root
+assignComments
+  = Abstract.create . fmap (const []) . ConcreteCommented.root
 
 arrangeElements ::
                 ConcreteCommentless.ConcreteCommentless ->
@@ -57,5 +57,5 @@ arrangeElements (ConcreteCommentless.ConcreteCommentless root)
 dropComments ::
              ConcreteCommented.ConcreteCommented ->
                ConcreteCommentless.ConcreteCommentless
-dropComments (ConcreteCommented.ConcreteCommented root comments)
-  = ConcreteCommentless.ConcreteCommentless root
+dropComments
+  = ConcreteCommentless.ConcreteCommentless . ConcreteCommented.root
