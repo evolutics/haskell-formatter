@@ -1,20 +1,11 @@
 module Evolutics.Formatter (formatSource) where
 import qualified Language.Haskell.Exts.Annotated as Exts
+import qualified Evolutics.Code.Abstract as Abstract
+import qualified Evolutics.Code.ConcreteCommented
+       as ConcreteCommented
+import qualified Evolutics.Code.ConcreteCommentless
+       as ConcreteCommentless
 import qualified Evolutics.Tools as Tools
-
-data ConcreteCommented = ConcreteCommented (Exts.Module
-                                              Exts.SrcSpanInfo)
-                                           [Exts.Comment]
-
-data ConcreteCommentless = ConcreteCommentless (Exts.Module
-                                                  Exts.SrcSpanInfo)
-
-data Abstract = Abstract (Exts.Module [AbstractComment])
-
-data AbstractComment = AbstractComment Displacement Bool String
-
-data Displacement = Before
-                  | After
 
 formatSource :: Maybe FilePath -> String -> Either String String
 formatSource maybeFile
@@ -22,17 +13,21 @@ formatSource maybeFile
   where format (Exts.ParseFailed location message)
           = Left $ Tools.formatSourceMessage location message
         format (Exts.ParseOk (root, comments))
-          = Right . rawFormat $ ConcreteCommented root comments
+          = Right . rawFormat $
+              ConcreteCommented.ConcreteCommented root comments
         parseMode
           = case maybeFile of
                 Nothing -> Exts.defaultParseMode
                 Just file -> Exts.defaultParseMode{Exts.parseFilename = file}
 
-rawFormat :: ConcreteCommented -> String
+rawFormat :: ConcreteCommented.ConcreteCommented -> String
 rawFormat code = Exts.exactPrint root comments
-  where ConcreteCommented root comments = formatCode code
+  where ConcreteCommented.ConcreteCommented root comments
+          = formatCode code
 
-formatCode :: ConcreteCommented -> ConcreteCommented
+formatCode ::
+           ConcreteCommented.ConcreteCommented ->
+             ConcreteCommented.ConcreteCommented
 formatCode concreteCommented
   = integrateComments abstract concreteCommentless
   where abstract = assignComments concreteCommented
@@ -40,20 +35,27 @@ formatCode concreteCommented
           = arrangeElements $ dropComments concreteCommented
 
 integrateComments ::
-                  Abstract -> ConcreteCommentless -> ConcreteCommented
-integrateComments _ (ConcreteCommentless root)
-  = ConcreteCommented root []
+                  Abstract.Abstract ->
+                    ConcreteCommentless.ConcreteCommentless ->
+                      ConcreteCommented.ConcreteCommented
+integrateComments _ (ConcreteCommentless.ConcreteCommentless root)
+  = ConcreteCommented.ConcreteCommented root []
 
-assignComments :: ConcreteCommented -> Abstract
-assignComments (ConcreteCommented root _)
-  = Abstract $ fmap (const []) root
+assignComments ::
+               ConcreteCommented.ConcreteCommented -> Abstract.Abstract
+assignComments (ConcreteCommented.ConcreteCommented root _)
+  = Abstract.Abstract $ fmap (const []) root
 
-arrangeElements :: ConcreteCommentless -> ConcreteCommentless
-arrangeElements (ConcreteCommentless root)
-  = ConcreteCommentless .
+arrangeElements ::
+                ConcreteCommentless.ConcreteCommentless ->
+                  ConcreteCommentless.ConcreteCommentless
+arrangeElements (ConcreteCommentless.ConcreteCommentless root)
+  = ConcreteCommentless.ConcreteCommentless .
       Exts.fromParseResult . Exts.parseFileContents
       $ Exts.prettyPrint root
 
-dropComments :: ConcreteCommented -> ConcreteCommentless
-dropComments (ConcreteCommented root comments)
-  = ConcreteCommentless root
+dropComments ::
+             ConcreteCommented.ConcreteCommented ->
+               ConcreteCommentless.ConcreteCommentless
+dropComments (ConcreteCommented.ConcreteCommented root comments)
+  = ConcreteCommentless.ConcreteCommentless root
