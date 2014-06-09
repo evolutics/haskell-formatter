@@ -1,6 +1,6 @@
 module Evolutics.Code.Concrete
        (Commented, commentedRoot, comments, Commentless, commentlessRoot,
-        createCommented, createCommentless, dropComments, commentPortion)
+        createCommented, createCommentless, dropComments)
        where
 import qualified Language.Haskell.Exts.Annotated as Exts
 
@@ -26,6 +26,3 @@ createCommentless root = Commentless{commentlessRoot = root}
 dropComments :: Commented -> Commentless
 dropComments Commented{commentedRoot = root}
   = createCommentless root
-
-commentPortion :: Exts.Comment -> Exts.SrcSpan
-commentPortion (Exts.Comment _ portion _) = portion

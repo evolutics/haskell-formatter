@@ -23,9 +23,5 @@ processElement concreteComments elementPortion
         abstractComments = []
 
 follows :: Exts.SrcSpanInfo -> Exts.Comment -> Bool
-follows portion comment = comparePortions portion comment == GT
-
-comparePortions :: Exts.SrcSpanInfo -> Exts.Comment -> Ordering
-comparePortions portion comment
-  = SourceLocations.comparePortions (Exts.srcInfoSpan portion) $
-      Concrete.commentPortion comment
+follows portion comment
+  = SourceLocations.comparePortions portion comment == GT
