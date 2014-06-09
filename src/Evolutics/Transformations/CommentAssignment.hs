@@ -20,8 +20,15 @@ processElement concreteComments elementPortion
   = (remainder, abstractComments)
   where (choice, remainder)
           = span (follows elementPortion) concreteComments
-        abstractComments = []
+        abstractComments = map (abstractComment Abstract.Before) choice
 
 follows :: Exts.SrcSpanInfo -> Exts.Comment -> Bool
 follows portion comment
   = SourceLocations.comparePortions portion comment == GT
+
+abstractComment ::
+                Abstract.Displacement -> Exts.Comment -> Abstract.Comment
+abstractComment displacement concreteComment
+  = Abstract.createComment displacement isMultiLine content
+  where isMultiLine = Concrete.isCommentMultiLine concreteComment
+        content = Concrete.commentContent concreteComment

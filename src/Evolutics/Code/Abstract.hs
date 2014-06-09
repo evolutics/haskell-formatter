@@ -1,5 +1,5 @@
 module Evolutics.Code.Abstract
-       (Code, Comment, Displacement, createCode, createComment) where
+       (Code, Comment, Displacement(..), createCode, createComment) where
 import qualified Language.Haskell.Exts.Annotated as Exts
 import qualified Evolutics.Code.Concrete as Concrete
 
