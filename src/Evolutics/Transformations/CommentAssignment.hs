@@ -4,7 +4,7 @@ import qualified Data.Traversable as Traversable
 import qualified Language.Haskell.Exts.Annotated as Exts
 import qualified Evolutics.Code.Abstract as Abstract
 import qualified Evolutics.Code.Concrete as Concrete
-import qualified Evolutics.Tools.Core as Core
+import qualified Evolutics.Tools.SourceLocations as SourceLocations
 
 assignComments :: Concrete.Commented -> Abstract.Code
 assignComments concrete = Abstract.create root'
@@ -27,5 +27,5 @@ follows portion comment = comparePortions portion comment == GT
 
 comparePortions :: Exts.SrcSpanInfo -> Exts.Comment -> Ordering
 comparePortions portion comment
-  = Core.comparePortions (Exts.srcInfoSpan portion) $
+  = SourceLocations.comparePortions (Exts.srcInfoSpan portion) $
       Concrete.commentPortion comment

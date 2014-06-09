@@ -1,7 +1,7 @@
 module Evolutics.Formatting (formatSource) where
 import qualified Language.Haskell.Exts.Annotated as Exts
 import qualified Evolutics.Code.Concrete as Concrete
-import qualified Evolutics.Tools.Core as Core
+import qualified Evolutics.Tools.SourceLocations as SourceLocations
 import qualified Evolutics.Transformations.CommentAssignment
        as CommentAssignment
 import qualified Evolutics.Transformations.CommentIntegration
@@ -13,7 +13,7 @@ formatSource :: Maybe FilePath -> String -> Either String String
 formatSource maybeFile
   = format . Exts.parseFileContentsWithComments parseMode
   where format (Exts.ParseFailed location message)
-          = Left $ Core.formatSourceMessage location message
+          = Left $ SourceLocations.formatMessage location message
         format (Exts.ParseOk (root, comments))
           = Right . show . formatCode $
               Concrete.createCommented root comments
