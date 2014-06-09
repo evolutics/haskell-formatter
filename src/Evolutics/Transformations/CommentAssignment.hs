@@ -7,11 +7,20 @@ import qualified Evolutics.Code.Concrete as Concrete
 import qualified Evolutics.Tools.SourceLocations as SourceLocations
 
 assignComments :: Concrete.Commented -> Abstract.Code
-assignComments concrete = Abstract.createCode root'
-  where root = Concrete.commentedRoot concrete
+assignComments concrete = Abstract.createCode newRoot
+  where newRoot = Exts.amap integrateRest intermediateRoot
+        integrateRest = (++ map (abstractComment Abstract.After) rest)
+        (rest, intermediateRoot)
+          = Traversable.mapAccumL processElement comments oldRoot
         comments = Concrete.comments concrete
-        (remainder, root')
-          = Traversable.mapAccumL processElement comments root
+        oldRoot = Concrete.commentedRoot concrete
+
+abstractComment ::
+                Abstract.Displacement -> Exts.Comment -> Abstract.Comment
+abstractComment displacement concreteComment
+  = Abstract.createComment displacement isMultiLine content
+  where isMultiLine = Concrete.isCommentMultiLine concreteComment
+        content = Concrete.commentContent concreteComment
 
 processElement ::
                [Exts.Comment] ->
@@ -25,10 +34,3 @@ processElement concreteComments elementPortion
 follows :: Exts.SrcSpanInfo -> Exts.Comment -> Bool
 follows portion comment
   = SourceLocations.comparePortions portion comment == GT
-
-abstractComment ::
-                Abstract.Displacement -> Exts.Comment -> Abstract.Comment
-abstractComment displacement concreteComment
-  = Abstract.createComment displacement isMultiLine content
-  where isMultiLine = Concrete.isCommentMultiLine concreteComment
-        content = Concrete.commentContent concreteComment
