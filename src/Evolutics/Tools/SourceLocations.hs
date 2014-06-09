@@ -1,5 +1,5 @@
 module Evolutics.Tools.SourceLocations
-       (formatMessage, comparePortions) where
+       (portion, formatMessage, comparePortions) where
 import qualified Data.Function as Function
 import qualified Data.List as List
 import qualified Language.Haskell.Exts.Annotated as Exts
