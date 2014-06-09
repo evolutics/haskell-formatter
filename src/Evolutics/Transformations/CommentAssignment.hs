@@ -7,7 +7,7 @@ import qualified Evolutics.Code.Concrete as Concrete
 import qualified Evolutics.Tools.SourceLocations as SourceLocations
 
 assignComments :: Concrete.Commented -> Abstract.Code
-assignComments concrete = Abstract.create root'
+assignComments concrete = Abstract.createCode root'
   where root = Concrete.commentedRoot concrete
         comments = Concrete.comments concrete
         (remainder, root')
