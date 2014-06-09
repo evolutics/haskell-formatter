@@ -1,5 +1,8 @@
 module Evolutics.Tools.Core
-       (transformFilesOrStandardStreams, formatSourceMessage) where
+       (transformFilesOrStandardStreams, formatSourceMessage,
+        comparePortions)
+       where
+import qualified Data.Function as Function
 import qualified Data.List as List
 import qualified System.IO as IO
 import qualified Language.Haskell.Exts.Annotated as Exts
@@ -34,3 +37,12 @@ formatSourceLocation :: Exts.SrcLoc -> String
 formatSourceLocation (Exts.SrcLoc file line column)
   = List.intercalate separator $ file : map show [line, column]
   where separator = ":"
+
+comparePortions :: Exts.SrcSpan -> Exts.SrcSpan -> Ordering
+comparePortions left right
+  = if Function.on (==) Exts.srcSpanFilename left right then
+      compareIgnoringFile else EQ
+  where compareIgnoringFile
+          | Exts.srcSpanEnd left < Exts.srcSpanStart right = LT
+          | Exts.srcSpanStart left > Exts.srcSpanEnd right = GT
+          | otherwise = EQ
