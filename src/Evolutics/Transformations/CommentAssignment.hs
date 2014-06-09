@@ -1,7 +1,8 @@
 module Evolutics.Transformations.CommentAssignment (assignComments)
        where
-import qualified Evolutics.Code.Abstract.Abstract as Abstract
-import qualified Evolutics.Code.Concrete.Commented as Commented
+import qualified Evolutics.Code.Abstract as Abstract
+import qualified Evolutics.Code.Concrete as Concrete
 
-assignComments :: Commented.Commented -> Abstract.Abstract
-assignComments = Abstract.create . fmap (const []) . Commented.root
+assignComments :: Concrete.Commented -> Abstract.Code
+assignComments
+  = Abstract.create . fmap (const []) . Concrete.commentedRoot

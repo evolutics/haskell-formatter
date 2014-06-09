@@ -1,10 +1,11 @@
 module Evolutics.Transformations.CommentIntegration
        (integrateComments) where
-import qualified Evolutics.Code.Abstract.Abstract as Abstract
-import qualified Evolutics.Code.Concrete.Commented as Commented
-import qualified Evolutics.Code.Concrete.Commentless as Commentless
+import qualified Evolutics.Code.Abstract as Abstract
+import qualified Evolutics.Code.Concrete as Concrete
 
 integrateComments ::
-                  Abstract.Abstract -> Commentless.Commentless -> Commented.Commented
+                  Abstract.Code -> Concrete.Commentless -> Concrete.Commented
 integrateComments _ concreteCommentless
-  = Commented.create (Commentless.root concreteCommentless) []
+  = Concrete.createCommented
+      (Concrete.commentlessRoot concreteCommentless)
+      []

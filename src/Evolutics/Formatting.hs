@@ -1,6 +1,6 @@
 module Evolutics.Formatting (formatSource) where
 import qualified Language.Haskell.Exts.Annotated as Exts
-import qualified Evolutics.Code.Concrete.Commented as Commented
+import qualified Evolutics.Code.Concrete as Concrete
 import qualified Evolutics.Tools.Core as Core
 import qualified Evolutics.Transformations.CommentAssignment
        as CommentAssignment
@@ -15,16 +15,17 @@ formatSource maybeFile
   where format (Exts.ParseFailed location message)
           = Left $ Core.formatSourceMessage location message
         format (Exts.ParseOk (root, comments))
-          = Right . show . formatCode $ Commented.create root comments
+          = Right . show . formatCode $
+              Concrete.createCommented root comments
         parseMode
           = case maybeFile of
                 Nothing -> Exts.defaultParseMode
                 Just file -> Exts.defaultParseMode{Exts.parseFilename = file}
 
-formatCode :: Commented.Commented -> Commented.Commented
+formatCode :: Concrete.Commented -> Concrete.Commented
 formatCode concreteCommented
   = CommentIntegration.integrateComments abstract concreteCommentless
   where abstract = CommentAssignment.assignComments concreteCommented
         concreteCommentless
           = ElementArrangement.arrangeElements $
-              Commented.dropComments concreteCommented
+              Concrete.dropComments concreteCommented
