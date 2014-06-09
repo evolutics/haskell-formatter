@@ -1,9 +1,9 @@
 module Main (main) where
 import qualified System.Environment as Environment
 import qualified Evolutics.Formatting as Formatting
-import qualified Evolutics.Tools.Core as Core
+import qualified Evolutics.Tools.FileStreams as FileStreams
 
 main :: IO ()
 main
   = Environment.getArgs >>=
-      Core.transformFilesOrStandardStreams Formatting.formatSource
+      FileStreams.transformFilesOrStandardStreams Formatting.formatSource

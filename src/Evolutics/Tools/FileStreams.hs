@@ -1,4 +1,5 @@
-module Evolutics.Tools.Core (transformFilesOrStandardStreams) where
+module Evolutics.Tools.FileStreams
+       (transformFilesOrStandardStreams) where
 import qualified System.IO as IO
 
 transformFilesOrStandardStreams ::
