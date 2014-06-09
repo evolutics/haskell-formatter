@@ -15,12 +15,12 @@ instance Portioned Exts.Comment where
         portion (Exts.Comment _ portion _) = portion
 
 formatMessage :: Exts.SrcLoc -> String -> String
-formatMessage location message
-  = formatLocation location ++ separator ++ message
+formatMessage position message
+  = formatPosition position ++ separator ++ message
   where separator = ": "
 
-formatLocation :: Exts.SrcLoc -> String
-formatLocation (Exts.SrcLoc file line column)
+formatPosition :: Exts.SrcLoc -> String
+formatPosition (Exts.SrcLoc file line column)
   = List.intercalate separator $ file : map show [line, column]
   where separator = ":"
 

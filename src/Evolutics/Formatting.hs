@@ -12,8 +12,8 @@ import qualified Evolutics.Transformations.ElementArrangement
 formatSource :: Maybe FilePath -> String -> Either String String
 formatSource maybeFile
   = format . Exts.parseFileContentsWithComments parseMode
-  where format (Exts.ParseFailed location message)
-          = Left $ SourceLocations.formatMessage location message
+  where format (Exts.ParseFailed position message)
+          = Left $ SourceLocations.formatMessage position message
         format (Exts.ParseOk (root, comments))
           = Right . show . formatCode $
               Concrete.createCommented root comments
