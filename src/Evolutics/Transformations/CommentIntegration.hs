@@ -5,6 +5,7 @@ import qualified Data.Map.Strict as Map
 import qualified Language.Haskell.Exts.Annotated as Exts
 import qualified Evolutics.Code.Abstract as Abstract
 import qualified Evolutics.Code.Concrete as Concrete
+import qualified Evolutics.Tools.Functions as Functions
 import qualified Evolutics.Tools.HalfZippable as HalfZippable
 import qualified Evolutics.Tools.SourceLocations as SourceLocations
 
@@ -19,14 +20,23 @@ integrateComments abstract concreteCommentless
   where abstractRoot = Abstract.codeRoot abstract
         concreteCommentlessRoot
           = Concrete.commentlessRoot concreteCommentless
-        localShifts = lineShifts zippedRoot
         zippedRoot
           = HalfZippable.halfZipWith (,) abstractRoot concreteCommentlessRoot
 
 lineShifts ::
            Exts.Module ([Abstract.Comment], Exts.SrcSpanInfo) ->
              Map.Map LineIndex Int
-lineShifts = Foldable.foldl' process Map.empty
+lineShifts root
+  = snd $ Map.mapAccum accummulate baseShift originShifts
+  where accummulate accummulatedShift
+          = Functions.doubleArgument (,) . (accummulatedShift +)
+        baseShift = 0
+        originShifts = originLineShifts root
+
+originLineShifts ::
+                 Exts.Module ([Abstract.Comment], Exts.SrcSpanInfo) ->
+                   Map.Map LineIndex Int
+originLineShifts = Foldable.foldl' process Map.empty
   where process shifts (comments, location)
           = Map.unionWith (+) shifts shiftsNow
           where shiftsNow
