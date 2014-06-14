@@ -1,9 +1,10 @@
 module Evolutics.Code.Abstract
        (Code, codeRoot, Comment, commentDisplacement, Displacement(..),
-        createCode, createComment)
+        createCode, createComment, commentLineCount)
        where
 import qualified Language.Haskell.Exts.Annotated as Exts
 import qualified Evolutics.Code.Concrete as Concrete
+import qualified Evolutics.Tools.Newlines as Newlines
 
 data Code = Code{codeRoot :: Exts.Module [Comment]}
 
@@ -20,3 +21,7 @@ createComment :: Displacement -> Bool -> String -> Comment
 createComment displacement isMultiLine content
   = Comment{commentDisplacement = displacement,
             isCommentMultiLine = isMultiLine, commentContent = content}
+
+commentLineCount :: Comment -> Int
+commentLineCount
+  = length . Newlines.splitSeparatedLines . commentContent
