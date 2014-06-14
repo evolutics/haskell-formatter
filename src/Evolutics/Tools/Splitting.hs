@@ -1,4 +1,4 @@
-module Evolutics.Tools.Splitting () where
+module Evolutics.Tools.Splitting (separate) where
 import qualified Data.List as List
 import qualified Data.List.Split.Internals as Internals
 import qualified Evolutics.Tools.Functions as Functions
@@ -6,6 +6,12 @@ import qualified Evolutics.Tools.Lists as Lists
 
 data Splitting a = Splitting{delimiters :: [[a]],
                              delimiterPolicy :: Internals.DelimPolicy}
+
+separate :: (Eq a) => [[a]] -> [a] -> [[a]]
+separate delimiters
+  = split
+      Splitting{delimiters = delimiters,
+                delimiterPolicy = Internals.Drop}
 
 split :: (Eq a) => Splitting a -> [a] -> [[a]]
 split splitting list = processedDelimiters
