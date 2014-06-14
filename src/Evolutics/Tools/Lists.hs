@@ -1,6 +1,28 @@
 module Evolutics.Tools.Lists () where
 import qualified Data.List as List
+import qualified Data.List.Split.Internals as Internals
 import qualified Evolutics.Tools.Functions as Functions
+
+data Splitting a = Splitting{delimiters :: [[a]],
+                             delimiterPolicy :: Internals.DelimPolicy}
+
+split :: (Eq a) => Splitting a -> [a] -> [[a]]
+split splitting list = processedDelimiters
+  where processedDelimiters
+          = case delimiterPolicy splitting of
+                Internals.Drop -> takeEvery period raw
+                Internals.Keep -> raw
+                Internals.KeepLeft -> concatenatePairs raw
+                Internals.KeepRight -> case raw of
+                                           (first : rest) -> first : concatenatePairs rest
+        period = 2
+        raw = rawSplit (delimiters splitting) list
+        concatenatePairs = concatenateNeighbors period
+
+takeEvery :: Int -> [a] -> [a]
+takeEvery _ [] = []
+takeEvery period list@(first : _)
+  = first : takeEvery period (drop period list)
 
 rawSplit :: (Eq a) => [[a]] -> [a] -> [[a]]
 rawSplit separators = Functions.untilRight move . (,) []
@@ -27,3 +49,9 @@ stripFirstPrefix :: (Eq a) => [[a]] -> [a] -> Maybe ([a], [a])
 stripFirstPrefix prefixes list = Functions.findJust strip prefixes
   where strip prefix
           = fmap ((,) prefix) $ List.stripPrefix prefix list
+
+concatenateNeighbors :: Int -> [[a]] -> [[a]]
+concatenateNeighbors _ [] = []
+concatenateNeighbors period lists
+  = concat list : concatenateNeighbors period rest
+  where (list, rest) = splitAt period lists
