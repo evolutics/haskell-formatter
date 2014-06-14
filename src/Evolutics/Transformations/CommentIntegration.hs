@@ -52,6 +52,6 @@ elementShifts comments portion
                   = case Abstract.commentDisplacement comment of
                         Abstract.Before -> startLine
                         Abstract.After -> endLine + 1
-                difference = 1
+                difference = Abstract.commentLineCount comment
         startLine = Exts.srcSpanStartLine portion
         endLine = Exts.srcSpanEndLine portion
