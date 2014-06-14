@@ -1,5 +1,5 @@
 module Evolutics.Tools.Functions
-       (doubleArgument, iterateUntil, findJust) where
+       (doubleArgument, iterateUntilNothing, findJust) where
 import qualified Control.Monad as Monad
 import qualified Data.Foldable as Foldable
 import qualified Data.Maybe as Maybe
@@ -7,12 +7,12 @@ import qualified Data.Maybe as Maybe
 doubleArgument :: (a -> a -> b) -> a -> b
 doubleArgument function argument = function argument argument
 
-iterateUntil :: (a -> Maybe a) -> a -> [a]
-iterateUntil function base
+iterateUntilNothing :: (a -> Maybe a) -> a -> [a]
+iterateUntilNothing function base
   = base :
       case function base of
           Nothing -> []
-          Just next -> iterateUntil function next
+          Just next -> iterateUntilNothing function next
 
 findJust ::
            (Functor t, Foldable.Foldable t) =>
