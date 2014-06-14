@@ -2,6 +2,14 @@ module Evolutics.Tools.Lists () where
 import qualified Data.List as List
 import qualified Evolutics.Tools.Functions as Functions
 
+rawSplit :: (Eq a) => [[a]] -> [a] -> [[a]]
+rawSplit separators = Functions.untilRight move . (,) []
+  where move (splitLists, restList)
+          = case findFirstSeparator separators restList of
+                Nothing -> Right $ splitLists ++ [restList]
+                Just (left, separator, right) -> Left
+                                                   (splitLists ++ [left, separator], right)
+
 findFirstSeparator ::
                      (Eq a) => [[a]] -> [a] -> Maybe ([a], [a], [a])
 findFirstSeparator separators
