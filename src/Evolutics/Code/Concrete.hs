@@ -35,15 +35,15 @@ dropComments Commented{commentedRoot = root}
   = createCommentless root
 
 createComment :: Bool -> String -> Exts.SrcLoc -> Exts.Comment
-createComment isMultiLine content startLocation
+createComment isMultiLine content startPosition
   = Exts.Comment isMultiLine portion content
-  where portion = Exts.mkSrcSpan startLocation endLocation
-        endLocation
+  where portion = Exts.mkSrcSpan startPosition endPosition
+        endPosition
           = Exts.SrcLoc{Exts.srcFilename = file, Exts.srcLine = endLine,
                         Exts.srcColumn = endColumn}
-        file = Exts.fileName startLocation
+        file = Exts.fileName startPosition
         endLine = startLine + lineCount - 1
-        startLine = Exts.startLine startLocation
+        startLine = Exts.startLine startPosition
         lineCount = length contentLines
         contentLines = Newlines.splitSeparatedLines content
         endColumn = contentEndColumn + if isMultiLine then 2 else 0
@@ -51,7 +51,7 @@ createComment isMultiLine content startLocation
           = lastContentLineStartColumn + lastContentLineLength - 1
         lastContentLineStartColumn
           = if lineCount == 1 then startColumn + 2 else 1
-        startColumn = Exts.startColumn startLocation
+        startColumn = Exts.startColumn startPosition
         lastContentLineLength = length $ last contentLines
 
 isCommentMultiLine :: Exts.Comment -> Bool
