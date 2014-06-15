@@ -18,6 +18,10 @@ instance Show Commented where
         show Commented{commentedRoot = root, comments = comments}
           = Exts.exactPrint root comments
 
+instance SourceLocations.Portioned Commentless where
+        portion Commentless{commentlessRoot = root}
+          = SourceLocations.portion $ Exts.ann root
+
 createCommented ::
                 Exts.Module Exts.SrcSpanInfo -> [Exts.Comment] -> Commented
 createCommented root comments
