@@ -6,7 +6,6 @@ import qualified Language.Haskell.Exts.Annotated as Exts
 import qualified Evolutics.Code.Abstract as Abstract
 import qualified Evolutics.Code.Concrete as Concrete
 import qualified Evolutics.Tools.Functions as Functions
-import qualified Evolutics.Tools.HalfZippable as HalfZippable
 import qualified Evolutics.Tools.SourceLocations as SourceLocations
 
 type LineIndex = Int
@@ -21,7 +20,7 @@ integrateComments abstract concreteCommentless
         concreteCommentlessRoot
           = Concrete.commentlessRoot concreteCommentless
         zippedRoot
-          = HalfZippable.halfZipWith (,) abstractRoot concreteCommentlessRoot
+          = Functions.halfZipWith (,) abstractRoot concreteCommentlessRoot
 
 lineShifts ::
            Exts.Module ([Abstract.Comment], Exts.SrcSpanInfo) ->
