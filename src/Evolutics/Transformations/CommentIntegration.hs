@@ -96,12 +96,23 @@ endLine :: Exts.SrcSpan -> LineIndex
 endLine = LineIndex . Exts.srcSpanEndLine
 
 reservationShifting :: Reservation -> LineShifting
-reservationShifting (Reservation reservation)
-  = LineShifting . snd $
-      Map.mapAccum accummulate Monoid.mempty reservation
-  where accummulate accummulatedShift
-          = Functions.doubleArgument (,) .
-              Monoid.mappend accummulatedShift . commentsShift
+reservationShifting = LineShifting . accummulateReservation create
+  where create line _ shift _ = Map.singleton line shift
+
+accummulateReservation ::
+                         (Monoid.Monoid m) =>
+                         (LineIndex -> LineIndex -> LineShift -> [Abstract.Comment] -> m) ->
+                           Reservation -> m
+accummulateReservation create (Reservation reservation)
+  = snd $
+      Map.foldlWithKey' accummulate (Monoid.mempty, Monoid.mempty)
+        reservation
+  where accummulate (shift, structure) line comments
+          = (shift', structure')
+          where shift' = Monoid.mappend shift $ commentsShift comments
+                structure' = Monoid.mappend structure part
+                part = create line shiftedLine shift' comments
+                shiftedLine = applyLineShift shift line
 
 commentsShift :: [Abstract.Comment] -> LineShift
 commentsShift = Monoid.mconcat . map commentShift
