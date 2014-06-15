@@ -33,8 +33,10 @@ integrateComments abstract commentless
         shifting = lineShifting annotatedRoot
         annotatedRoot
           = AnnotatedRoot $
-              Functions.halfZipWith ElementAnnotation abstractRoot
-                commentlessRoot
+              if abstractRoot Exts.=~= commentlessRoot then
+                Functions.halfZipWith ElementAnnotation abstractRoot
+                  commentlessRoot
+                else error unequalStructuresMessage
         abstractRoot = Abstract.codeRoot abstract
         commentlessRoot = Concrete.commentlessRoot commentless
 
@@ -126,3 +128,7 @@ elementShifting (ElementAnnotation comments location)
 
 oneLineShift :: LineShift
 oneLineShift = LineShift 1
+
+unequalStructuresMessage :: String
+unequalStructuresMessage
+  = "The structures of the abstract and concrete code are unequal."
