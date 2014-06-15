@@ -19,12 +19,12 @@ split splitting list = processedDelimiters
           = case delimiterPolicy splitting of
                 Internals.Drop -> Lists.takeEvery period raw
                 Internals.Keep -> raw
-                Internals.KeepLeft -> concatenatePairs raw
-                Internals.KeepRight -> case raw of
-                                           (first : rest) -> first : concatenatePairs rest
+                Internals.KeepLeft -> Lists.concatenateRuns period raw
+                Internals.KeepRight -> Lists.concatenateShiftedRuns period shift
+                                         raw
+                  where shift = 1
         period = 2
         raw = rawSplit (delimiters splitting) list
-        concatenatePairs = Lists.concatenateNeighbors period
 
 rawSplit :: (Eq a) => [[a]] -> [a] -> [[a]]
 rawSplit separators = Functions.untilRight move . (,) []

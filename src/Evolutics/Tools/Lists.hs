@@ -1,5 +1,6 @@
 module Evolutics.Tools.Lists
-       (takeEvery, concatenateNeighbors, partitions) where
+       (takeEvery, concatenateRuns, concatenateShiftedRuns, partitions)
+       where
 import qualified Evolutics.Tools.Functions as Functions
 
 takeEvery :: Int -> [a] -> [a]
@@ -7,11 +8,19 @@ takeEvery _ [] = []
 takeEvery period list@(first : _)
   = first : takeEvery period (drop period list)
 
-concatenateNeighbors :: Int -> [[a]] -> [[a]]
-concatenateNeighbors _ [] = []
-concatenateNeighbors period lists
-  = concat list : concatenateNeighbors period rest
-  where (list, rest) = splitAt period lists
+concatenateRuns :: Int -> [[a]] -> [[a]]
+concatenateRuns _ [] = []
+concatenateRuns period lists
+  = concat run : concatenateRuns period rest
+  where (run, rest) = splitAt period lists
+
+concatenateShiftedRuns :: Int -> Int -> [[a]] -> [[a]]
+concatenateShiftedRuns period shift lists
+  = case shift of
+        0 -> concatenateUnshifted lists
+        _ -> concat shifted : concatenateUnshifted unshifted
+          where (shifted, unshifted) = splitAt shift lists
+  where concatenateUnshifted = concatenateRuns period
 
 partitions :: [a] -> [([a], [a])]
 partitions list = Functions.iterateUntilNothing move ([], list)
