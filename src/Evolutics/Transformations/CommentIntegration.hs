@@ -20,6 +20,9 @@ data LineIndex = LineIndex Int
 
 data LineShift = LineShift Int
 
+data OriginLineShifting = OriginLineShifting (Map.Map LineIndex
+                                                LineShift)
+
 integrateComments ::
                   Abstract.Code -> Concrete.Commentless -> Concrete.Commented
 integrateComments abstract commentless
@@ -87,27 +90,29 @@ endLine :: Exts.SrcSpan -> LineIndex
 endLine = LineIndex . Exts.srcSpanEndLine
 
 lineShifting :: AnnotatedRoot -> LineShifting
-lineShifting root
+lineShifting = accummulateLineShifting . originLineShifting
+
+accummulateLineShifting :: OriginLineShifting -> LineShifting
+accummulateLineShifting (OriginLineShifting shifting)
   = LineShifting . snd $
-      Map.mapAccum accummulate noLineShift originShifting
+      Map.mapAccum accummulate noLineShift shifting
   where accummulate accummulatedShift
           = Functions.doubleArgument (,) . summarizeShifts accummulatedShift
-        LineShifting originShifting = originLineShifting root
 
-originLineShifting :: AnnotatedRoot -> LineShifting
+originLineShifting :: AnnotatedRoot -> OriginLineShifting
 originLineShifting (AnnotatedRoot root)
-  = LineShifting $ Foldable.foldl' process Map.empty root
+  = OriginLineShifting $ Foldable.foldl' process Map.empty root
   where process shifting annotation
           = Map.unionWith summarizeShifts shifting shiftingNow
-          where LineShifting shiftingNow = elementShifting annotation
+          where OriginLineShifting shiftingNow = elementShifting annotation
 
 summarizeShifts :: LineShift -> LineShift -> LineShift
 summarizeShifts (LineShift left) (LineShift right)
   = LineShift $ left + right
 
-elementShifting :: ElementAnnotation -> LineShifting
+elementShifting :: ElementAnnotation -> OriginLineShifting
 elementShifting (ElementAnnotation comments location)
-  = LineShifting $ Foldable.foldl' process Map.empty comments
+  = OriginLineShifting $ Foldable.foldl' process Map.empty comments
   where process shifting comment
           = Map.insertWith summarizeShifts shiftedLine difference shifting
           where shiftedLine
