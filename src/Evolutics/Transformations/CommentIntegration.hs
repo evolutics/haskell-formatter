@@ -32,10 +32,10 @@ instance Monoid.Monoid LineShift where
 integrateComments ::
                   Abstract.Code -> Concrete.Commentless -> Concrete.Commented
 integrateComments abstract commentless
-  = Concrete.createCommented
-      (Concrete.commentlessRoot movedCommentless)
-      []
-  where movedCommentless = shiftRoot shifting commentless
+  = Concrete.createCommented movedCommentlessRoot comments
+  where movedCommentlessRoot
+          = Concrete.commentlessRoot movedCommentless
+        movedCommentless = shiftRoot shifting commentless
         shifting = reservationShifting reservation
         reservation = makeReservation annotatedRoot
         annotatedRoot
@@ -46,6 +46,9 @@ integrateComments abstract commentless
                 else error unequalStructuresMessage
         abstractRoot = Abstract.codeRoot abstract
         commentlessRoot = Concrete.commentlessRoot commentless
+        comments = concretizeComments file reservation
+        file
+          = Exts.srcSpanFilename $ SourceLocations.portion movedCommentless
 
 shiftRoot ::
           LineShifting -> Concrete.Commentless -> Concrete.Commentless
@@ -150,3 +153,20 @@ oneLineShift = LineShift 1
 unequalStructuresMessage :: String
 unequalStructuresMessage
   = "The structures of the abstract and concrete code are unequal."
+
+concretizeComments :: FilePath -> Reservation -> [Exts.Comment]
+concretizeComments file = accummulateReservation create
+  where create _ shiftedLine _
+          = snd . Foldable.foldl' merge (shiftedLine, [])
+        merge (startLine, concretePart) abstract
+          = (followingLine, concretePart ++ [concrete])
+          where followingLine = applyLineShift shift startLine
+                shift = commentShift abstract
+                concrete = Concrete.createComment isMultiLine content startPosition
+                isMultiLine = Abstract.isCommentMultiLine abstract
+                content = Abstract.commentContent abstract
+                startPosition
+                  = Exts.SrcLoc{Exts.srcFilename = file, Exts.srcLine = rawStartLine,
+                                Exts.srcColumn = startColumn}
+                LineIndex rawStartLine = startLine
+                startColumn = 1
