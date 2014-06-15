@@ -37,10 +37,10 @@ integrateComments abstract concreteCommentless
 lineShifting :: AnnotatedRoot -> LineShifting
 lineShifting root
   = LineShifting . snd $
-      Map.mapAccum accummulate baseShift originShifting
+      Map.mapAccum accummulate noShift originShifting
   where accummulate accummulatedShift
           = Functions.doubleArgument (,) . summarizeShifts accummulatedShift
-        baseShift = LineShift 0
+        noShift = LineShift 0
         LineShifting originShifting = originLineShifting root
 
 originLineShifting :: AnnotatedRoot -> LineShifting
@@ -58,12 +58,12 @@ elementShifting :: ElementAnnotation -> LineShifting
 elementShifting (ElementAnnotation comments location)
   = LineShifting $ Foldable.foldl' process Map.empty comments
   where process shifting comment
-          = Map.insertWith summarizeShifts line difference shifting
-          where line
+          = Map.insertWith summarizeShifts shiftedLine difference shifting
+          where shiftedLine
                   = case Abstract.commentDisplacement comment of
-                        Abstract.Before -> lineBefore
-                        Abstract.After -> lineAfter
+                        Abstract.Before -> lineIfBefore
+                        Abstract.After -> lineIfAfter
                 difference = LineShift $ Abstract.commentLineCount comment
-        lineBefore = LineIndex $ Exts.srcSpanStartLine portion
+        lineIfBefore = LineIndex $ Exts.srcSpanStartLine portion
         portion = SourceLocations.portion location
-        lineAfter = LineIndex $ Exts.srcSpanEndLine portion + 1
+        lineIfAfter = LineIndex $ Exts.srcSpanEndLine portion + 1
