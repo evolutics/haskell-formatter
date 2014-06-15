@@ -1,6 +1,7 @@
 module Evolutics.Code.Abstract
-       (Code, codeRoot, Comment, commentDisplacement, Displacement(..),
-        createCode, createComment, commentLineCount)
+       (Code, codeRoot, Comment, commentDisplacement, isCommentMultiLine,
+        commentContent, Displacement(..), createCode, createComment,
+        commentLineCount)
        where
 import qualified Language.Haskell.Exts.Annotated as Exts
 import qualified Evolutics.Code.Concrete as Concrete
