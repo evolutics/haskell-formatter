@@ -8,7 +8,17 @@ import qualified Evolutics.Code.Concrete as Concrete
 import qualified Evolutics.Tools.Functions as Functions
 import qualified Evolutics.Tools.SourceLocations as SourceLocations
 
-type LineIndex = Int
+data AnnotatedRoot = AnnotatedRoot (Exts.Module ElementAnnotation)
+
+data ElementAnnotation = ElementAnnotation [Abstract.Comment]
+                                           Exts.SrcSpanInfo
+
+data LineShifting = LineShifting (Map.Map LineIndex LineShift)
+
+data LineIndex = LineIndex Int
+               deriving (Eq, Ord)
+
+data LineShift = LineShift Int
 
 integrateComments ::
                   Abstract.Code -> Concrete.Commentless -> Concrete.Commented
@@ -19,38 +29,41 @@ integrateComments abstract concreteCommentless
   where abstractRoot = Abstract.codeRoot abstract
         concreteCommentlessRoot
           = Concrete.commentlessRoot concreteCommentless
-        zippedRoot
-          = Functions.halfZipWith (,) abstractRoot concreteCommentlessRoot
+        annotatedRoot
+          = AnnotatedRoot $
+              Functions.halfZipWith ElementAnnotation abstractRoot
+                concreteCommentlessRoot
 
-lineShifts ::
-           Exts.Module ([Abstract.Comment], Exts.SrcSpanInfo) ->
-             Map.Map LineIndex Int
-lineShifts root
-  = snd $ Map.mapAccum accummulate baseShift originShifts
+lineShifting :: AnnotatedRoot -> LineShifting
+lineShifting root
+  = LineShifting . snd $
+      Map.mapAccum accummulate baseShift originShifting
   where accummulate accummulatedShift
-          = Functions.doubleArgument (,) . (accummulatedShift +)
-        baseShift = 0
-        originShifts = originLineShifts root
+          = Functions.doubleArgument (,) . summarizeShifts accummulatedShift
+        baseShift = LineShift 0
+        LineShifting originShifting = originLineShifting root
 
-originLineShifts ::
-                 Exts.Module ([Abstract.Comment], Exts.SrcSpanInfo) ->
-                   Map.Map LineIndex Int
-originLineShifts = Foldable.foldl' process Map.empty
-  where process shifts (comments, location)
-          = Map.unionWith (+) shifts shiftsNow
-          where shiftsNow
-                  = elementShifts comments $ SourceLocations.portion location
+originLineShifting :: AnnotatedRoot -> LineShifting
+originLineShifting (AnnotatedRoot root)
+  = LineShifting $ Foldable.foldl' process Map.empty root
+  where process shifting annotation
+          = Map.unionWith summarizeShifts shifting shiftingNow
+          where LineShifting shiftingNow = elementShifting annotation
 
-elementShifts ::
-              [Abstract.Comment] -> Exts.SrcSpan -> Map.Map LineIndex Int
-elementShifts comments portion
-  = Foldable.foldl' process Map.empty comments
-  where process shifts comment
-          = Map.insertWith (+) line difference shifts
+summarizeShifts :: LineShift -> LineShift -> LineShift
+summarizeShifts (LineShift left) (LineShift right)
+  = LineShift $ left + right
+
+elementShifting :: ElementAnnotation -> LineShifting
+elementShifting (ElementAnnotation comments location)
+  = LineShifting $ Foldable.foldl' process Map.empty comments
+  where process shifting comment
+          = Map.insertWith summarizeShifts line difference shifting
           where line
                   = case Abstract.commentDisplacement comment of
-                        Abstract.Before -> startLine
-                        Abstract.After -> endLine + 1
-                difference = Abstract.commentLineCount comment
-        startLine = Exts.srcSpanStartLine portion
-        endLine = Exts.srcSpanEndLine portion
+                        Abstract.Before -> lineBefore
+                        Abstract.After -> lineAfter
+                difference = LineShift $ Abstract.commentLineCount comment
+        lineBefore = LineIndex $ Exts.srcSpanStartLine portion
+        portion = SourceLocations.portion location
+        lineAfter = LineIndex $ Exts.srcSpanEndLine portion + 1
