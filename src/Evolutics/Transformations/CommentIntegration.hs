@@ -2,6 +2,7 @@ module Evolutics.Transformations.CommentIntegration
        (integrateComments) where
 import qualified Data.Foldable as Foldable
 import qualified Data.Map.Strict as Map
+import qualified Data.Monoid as Monoid
 import qualified Language.Haskell.Exts.Annotated as Exts
 import qualified Evolutics.Code.Abstract as Abstract
 import qualified Evolutics.Code.Concrete as Concrete
@@ -20,8 +21,13 @@ data LineIndex = LineIndex Int
 
 data LineShift = LineShift Int
 
-data OriginLineShifting = OriginLineShifting (Map.Map LineIndex
-                                                LineShift)
+data Reservation = Reservation (Map.Map LineIndex
+                                  [Abstract.Comment])
+
+instance Monoid.Monoid LineShift where
+        mempty = LineShift 0
+        mappend (LineShift left) (LineShift right)
+          = LineShift $ left + right
 
 integrateComments ::
                   Abstract.Code -> Concrete.Commentless -> Concrete.Commented
@@ -30,7 +36,8 @@ integrateComments abstract commentless
       (Concrete.commentlessRoot movedCommentless)
       []
   where movedCommentless = shiftRoot shifting commentless
-        shifting = lineShifting annotatedRoot
+        shifting = reservationShifting reservation
+        reservation = makeReservation annotatedRoot
         annotatedRoot
           = AnnotatedRoot $
               if abstractRoot Exts.=~= commentlessRoot then
@@ -80,10 +87,7 @@ lookupLineShift :: LineShifting -> LineIndex -> LineShift
 lookupLineShift (LineShifting shifting) line
   = case Map.lookupLE line shifting of
         Just (_, shift) -> shift
-        Nothing -> noLineShift
-
-noLineShift :: LineShift
-noLineShift = LineShift 0
+        Nothing -> Monoid.mempty
 
 startLine :: Exts.SrcSpan -> LineIndex
 startLine = LineIndex . Exts.srcSpanStartLine
@@ -91,37 +95,40 @@ startLine = LineIndex . Exts.srcSpanStartLine
 endLine :: Exts.SrcSpan -> LineIndex
 endLine = LineIndex . Exts.srcSpanEndLine
 
-lineShifting :: AnnotatedRoot -> LineShifting
-lineShifting = accummulateLineShifting . originLineShifting
-
-accummulateLineShifting :: OriginLineShifting -> LineShifting
-accummulateLineShifting (OriginLineShifting shifting)
+reservationShifting :: Reservation -> LineShifting
+reservationShifting (Reservation reservation)
   = LineShifting . snd $
-      Map.mapAccum accummulate noLineShift shifting
+      Map.mapAccum accummulate Monoid.mempty reservation
   where accummulate accummulatedShift
-          = Functions.doubleArgument (,) . summarizeShifts accummulatedShift
+          = Functions.doubleArgument (,) .
+              Monoid.mappend accummulatedShift . commentsShift
 
-originLineShifting :: AnnotatedRoot -> OriginLineShifting
-originLineShifting (AnnotatedRoot root)
-  = OriginLineShifting $ Foldable.foldl' process Map.empty root
-  where process shifting annotation
-          = Map.unionWith summarizeShifts shifting shiftingNow
-          where OriginLineShifting shiftingNow = elementShifting annotation
+commentsShift :: [Abstract.Comment] -> LineShift
+commentsShift = Monoid.mconcat . map commentShift
 
-summarizeShifts :: LineShift -> LineShift -> LineShift
-summarizeShifts (LineShift left) (LineShift right)
-  = LineShift $ left + right
+commentShift :: Abstract.Comment -> LineShift
+commentShift = LineShift . Abstract.commentLineCount
 
-elementShifting :: ElementAnnotation -> OriginLineShifting
-elementShifting (ElementAnnotation comments location)
-  = OriginLineShifting $ Foldable.foldl' process Map.empty comments
-  where process shifting comment
-          = Map.insertWith summarizeShifts shiftedLine difference shifting
-          where shiftedLine
+makeReservation :: AnnotatedRoot -> Reservation
+makeReservation (AnnotatedRoot root)
+  = Reservation $ Foldable.foldl' reserve Map.empty root
+  where reserve reservation annotation
+          = Map.unionWith mergeReservations reservation reservationNow
+          where Reservation reservationNow = elementReservation annotation
+
+mergeReservations ::
+                  [Abstract.Comment] -> [Abstract.Comment] -> [Abstract.Comment]
+mergeReservations = (++)
+
+elementReservation :: ElementAnnotation -> Reservation
+elementReservation (ElementAnnotation comments location)
+  = Reservation $ foldr reserve Map.empty comments
+  where reserve comment
+          = Map.insertWith mergeReservations movedLine [comment]
+          where movedLine
                   = case Abstract.commentDisplacement comment of
                         Abstract.Before -> lineIfBefore
                         Abstract.After -> lineIfAfter
-                difference = LineShift $ Abstract.commentLineCount comment
         lineIfBefore = startLine portion
         portion = SourceLocations.portion location
         lineIfAfter = applyLineShift oneLineShift $ endLine portion
