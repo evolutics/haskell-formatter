@@ -22,25 +22,76 @@ data LineShift = LineShift Int
 
 integrateComments ::
                   Abstract.Code -> Concrete.Commentless -> Concrete.Commented
-integrateComments abstract concreteCommentless
+integrateComments abstract commentless
   = Concrete.createCommented
-      (Concrete.commentlessRoot concreteCommentless)
+      (Concrete.commentlessRoot movedCommentless)
       []
-  where abstractRoot = Abstract.codeRoot abstract
-        concreteCommentlessRoot
-          = Concrete.commentlessRoot concreteCommentless
+  where movedCommentless = shiftRoot shifting commentless
+        shifting = lineShifting annotatedRoot
         annotatedRoot
           = AnnotatedRoot $
               Functions.halfZipWith ElementAnnotation abstractRoot
-                concreteCommentlessRoot
+                commentlessRoot
+        abstractRoot = Abstract.codeRoot abstract
+        commentlessRoot = Concrete.commentlessRoot commentless
+
+shiftRoot ::
+          LineShifting -> Concrete.Commentless -> Concrete.Commentless
+shiftRoot shifting commentless
+  = Concrete.createCommentless shiftedRoot
+  where shiftedRoot = fmap (shiftLocation shifting) unshiftedRoot
+        unshiftedRoot = Concrete.commentlessRoot commentless
+
+shiftLocation ::
+              LineShifting -> Exts.SrcSpanInfo -> Exts.SrcSpanInfo
+shiftLocation shifting location
+  = location{Exts.srcInfoSpan = shiftedParent,
+             Exts.srcInfoPoints = shiftedChildren}
+  where shiftedParent = shift originalParent
+        shift = shiftPortion shifting
+        originalParent = Exts.srcInfoSpan location
+        shiftedChildren = map shift originalChildren
+        originalChildren = Exts.srcInfoPoints location
+
+shiftPortion :: LineShifting -> Exts.SrcSpan -> Exts.SrcSpan
+shiftPortion shifting portion
+  = portion{Exts.srcSpanStartLine = shiftedStart,
+            Exts.srcSpanEndLine = shiftedEnd}
+  where LineIndex shiftedStart = shiftLine originalStart
+        shiftLine = applyLineShifting shifting
+        originalStart = startLine portion
+        LineIndex shiftedEnd = shiftLine originalEnd
+        originalEnd = endLine portion
+
+applyLineShifting :: LineShifting -> LineIndex -> LineIndex
+applyLineShifting shifting line = applyLineShift shift line
+  where shift = lookupLineShift shifting line
+
+applyLineShift :: LineShift -> LineIndex -> LineIndex
+applyLineShift (LineShift shift) (LineIndex line)
+  = LineIndex $ line + shift
+
+lookupLineShift :: LineShifting -> LineIndex -> LineShift
+lookupLineShift (LineShifting shifting) line
+  = case Map.lookupLE line shifting of
+        Just (_, shift) -> shift
+        Nothing -> noLineShift
+
+noLineShift :: LineShift
+noLineShift = LineShift 0
+
+startLine :: Exts.SrcSpan -> LineIndex
+startLine = LineIndex . Exts.srcSpanStartLine
+
+endLine :: Exts.SrcSpan -> LineIndex
+endLine = LineIndex . Exts.srcSpanEndLine
 
 lineShifting :: AnnotatedRoot -> LineShifting
 lineShifting root
   = LineShifting . snd $
-      Map.mapAccum accummulate noShift originShifting
+      Map.mapAccum accummulate noLineShift originShifting
   where accummulate accummulatedShift
           = Functions.doubleArgument (,) . summarizeShifts accummulatedShift
-        noShift = LineShift 0
         LineShifting originShifting = originLineShifting root
 
 originLineShifting :: AnnotatedRoot -> LineShifting
@@ -64,6 +115,9 @@ elementShifting (ElementAnnotation comments location)
                         Abstract.Before -> lineIfBefore
                         Abstract.After -> lineIfAfter
                 difference = LineShift $ Abstract.commentLineCount comment
-        lineIfBefore = LineIndex $ Exts.srcSpanStartLine portion
+        lineIfBefore = startLine portion
         portion = SourceLocations.portion location
-        lineIfAfter = LineIndex $ Exts.srcSpanEndLine portion + 1
+        lineIfAfter = applyLineShift oneLineShift $ endLine portion
+
+oneLineShift :: LineShift
+oneLineShift = LineShift 1
