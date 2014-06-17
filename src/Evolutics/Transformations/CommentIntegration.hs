@@ -6,6 +6,8 @@ import qualified Data.Monoid as Monoid
 import qualified Language.Haskell.Exts.Annotated as Exts
 import qualified Evolutics.Code.Abstract as Abstract
 import qualified Evolutics.Code.Concrete as Concrete
+import qualified Evolutics.Code.Location as Location
+import qualified Evolutics.Code.Shifting as Shifting
 import qualified Evolutics.Tools.Functions as Functions
 import qualified Evolutics.Tools.SourceLocations as SourceLocations
 
@@ -14,20 +16,8 @@ data AnnotatedRoot = AnnotatedRoot (Exts.Module ElementAnnotation)
 data ElementAnnotation = ElementAnnotation [Abstract.Comment]
                                            Exts.SrcSpanInfo
 
-data LineShifting = LineShifting (Map.Map LineIndex LineShift)
-
-data LineIndex = LineIndex Int
-               deriving (Eq, Ord)
-
-data LineShift = LineShift Int
-
-data Reservation = Reservation (Map.Map LineIndex
+data Reservation = Reservation (Map.Map Location.Line
                                   [Abstract.Comment])
-
-instance Monoid.Monoid LineShift where
-        mempty = LineShift 0
-        mappend (LineShift left) (LineShift right)
-          = LineShift $ left + right
 
 integrateComments ::
                   Abstract.Code -> Concrete.Commentless -> Concrete.Commented
@@ -35,7 +25,7 @@ integrateComments abstract commentless
   = Concrete.createCommented movedCommentlessRoot comments
   where movedCommentlessRoot
           = Concrete.commentlessRoot movedCommentless
-        movedCommentless = shiftRoot shifting commentless
+        movedCommentless = Shifting.shiftCode shifting commentless
         shifting = reservationShifting reservation
         reservation = makeReservation annotatedRoot
         annotatedRoot
@@ -50,62 +40,16 @@ integrateComments abstract commentless
         file
           = Exts.srcSpanFilename $ SourceLocations.portion movedCommentless
 
-shiftRoot ::
-          LineShifting -> Concrete.Commentless -> Concrete.Commentless
-shiftRoot shifting commentless
-  = Concrete.createCommentless shiftedRoot
-  where shiftedRoot = fmap (shiftLocation shifting) unshiftedRoot
-        unshiftedRoot = Concrete.commentlessRoot commentless
-
-shiftLocation ::
-              LineShifting -> Exts.SrcSpanInfo -> Exts.SrcSpanInfo
-shiftLocation shifting location
-  = location{Exts.srcInfoSpan = shiftedParent,
-             Exts.srcInfoPoints = shiftedChildren}
-  where shiftedParent = shift originalParent
-        shift = shiftPortion shifting
-        originalParent = Exts.srcInfoSpan location
-        shiftedChildren = map shift originalChildren
-        originalChildren = Exts.srcInfoPoints location
-
-shiftPortion :: LineShifting -> Exts.SrcSpan -> Exts.SrcSpan
-shiftPortion shifting portion
-  = portion{Exts.srcSpanStartLine = shiftedStart,
-            Exts.srcSpanEndLine = shiftedEnd}
-  where LineIndex shiftedStart = shiftLine originalStart
-        shiftLine = applyLineShifting shifting
-        originalStart = startLine portion
-        LineIndex shiftedEnd = shiftLine originalEnd
-        originalEnd = endLine portion
-
-applyLineShifting :: LineShifting -> LineIndex -> LineIndex
-applyLineShifting shifting line = applyLineShift shift line
-  where shift = lookupLineShift shifting line
-
-applyLineShift :: LineShift -> LineIndex -> LineIndex
-applyLineShift (LineShift shift) (LineIndex line)
-  = LineIndex $ line + shift
-
-lookupLineShift :: LineShifting -> LineIndex -> LineShift
-lookupLineShift (LineShifting shifting) line
-  = case Map.lookupLE line shifting of
-        Just (_, shift) -> shift
-        Nothing -> Monoid.mempty
-
-startLine :: Exts.SrcSpan -> LineIndex
-startLine = LineIndex . Exts.srcSpanStartLine
-
-endLine :: Exts.SrcSpan -> LineIndex
-endLine = LineIndex . Exts.srcSpanEndLine
-
-reservationShifting :: Reservation -> LineShifting
-reservationShifting = LineShifting . accummulateReservation create
+reservationShifting :: Reservation -> Shifting.LineShifting
+reservationShifting
+  = Shifting.createLineShifting . accummulateReservation create
   where create line _ shift _ = Map.singleton line shift
 
 accummulateReservation ::
                          (Monoid.Monoid m) =>
-                         (LineIndex -> LineIndex -> LineShift -> [Abstract.Comment] -> m) ->
-                           Reservation -> m
+                         (Location.Line ->
+                            Location.Line -> Shifting.LineShift -> [Abstract.Comment] -> m)
+                           -> Reservation -> m
 accummulateReservation create (Reservation reservation)
   = snd $
       Map.foldlWithKey' accummulate (Monoid.mempty, Monoid.mempty)
@@ -115,13 +59,13 @@ accummulateReservation create (Reservation reservation)
           where shift' = Monoid.mappend shift $ commentsShift comments
                 structure' = Monoid.mappend structure part
                 part = create line shiftedLine shift' comments
-                shiftedLine = applyLineShift shift line
+                shiftedLine = Shifting.shiftLine shift line
 
-commentsShift :: [Abstract.Comment] -> LineShift
+commentsShift :: [Abstract.Comment] -> Shifting.LineShift
 commentsShift = Monoid.mconcat . map commentShift
 
-commentShift :: Abstract.Comment -> LineShift
-commentShift = LineShift . Abstract.commentLineCount
+commentShift :: Abstract.Comment -> Shifting.LineShift
+commentShift = Shifting.LineShift . Abstract.commentLineCount
 
 makeReservation :: AnnotatedRoot -> Reservation
 makeReservation (AnnotatedRoot root)
@@ -143,12 +87,9 @@ elementReservation (ElementAnnotation comments location)
                   = case Abstract.commentDisplacement comment of
                         Abstract.Before -> lineIfBefore
                         Abstract.After -> lineIfAfter
-        lineIfBefore = startLine portion
+        lineIfBefore = Location.startLine portion
         portion = SourceLocations.portion location
-        lineIfAfter = applyLineShift oneLineShift $ endLine portion
-
-oneLineShift :: LineShift
-oneLineShift = LineShift 1
+        lineIfAfter = Location.successorLine $ Location.endLine portion
 
 unequalStructuresMessage :: String
 unequalStructuresMessage
@@ -160,7 +101,7 @@ concretizeComments file = accummulateReservation create
           = snd . Foldable.foldl' merge (shiftedLine, [])
         merge (startLine, concretePart) abstract
           = (followingLine, concretePart ++ [concrete])
-          where followingLine = applyLineShift shift startLine
+          where followingLine = Shifting.shiftLine shift startLine
                 shift = commentShift abstract
                 concrete = Concrete.createComment isMultiLine content startPosition
                 isMultiLine = Abstract.isCommentMultiLine abstract
@@ -168,5 +109,5 @@ concretizeComments file = accummulateReservation create
                 startPosition
                   = Exts.SrcLoc{Exts.srcFilename = file, Exts.srcLine = rawStartLine,
                                 Exts.srcColumn = startColumn}
-                LineIndex rawStartLine = startLine
+                Location.Line rawStartLine = startLine
                 startColumn = 1
