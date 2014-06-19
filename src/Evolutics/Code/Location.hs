@@ -9,7 +9,7 @@ successorLine :: Line -> Line
 successorLine (Line line) = Line $ succ line
 
 startLine :: Core.SrcSpan -> Line
-startLine = Line . Core.srcSpanStartLine
+startLine = Line . Core.startLine
 
 endLine :: Core.SrcSpan -> Line
 endLine = Line . Core.srcSpanEndLine

@@ -26,7 +26,7 @@ formatPosition (Core.SrcLoc file line column)
 
 comparePortions :: (Portioned a, Portioned b) => a -> b -> Ordering
 comparePortions leftPortion rightPortion
-  = if Function.on (==) Core.srcSpanFilename left right then
+  = if Function.on (==) Core.fileName left right then
       compareIgnoringFile else EQ
   where left = portion leftPortion
         right = portion rightPortion

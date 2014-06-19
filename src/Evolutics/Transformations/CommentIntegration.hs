@@ -37,8 +37,7 @@ integrateComments abstract commentless
         abstractRoot = Abstract.codeRoot abstract
         commentlessRoot = Concrete.commentlessRoot commentless
         comments = concretizeComments file reservation
-        file
-          = Core.srcSpanFilename $ SourceLocations.portion movedCommentless
+        file = Core.fileName $ SourceLocations.portion movedCommentless
 
 reservationShifting :: Reservation -> Shifting.LineShifting
 reservationShifting
