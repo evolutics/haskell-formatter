@@ -4,8 +4,8 @@ module Evolutics.Code.Shifting
        where
 import qualified Data.Map.Strict as Map
 import qualified Data.Monoid as Monoid
-import qualified Language.Haskell.Exts.Annotated as Exts
 import qualified Evolutics.Code.Concrete as Concrete
+import qualified Evolutics.Code.Core as Core
 import qualified Evolutics.Code.Location as Location
 
 data LineShifting = LineShifting (Map.Map Location.Line LineShift)
@@ -29,20 +29,20 @@ shiftCode shifting commentless
         unshiftedRoot = Concrete.commentlessRoot commentless
 
 shiftLocation ::
-              LineShifting -> Exts.SrcSpanInfo -> Exts.SrcSpanInfo
+              LineShifting -> Core.SrcSpanInfo -> Core.SrcSpanInfo
 shiftLocation shifting location
-  = location{Exts.srcInfoSpan = shiftedParent,
-             Exts.srcInfoPoints = shiftedChildren}
+  = location{Core.srcInfoSpan = shiftedParent,
+             Core.srcInfoPoints = shiftedChildren}
   where shiftedParent = shift originalParent
         shift = shiftPortion shifting
-        originalParent = Exts.srcInfoSpan location
+        originalParent = Core.srcInfoSpan location
         shiftedChildren = map shift originalChildren
-        originalChildren = Exts.srcInfoPoints location
+        originalChildren = Core.srcInfoPoints location
 
-shiftPortion :: LineShifting -> Exts.SrcSpan -> Exts.SrcSpan
+shiftPortion :: LineShifting -> Core.SrcSpan -> Core.SrcSpan
 shiftPortion shifting portion
-  = portion{Exts.srcSpanStartLine = shiftedStart,
-            Exts.srcSpanEndLine = shiftedEnd}
+  = portion{Core.srcSpanStartLine = shiftedStart,
+            Core.srcSpanEndLine = shiftedEnd}
   where Location.Line shiftedStart = shift originalStart
         shift = applyLineShifting shifting
         originalStart = Location.startLine portion

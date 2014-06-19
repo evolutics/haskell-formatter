@@ -3,47 +3,47 @@ module Evolutics.Code.Concrete
         createCommented, createCommentless, dropComments, createComment,
         isCommentMultiLine, commentPortion, commentContent)
        where
-import qualified Language.Haskell.Exts.Annotated as Exts
+import qualified Evolutics.Code.Core as Core
 import qualified Evolutics.Tools.Newlines as Newlines
 import qualified Evolutics.Tools.SourceLocations as SourceLocations
 
 data Commented = Commented{commentedRoot ::
-                           Exts.Module Exts.SrcSpanInfo,
-                           comments :: [Exts.Comment]}
+                           Core.Module Core.SrcSpanInfo,
+                           comments :: [Core.Comment]}
 
 data Commentless = Commentless{commentlessRoot ::
-                               Exts.Module Exts.SrcSpanInfo}
+                               Core.Module Core.SrcSpanInfo}
 
 instance Show Commented where
         show Commented{commentedRoot = root, comments = comments}
-          = Exts.exactPrint root comments
+          = Core.exactPrint root comments
 
 instance SourceLocations.Portioned Commentless where
         portion Commentless{commentlessRoot = root}
-          = SourceLocations.portion $ Exts.ann root
+          = SourceLocations.portion $ Core.ann root
 
 createCommented ::
-                Exts.Module Exts.SrcSpanInfo -> [Exts.Comment] -> Commented
+                Core.Module Core.SrcSpanInfo -> [Core.Comment] -> Commented
 createCommented root comments
   = Commented{commentedRoot = root, comments = comments}
 
-createCommentless :: Exts.Module Exts.SrcSpanInfo -> Commentless
+createCommentless :: Core.Module Core.SrcSpanInfo -> Commentless
 createCommentless root = Commentless{commentlessRoot = root}
 
 dropComments :: Commented -> Commentless
 dropComments Commented{commentedRoot = root}
   = createCommentless root
 
-createComment :: Bool -> String -> Exts.SrcLoc -> Exts.Comment
+createComment :: Bool -> String -> Core.SrcLoc -> Core.Comment
 createComment isMultiLine content startPosition
-  = Exts.Comment isMultiLine portion content
-  where portion = Exts.mkSrcSpan startPosition endPosition
+  = Core.Comment isMultiLine portion content
+  where portion = Core.mkSrcSpan startPosition endPosition
         endPosition
-          = Exts.SrcLoc{Exts.srcFilename = file, Exts.srcLine = endLine,
-                        Exts.srcColumn = endColumn}
-        file = Exts.fileName startPosition
+          = Core.SrcLoc{Core.srcFilename = file, Core.srcLine = endLine,
+                        Core.srcColumn = endColumn}
+        file = Core.fileName startPosition
         endLine = startLine + lineCount - 1
-        startLine = Exts.startLine startPosition
+        startLine = Core.startLine startPosition
         lineCount = length contentLines
         contentLines = Newlines.splitSeparatedLines content
         endColumn = contentEndColumn + if isMultiLine then 2 else 0
@@ -51,14 +51,14 @@ createComment isMultiLine content startPosition
           = lastContentLineStartColumn + lastContentLineLength - 1
         lastContentLineStartColumn
           = if lineCount == 1 then startColumn + 2 else 1
-        startColumn = Exts.startColumn startPosition
+        startColumn = Core.startColumn startPosition
         lastContentLineLength = length $ last contentLines
 
-isCommentMultiLine :: Exts.Comment -> Bool
-isCommentMultiLine (Exts.Comment isMultiLine _ _) = isMultiLine
+isCommentMultiLine :: Core.Comment -> Bool
+isCommentMultiLine (Core.Comment isMultiLine _ _) = isMultiLine
 
-commentPortion :: Exts.Comment -> Exts.SrcSpan
+commentPortion :: Core.Comment -> Core.SrcSpan
 commentPortion = SourceLocations.portion
 
-commentContent :: Exts.Comment -> String
-commentContent (Exts.Comment _ _ content) = content
+commentContent :: Core.Comment -> String
+commentContent (Core.Comment _ _ content) = content

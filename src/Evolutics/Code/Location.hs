@@ -1,6 +1,6 @@
 module Evolutics.Code.Location
        (Line(..), successorLine, startLine, endLine) where
-import qualified Language.Haskell.Exts.Annotated as Exts
+import qualified Evolutics.Code.Core as Core
 
 data Line = Line Int
           deriving (Eq, Ord)
@@ -8,8 +8,8 @@ data Line = Line Int
 successorLine :: Line -> Line
 successorLine (Line line) = Line $ succ line
 
-startLine :: Exts.SrcSpan -> Line
-startLine = Line . Exts.srcSpanStartLine
+startLine :: Core.SrcSpan -> Line
+startLine = Line . Core.srcSpanStartLine
 
-endLine :: Exts.SrcSpan -> Line
-endLine = Line . Exts.srcSpanEndLine
+endLine :: Core.SrcSpan -> Line
+endLine = Line . Core.srcSpanEndLine
