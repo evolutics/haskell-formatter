@@ -101,8 +101,8 @@ concretizeComments file = accummulateReservation create
           = (followingLine, concretePart ++ [concrete])
           where followingLine = Shifting.shiftLine shift startLine
                 shift = commentShift abstract
-                concrete = Concrete.createComment isMultiLine content startPosition
-                isMultiLine = Abstract.isCommentMultiLine abstract
+                concrete = Concrete.createComment kind content startPosition
+                kind = Abstract.commentKind abstract
                 content = Abstract.commentContent abstract
                 startPosition
                   = Core.SrcLoc{Core.srcFilename = file, Core.srcLine = rawStartLine,

@@ -18,8 +18,8 @@ assignComments concrete = Abstract.createCode newRoot
 abstractComment ::
                 Abstract.Displacement -> Core.Comment -> Abstract.Comment
 abstractComment displacement concreteComment
-  = Abstract.createComment displacement isMultiLine content
-  where isMultiLine = Concrete.isCommentMultiLine concreteComment
+  = Abstract.createComment displacement kind content
+  where kind = Concrete.commentKind concreteComment
         content = Concrete.commentContent concreteComment
 
 processElement ::

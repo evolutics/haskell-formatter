@@ -1,8 +1,9 @@
 module Evolutics.Code.Concrete
        (Commented, commentedRoot, comments, Commentless, commentlessRoot,
         createCommented, createCommentless, dropComments, createComment,
-        isCommentMultiLine, commentContent)
+        commentKind, commentContent)
        where
+import qualified Evolutics.Code.Comment as Comment
 import qualified Evolutics.Code.Core as Core
 import qualified Evolutics.Code.Locations as Locations
 import qualified Evolutics.Tools.Newlines as Newlines
@@ -37,10 +38,15 @@ dropComments :: Commented -> Commentless
 dropComments Commented{commentedRoot = root}
   = createCommentless root
 
-createComment :: Bool -> String -> Core.SrcLoc -> Core.Comment
-createComment isMultiLine content startPosition
+createComment ::
+              Comment.Kind -> String -> Core.SrcLoc -> Core.Comment
+createComment kind content startPosition
   = Core.Comment isMultiLine portion content
-  where portion = Core.mkSrcSpan startPosition endPosition
+  where isMultiLine
+          = case kind of
+                Comment.Ordinary -> False
+                Comment.Nested -> True
+        portion = Core.mkSrcSpan startPosition endPosition
         endPosition
           = Core.SrcLoc{Core.srcFilename = file, Core.srcLine = endLine,
                         Core.srcColumn = endColumn}
@@ -57,8 +63,9 @@ createComment isMultiLine content startPosition
         startColumn = Core.startColumn startPosition
         lastContentLineLength = length $ last contentLines
 
-isCommentMultiLine :: Core.Comment -> Bool
-isCommentMultiLine (Core.Comment isMultiLine _ _) = isMultiLine
+commentKind :: Core.Comment -> Comment.Kind
+commentKind (Core.Comment False _ _) = Comment.Ordinary
+commentKind (Core.Comment True _ _) = Comment.Nested
 
 commentContent :: Core.Comment -> String
 commentContent (Core.Comment _ _ content) = content
