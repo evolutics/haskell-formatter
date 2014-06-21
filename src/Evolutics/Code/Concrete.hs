@@ -46,22 +46,8 @@ createComment kind content startPosition
           = case kind of
                 Comment.Ordinary -> False
                 Comment.Nested -> True
-        portion = Core.mkSrcSpan startPosition endPosition
-        endPosition
-          = Core.SrcLoc{Core.srcFilename = file, Core.srcLine = endLine,
-                        Core.srcColumn = endColumn}
-        file = Core.fileName startPosition
-        endLine = startLine + lineCount - 1
-        startLine = Core.startLine startPosition
-        lineCount = length contentLines
-        contentLines = Newlines.splitSeparatedLines content
-        endColumn = contentEndColumn + if isMultiLine then 2 else 0
-        contentEndColumn
-          = lastContentLineStartColumn + lastContentLineLength - 1
-        lastContentLineStartColumn
-          = if lineCount == 1 then startColumn + 2 else 1
-        startColumn = Core.startColumn startPosition
-        lastContentLineLength = length $ last contentLines
+        portion = Locations.stringPortion startPosition wrappedComment
+        wrappedComment = show $ Comment.create kind content
 
 commentKind :: Core.Comment -> Comment.Kind
 commentKind (Core.Comment False _ _) = Comment.Ordinary
