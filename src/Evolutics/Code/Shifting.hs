@@ -25,19 +25,13 @@ shiftCode ::
           LineShifting -> Concrete.Commentless -> Concrete.Commentless
 shiftCode shifting commentless
   = Concrete.createCommentless shiftedRoot
-  where shiftedRoot = fmap (shiftLocation shifting) unshiftedRoot
+  where shiftedRoot
+          = fmap (shiftNestedPortion shifting) unshiftedRoot
         unshiftedRoot = Concrete.commentlessRoot commentless
 
-shiftLocation ::
-              LineShifting -> Core.SrcSpanInfo -> Core.SrcSpanInfo
-shiftLocation shifting location
-  = location{Core.srcInfoSpan = shiftedParent,
-             Core.srcInfoPoints = shiftedChildren}
-  where shiftedParent = shift originalParent
-        shift = shiftPortion shifting
-        originalParent = Core.srcInfoSpan location
-        shiftedChildren = map shift originalChildren
-        originalChildren = Core.srcInfoPoints location
+shiftNestedPortion ::
+                   LineShifting -> Core.SrcSpanInfo -> Core.SrcSpanInfo
+shiftNestedPortion = Locations.mapPortions . shiftPortion
 
 shiftPortion :: LineShifting -> Core.SrcSpan -> Core.SrcSpan
 shiftPortion shifting portion

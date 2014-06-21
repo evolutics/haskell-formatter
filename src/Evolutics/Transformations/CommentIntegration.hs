@@ -82,7 +82,7 @@ mergeReservations ::
 mergeReservations = (++)
 
 elementReservation :: ElementAnnotation -> Reservation
-elementReservation (ElementAnnotation comments location)
+elementReservation (ElementAnnotation comments nestedPortion)
   = Reservation $ foldr reserve Map.empty comments
   where reserve comment
           = Map.insertWith mergeReservations movedLine [comment]
@@ -91,7 +91,7 @@ elementReservation (ElementAnnotation comments location)
                         Abstract.Before -> lineIfBefore
                         Abstract.After -> lineIfAfter
         lineIfBefore = Locations.startLine portion
-        portion = Locations.portion location
+        portion = Locations.portion nestedPortion
         lineIfAfter = Locations.successorLine $ Locations.endLine portion
 
 unequalStructuresMessage :: String

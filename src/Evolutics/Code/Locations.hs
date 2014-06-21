@@ -1,6 +1,6 @@
 module Evolutics.Code.Locations
-       (Portioned, portion, Line(..), formatMessage, successorLine,
-        startLine, endLine, comparePortions, stringPortion)
+       (Portioned, portion, Line(..), formatMessage, mapPortions,
+        successorLine, startLine, endLine, comparePortions, stringPortion)
        where
 import qualified Data.Function as Function
 import qualified Data.List as List
@@ -21,6 +21,17 @@ formatMessage :: Core.SrcLoc -> String -> String
 formatMessage position message
   = Core.prettyPrint position ++ separator ++ message
   where separator = ": "
+
+mapPortions ::
+            (Core.SrcSpan -> Core.SrcSpan) ->
+              Core.SrcSpanInfo -> Core.SrcSpanInfo
+mapPortions function nestedPortion
+  = nestedPortion{Core.srcInfoSpan = mappedParent,
+                  Core.srcInfoPoints = mappedChildren}
+  where mappedParent = function parent
+        parent = Core.srcInfoSpan nestedPortion
+        mappedChildren = map function children
+        children = Core.srcInfoPoints nestedPortion
 
 successorLine :: Line -> Line
 successorLine (Line line) = Line $ succ line
