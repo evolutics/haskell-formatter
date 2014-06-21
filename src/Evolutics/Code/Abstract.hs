@@ -1,17 +1,16 @@
 module Evolutics.Code.Abstract
-       (Code, codeRoot, Comment, commentDisplacement, commentKind,
-        commentContent, Displacement(..), createCode, createComment,
+       (Code, codeRoot, Comment, commentDisplacement, Displacement(..),
+        createCode, createComment, commentKind, commentContent,
         commentLineCount)
        where
 import qualified Evolutics.Code.Comment as Comment
 import qualified Evolutics.Code.Concrete as Concrete
 import qualified Evolutics.Code.Core as Core
-import qualified Evolutics.Tools.Newlines as Newlines
 
 data Code = Code{codeRoot :: Core.Module [Comment]}
 
 data Comment = Comment{commentDisplacement :: Displacement,
-                       commentKind :: Comment.Kind, commentContent :: String}
+                       commentCore :: Comment.Comment}
 
 data Displacement = Before
                   | After
@@ -21,9 +20,14 @@ createCode root = Code{codeRoot = root}
 
 createComment :: Displacement -> Comment.Kind -> String -> Comment
 createComment displacement kind content
-  = Comment{commentDisplacement = displacement, commentKind = kind,
-            commentContent = content}
+  = Comment{commentDisplacement = displacement, commentCore = core}
+  where core = Comment.create kind content
+
+commentKind :: Comment -> Comment.Kind
+commentKind = Comment.kind . commentCore
+
+commentContent :: Comment -> String
+commentContent = Comment.content . commentCore
 
 commentLineCount :: Comment -> Int
-commentLineCount
-  = length . Newlines.splitSeparatedLines . commentContent
+commentLineCount = Comment.lineCount . commentCore
