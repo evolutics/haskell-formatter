@@ -100,13 +100,32 @@ unequalStructuresMessage
 
 concretizeComments :: FilePath -> Reservation -> [Core.Comment]
 concretizeComments file = accummulateReservation create
-  where create _ shiftedLine _
-          = snd . List.foldl' merge (shiftedLine, [])
-        merge (startLine, concretePart) abstract
+  where create _ baseLineBefore _ abstractComments
+          = concreteBefore ++ concreteAfter
+          where (originLine, concreteBefore) = run baseLineBefore coresBefore
+                run = concretizeRun file
+                (coresBefore, coresAfter) = unwrapComments abstractComments
+                (_, concreteAfter) = run baseLineAfter coresAfter
+                baseLineAfter = Locations.successorLine originLine
+
+unwrapComments ::
+               [Abstract.Comment] -> ([Comment.Comment], [Comment.Comment])
+unwrapComments = foldr unwrap ([], [])
+  where unwrap comment (before, after)
+          = case Abstract.commentDisplacement comment of
+                Abstract.Before -> (core : before, after)
+                Abstract.After -> (before, core : after)
+          where core = Abstract.commentCore comment
+
+concretizeRun ::
+              FilePath ->
+                Locations.Line ->
+                  [Comment.Comment] -> (Locations.Line, [Core.Comment])
+concretizeRun file baseLine = List.foldl' merge (baseLine, [])
+  where merge (startLine, concretePart) core
           = (followingLine, concretePart ++ [concrete])
           where followingLine = Shifting.shiftLine shift startLine
                 shift = commentShift core
-                core = Abstract.commentCore abstract
                 concrete = Concrete.createComment core startPosition
                 startPosition
                   = Core.SrcLoc{Core.srcFilename = file, Core.srcLine = rawStartLine,
