@@ -1,10 +1,11 @@
 module Evolutics.Code.Locations
        (Portioned, portion, Line(..), formatMessage, successorLine,
-        startLine, endLine, comparePortions)
+        startLine, endLine, comparePortions, stringPortion)
        where
 import qualified Data.Function as Function
 import qualified Data.List as List
 import qualified Evolutics.Code.Core as Core
+import qualified Evolutics.Tools.Newlines as Newlines
 
 class Portioned a where
 
@@ -40,3 +41,20 @@ comparePortions leftPortioned rightPortioned
           | Core.srcSpanEnd left < Core.srcSpanStart right = LT
           | Core.srcSpanStart left > Core.srcSpanEnd right = GT
           | otherwise = EQ
+
+stringPortion :: Core.SrcLoc -> String -> Core.SrcSpan
+stringPortion startPosition string
+  = Core.mkSrcSpan startPosition endPosition
+  where endPosition
+          = Core.SrcLoc{Core.srcFilename = file, Core.srcLine = endLine,
+                        Core.srcColumn = endColumn}
+        file = Core.fileName startPosition
+        endLine = startLine + lineCount - 1
+        startLine = Core.startLine startPosition
+        lineCount = length lines
+        lines = Newlines.splitSeparatedLines string
+        endColumn = lastLineStartColumn + lastLineLength - 1
+        lastLineStartColumn = if hasSingleLine then startColumn else 1
+        hasSingleLine = lineCount == 1
+        startColumn = Core.startColumn startPosition
+        lastLineLength = length $ last lines
