@@ -1,7 +1,7 @@
 module Evolutics.Formatting (formatSource) where
 import qualified Evolutics.Code.Concrete as Concrete
 import qualified Evolutics.Code.Core as Core
-import qualified Evolutics.Tools.SourceLocations as SourceLocations
+import qualified Evolutics.Code.Locations as Locations
 import qualified Evolutics.Transformations.CommentAssignment
        as CommentAssignment
 import qualified Evolutics.Transformations.CommentIntegration
@@ -13,7 +13,7 @@ formatSource :: Maybe FilePath -> String -> Either String String
 formatSource maybeFile
   = format . Core.parseFileContentsWithComments parseMode
   where format (Core.ParseFailed position message)
-          = Left $ SourceLocations.formatMessage position message
+          = Left $ Locations.formatMessage position message
         format (Core.ParseOk (root, comments))
           = Right . show . formatCode $
               Concrete.createCommented root comments

@@ -4,8 +4,8 @@ module Evolutics.Code.Concrete
         isCommentMultiLine, commentContent)
        where
 import qualified Evolutics.Code.Core as Core
+import qualified Evolutics.Code.Locations as Locations
 import qualified Evolutics.Tools.Newlines as Newlines
-import qualified Evolutics.Tools.SourceLocations as SourceLocations
 
 data Commented = Commented{commentedRoot ::
                            Core.Module Core.SrcSpanInfo,
@@ -18,11 +18,11 @@ instance Show Commented where
         show Commented{commentedRoot = root, comments = comments}
           = Core.exactPrint root comments
 
-instance SourceLocations.Portioned Commentless where
+instance Locations.Portioned Commentless where
         portion Commentless{commentlessRoot = root}
-          = SourceLocations.portion $ Core.ann root
+          = Locations.portion $ Core.ann root
 
-instance SourceLocations.Portioned Core.Comment where
+instance Locations.Portioned Core.Comment where
         portion (Core.Comment _ commentPortion _) = commentPortion
 
 createCommented ::

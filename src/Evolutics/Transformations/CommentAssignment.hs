@@ -4,7 +4,7 @@ import qualified Data.Traversable as Traversable
 import qualified Evolutics.Code.Abstract as Abstract
 import qualified Evolutics.Code.Concrete as Concrete
 import qualified Evolutics.Code.Core as Core
-import qualified Evolutics.Tools.SourceLocations as SourceLocations
+import qualified Evolutics.Code.Locations as Locations
 
 assignComments :: Concrete.Commented -> Abstract.Code
 assignComments concrete = Abstract.createCode newRoot
@@ -33,4 +33,4 @@ processElement concreteComments nestedPortion
 
 follows :: Core.SrcSpanInfo -> Core.Comment -> Bool
 follows nestedPortion comment
-  = SourceLocations.comparePortions nestedPortion comment == GT
+  = Locations.comparePortions nestedPortion comment == GT

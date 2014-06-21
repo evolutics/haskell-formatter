@@ -6,17 +6,16 @@ import qualified Data.Monoid as Monoid
 import qualified Evolutics.Code.Abstract as Abstract
 import qualified Evolutics.Code.Concrete as Concrete
 import qualified Evolutics.Code.Core as Core
-import qualified Evolutics.Code.Location as Location
+import qualified Evolutics.Code.Locations as Locations
 import qualified Evolutics.Code.Shifting as Shifting
 import qualified Evolutics.Tools.Functions as Functions
-import qualified Evolutics.Tools.SourceLocations as SourceLocations
 
 data AnnotatedRoot = AnnotatedRoot (Core.Module ElementAnnotation)
 
 data ElementAnnotation = ElementAnnotation [Abstract.Comment]
                                            Core.SrcSpanInfo
 
-data Reservation = Reservation (Map.Map Location.Line
+data Reservation = Reservation (Map.Map Locations.Line
                                   [Abstract.Comment])
 
 integrateComments ::
@@ -37,7 +36,7 @@ integrateComments abstract commentless
         abstractRoot = Abstract.codeRoot abstract
         commentlessRoot = Concrete.commentlessRoot commentless
         comments = concretizeComments file reservation
-        file = Core.fileName $ SourceLocations.portion movedCommentless
+        file = Core.fileName $ Locations.portion movedCommentless
 
 reservationShifting :: Reservation -> Shifting.LineShifting
 reservationShifting
@@ -46,8 +45,8 @@ reservationShifting
 
 accummulateReservation ::
                          (Monoid.Monoid m) =>
-                         (Location.Line ->
-                            Location.Line -> Shifting.LineShift -> [Abstract.Comment] -> m)
+                         (Locations.Line ->
+                            Locations.Line -> Shifting.LineShift -> [Abstract.Comment] -> m)
                            -> Reservation -> m
 accummulateReservation create (Reservation reservation)
   = snd $
@@ -86,9 +85,9 @@ elementReservation (ElementAnnotation comments location)
                   = case Abstract.commentDisplacement comment of
                         Abstract.Before -> lineIfBefore
                         Abstract.After -> lineIfAfter
-        lineIfBefore = Location.startLine portion
-        portion = SourceLocations.portion location
-        lineIfAfter = Location.successorLine $ Location.endLine portion
+        lineIfBefore = Locations.startLine portion
+        portion = Locations.portion location
+        lineIfAfter = Locations.successorLine $ Locations.endLine portion
 
 unequalStructuresMessage :: String
 unequalStructuresMessage
@@ -108,5 +107,5 @@ concretizeComments file = accummulateReservation create
                 startPosition
                   = Core.SrcLoc{Core.srcFilename = file, Core.srcLine = rawStartLine,
                                 Core.srcColumn = startColumn}
-                Location.Line rawStartLine = startLine
+                Locations.Line rawStartLine = startLine
                 startColumn = 1
