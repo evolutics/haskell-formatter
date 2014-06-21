@@ -1,5 +1,5 @@
 module Evolutics.Code.Comment
-       (Comment, kind, content, Kind(..), create, contentLineCount) where
+       (Comment, kind, content, Kind(..), create, wrappedLines) where
 import qualified Evolutics.Tools.Newlines as Newlines
 
 data Comment = Comment{kind :: Kind, content :: String}
@@ -17,5 +17,5 @@ create :: Kind -> String -> Comment
 create commentKind commentContent
   = Comment{kind = commentKind, content = commentContent}
 
-contentLineCount :: Comment -> Int
-contentLineCount = length . Newlines.splitSeparatedLines . content
+wrappedLines :: Comment -> [String]
+wrappedLines = Newlines.splitSeparatedLines . show

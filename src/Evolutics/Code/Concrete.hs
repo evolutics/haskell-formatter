@@ -1,7 +1,7 @@
 module Evolutics.Code.Concrete
        (Commented, commentedRoot, comments, Commentless, commentlessRoot,
         createCommented, createCommentless, dropComments, createComment,
-        commentKind, commentContent)
+        commentCore)
        where
 import qualified Evolutics.Code.Comment as Comment
 import qualified Evolutics.Code.Core as Core
@@ -38,16 +38,21 @@ dropComments :: Commented -> Commentless
 dropComments Commented{commentedRoot = root}
   = createCommentless root
 
-createComment ::
-              Comment.Kind -> String -> Core.SrcLoc -> Core.Comment
-createComment kind content startPosition
+createComment :: Comment.Comment -> Core.SrcLoc -> Core.Comment
+createComment core startPosition
   = Core.Comment isMultiLine portion content
   where isMultiLine
-          = case kind of
+          = case Comment.kind core of
                 Comment.Ordinary -> False
                 Comment.Nested -> True
         portion = Locations.stringPortion startPosition wrappedComment
-        wrappedComment = show $ Comment.create kind content
+        wrappedComment = show core
+        content = Comment.content core
+
+commentCore :: Core.Comment -> Comment.Comment
+commentCore core = Comment.create kind content
+  where kind = commentKind core
+        content = commentContent core
 
 commentKind :: Core.Comment -> Comment.Kind
 commentKind (Core.Comment False _ _) = Comment.Ordinary

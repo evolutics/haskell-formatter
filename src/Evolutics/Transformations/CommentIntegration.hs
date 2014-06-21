@@ -1,9 +1,11 @@
 module Evolutics.Transformations.CommentIntegration
        (integrateComments) where
 import qualified Data.Foldable as Foldable
+import qualified Data.List as List
 import qualified Data.Map.Strict as Map
 import qualified Data.Monoid as Monoid
 import qualified Evolutics.Code.Abstract as Abstract
+import qualified Evolutics.Code.Comment as Comment
 import qualified Evolutics.Code.Concrete as Concrete
 import qualified Evolutics.Code.Core as Core
 import qualified Evolutics.Code.Locations as Locations
@@ -41,7 +43,8 @@ integrateComments abstract commentless
 reservationShifting :: Reservation -> Shifting.LineShifting
 reservationShifting
   = Shifting.createLineShifting . accummulateReservation create
-  where create line _ shift _ = Map.singleton line shift
+  where create line _ shiftedShift _
+          = Map.singleton line shiftedShift
 
 accummulateReservation ::
                          (Monoid.Monoid m) =>
@@ -52,18 +55,20 @@ accummulateReservation create (Reservation reservation)
   = snd $
       Map.foldlWithKey' accummulate (Monoid.mempty, Monoid.mempty)
         reservation
-  where accummulate (shift, structure) line comments
-          = (shift', structure')
-          where shift' = Monoid.mappend shift $ commentsShift comments
+  where accummulate (shiftedShift, structure) line comments
+          = (shiftedShift', structure')
+          where shiftedShift' = Monoid.mappend shiftedShift unshiftedShift
+                unshiftedShift = commentsShift comments
                 structure' = Monoid.mappend structure part
-                part = create line shiftedLine shift' comments
-                shiftedLine = Shifting.shiftLine shift line
+                part = create line shiftedLine shiftedShift' comments
+                shiftedLine = Shifting.shiftLine shiftedShift line
 
 commentsShift :: [Abstract.Comment] -> Shifting.LineShift
-commentsShift = Monoid.mconcat . map commentShift
+commentsShift
+  = Monoid.mconcat . map (commentShift . Abstract.commentCore)
 
-commentShift :: Abstract.Comment -> Shifting.LineShift
-commentShift = Shifting.LineShift . Abstract.commentLineCount
+commentShift :: Comment.Comment -> Shifting.LineShift
+commentShift = Shifting.LineShift . length . Comment.wrappedLines
 
 makeReservation :: AnnotatedRoot -> Reservation
 makeReservation (AnnotatedRoot root)
@@ -96,14 +101,13 @@ unequalStructuresMessage
 concretizeComments :: FilePath -> Reservation -> [Core.Comment]
 concretizeComments file = accummulateReservation create
   where create _ shiftedLine _
-          = snd . Foldable.foldl' merge (shiftedLine, [])
+          = snd . List.foldl' merge (shiftedLine, [])
         merge (startLine, concretePart) abstract
           = (followingLine, concretePart ++ [concrete])
           where followingLine = Shifting.shiftLine shift startLine
-                shift = commentShift abstract
-                concrete = Concrete.createComment kind content startPosition
-                kind = Abstract.commentKind abstract
-                content = Abstract.commentContent abstract
+                shift = commentShift core
+                core = Abstract.commentCore abstract
+                concrete = Concrete.createComment core startPosition
                 startPosition
                   = Core.SrcLoc{Core.srcFilename = file, Core.srcLine = rawStartLine,
                                 Core.srcColumn = startColumn}

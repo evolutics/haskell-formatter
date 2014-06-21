@@ -17,10 +17,8 @@ assignComments concrete = Abstract.createCode newRoot
 
 abstractComment ::
                 Abstract.Displacement -> Core.Comment -> Abstract.Comment
-abstractComment displacement concreteComment
-  = Abstract.createComment displacement kind content
-  where kind = Concrete.commentKind concreteComment
-        content = Concrete.commentContent concreteComment
+abstractComment displacement
+  = Abstract.createComment displacement . Concrete.commentCore
 
 processElement ::
                [Core.Comment] ->
