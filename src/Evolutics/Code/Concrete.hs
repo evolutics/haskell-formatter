@@ -23,7 +23,7 @@ instance SourceLocations.Portioned Commentless where
           = SourceLocations.portion $ Core.ann root
 
 instance SourceLocations.Portioned Core.Comment where
-        portion (Core.Comment _ portion _) = portion
+        portion (Core.Comment _ commentPortion _) = commentPortion
 
 createCommented ::
                 Core.Module Core.SrcSpanInfo -> [Core.Comment] -> Commented

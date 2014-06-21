@@ -25,12 +25,12 @@ abstractComment displacement concreteComment
 processElement ::
                [Core.Comment] ->
                  Core.SrcSpanInfo -> ([Core.Comment], [Abstract.Comment])
-processElement concreteComments elementPortion
+processElement concreteComments nestedPortion
   = (remainder, abstractComments)
   where (choice, remainder)
-          = span (follows elementPortion) concreteComments
+          = span (follows nestedPortion) concreteComments
         abstractComments = map (abstractComment Abstract.Before) choice
 
 follows :: Core.SrcSpanInfo -> Core.Comment -> Bool
-follows portion comment
-  = SourceLocations.comparePortions portion comment == GT
+follows nestedPortion comment
+  = SourceLocations.comparePortions nestedPortion comment == GT

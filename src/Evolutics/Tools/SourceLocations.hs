@@ -22,11 +22,11 @@ formatPosition (Core.SrcLoc file line column)
   where separator = ":"
 
 comparePortions :: (Portioned a, Portioned b) => a -> b -> Ordering
-comparePortions leftPortion rightPortion
+comparePortions leftPortioned rightPortioned
   = if Function.on (==) Core.fileName left right then
       compareIgnoringFile else EQ
-  where left = portion leftPortion
-        right = portion rightPortion
+  where left = portion leftPortioned
+        right = portion rightPortioned
         compareIgnoringFile
           | Core.srcSpanEnd left < Core.srcSpanStart right = LT
           | Core.srcSpanStart left > Core.srcSpanEnd right = GT
