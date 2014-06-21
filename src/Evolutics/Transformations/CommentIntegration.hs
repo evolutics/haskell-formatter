@@ -18,7 +18,7 @@ data ElementAnnotation = ElementAnnotation [Abstract.Comment]
                                            Core.SrcSpanInfo
 
 data Reservation = Reservation (Map.Map Locations.Line
-                                  [Abstract.Comment])
+                                  [Comment.Comment])
 
 integrateComments ::
                   Abstract.Code -> Concrete.Commentless -> Concrete.Commented
@@ -49,7 +49,7 @@ reservationShifting
 accummulateReservation ::
                          (Monoid.Monoid m) =>
                          (Locations.Line ->
-                            Locations.Line -> Shifting.LineShift -> [Abstract.Comment] -> m)
+                            Locations.Line -> Shifting.LineShift -> [Comment.Comment] -> m)
                            -> Reservation -> m
 accummulateReservation create (Reservation reservation)
   = snd $
@@ -63,9 +63,8 @@ accummulateReservation create (Reservation reservation)
                 part = create line shiftedLine shiftedShift' comments
                 shiftedLine = Shifting.shiftLine shiftedShift line
 
-commentsShift :: [Abstract.Comment] -> Shifting.LineShift
-commentsShift
-  = Monoid.mconcat . map (commentShift . Abstract.commentCore)
+commentsShift :: [Comment.Comment] -> Shifting.LineShift
+commentsShift = Monoid.mconcat . map commentShift
 
 commentShift :: Comment.Comment -> Shifting.LineShift
 commentShift = Shifting.LineShift . length . Comment.wrappedLines
@@ -78,18 +77,19 @@ makeReservation (AnnotatedRoot root)
           where Reservation reservationNow = elementReservation annotation
 
 mergeReservations ::
-                  [Abstract.Comment] -> [Abstract.Comment] -> [Abstract.Comment]
+                  [Comment.Comment] -> [Comment.Comment] -> [Comment.Comment]
 mergeReservations = (++)
 
 elementReservation :: ElementAnnotation -> Reservation
 elementReservation (ElementAnnotation comments nestedPortion)
   = Reservation $ foldr reserve Map.empty comments
   where reserve comment
-          = Map.insertWith mergeReservations movedLine [comment]
+          = Map.insertWith mergeReservations movedLine [core]
           where movedLine
                   = case Abstract.commentDisplacement comment of
                         Abstract.Before -> lineIfBefore
                         Abstract.After -> lineIfAfter
+                core = Abstract.commentCore comment
         lineIfBefore = Locations.startLine portion
         portion = Locations.portion nestedPortion
         lineIfAfter = Locations.successorLine $ Locations.endLine portion
@@ -100,8 +100,7 @@ unequalStructuresMessage
 
 concretizeComments :: FilePath -> Reservation -> [Core.Comment]
 concretizeComments file = accummulateReservation create
-  where create _ baseLine _
-          = snd . List.foldl' merge (baseLine, []) . map Abstract.commentCore
+  where create _ baseLine _ = snd . List.foldl' merge (baseLine, [])
         merge (startLine, concretePart) core
           = (followingLine, concretePart ++ [concrete])
           where followingLine = Shifting.shiftLine shift startLine
