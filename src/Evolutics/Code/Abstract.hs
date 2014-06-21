@@ -30,4 +30,4 @@ commentContent :: Comment -> String
 commentContent = Comment.content . commentCore
 
 commentLineCount :: Comment -> Int
-commentLineCount = Comment.lineCount . commentCore
+commentLineCount = Comment.contentLineCount . commentCore
