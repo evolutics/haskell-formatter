@@ -1,6 +1,7 @@
 module Evolutics.Code.Locations
-       (Portioned, portion, Line(..), formatMessage, mapPortions,
-        successorLine, startLine, endLine, comparePortions, stringPortion)
+       (Portioned, portion, Line(..), Column, formatMessage, mapPortions,
+        successorLine, startLine, endLine, startColumn, createPosition,
+        comparePortions, stringPortion)
        where
 import qualified Data.Function as Function
 import qualified Data.List as List
@@ -13,6 +14,8 @@ class Portioned a where
 
 data Line = Line Int
           deriving (Eq, Ord)
+
+data Column = Column Int
 
 instance Portioned Core.SrcSpanInfo where
         portion = Core.srcInfoSpan
@@ -41,6 +44,14 @@ startLine = Line . Core.startLine
 
 endLine :: Core.SrcSpan -> Line
 endLine = Line . Core.srcSpanEndLine
+
+startColumn :: Core.SrcSpan -> Column
+startColumn = Column . Core.startColumn
+
+createPosition :: FilePath -> Line -> Column -> Core.SrcLoc
+createPosition file (Line line) (Column column)
+  = Core.SrcLoc{Core.srcFilename = file, Core.srcLine = line,
+                Core.srcColumn = column}
 
 comparePortions :: (Portioned a, Portioned b) => a -> b -> Ordering
 comparePortions leftPortioned rightPortioned
