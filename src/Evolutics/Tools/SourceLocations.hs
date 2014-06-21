@@ -11,9 +11,6 @@ class Portioned a where
 instance Portioned Core.SrcSpanInfo where
         portion = Core.srcInfoSpan
 
-instance Portioned Core.Comment where
-        portion (Core.Comment _ portion _) = portion
-
 formatMessage :: Core.SrcLoc -> String -> String
 formatMessage position message
   = formatPosition position ++ separator ++ message
