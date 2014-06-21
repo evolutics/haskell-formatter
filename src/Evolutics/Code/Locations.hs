@@ -18,13 +18,8 @@ instance Portioned Core.SrcSpanInfo where
 
 formatMessage :: Core.SrcLoc -> String -> String
 formatMessage position message
-  = formatPosition position ++ separator ++ message
+  = Core.prettyPrint position ++ separator ++ message
   where separator = ": "
-
-formatPosition :: Core.SrcLoc -> String
-formatPosition (Core.SrcLoc file line column)
-  = List.intercalate separator $ file : map show [line, column]
-  where separator = ":"
 
 successorLine :: Line -> Line
 successorLine (Line line) = Line $ succ line
