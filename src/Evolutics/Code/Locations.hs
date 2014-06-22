@@ -19,6 +19,9 @@ data Column = Column Int
 instance Portioned Core.SrcSpanInfo where
         portion = Core.srcInfoSpan
 
+instance (Portioned a) => Portioned (Core.Module a) where
+        portion = portion . Core.ann
+
 formatMessage :: Core.SrcLoc -> String -> String
 formatMessage position message
   = Core.prettyPrint position ++ separator ++ message
