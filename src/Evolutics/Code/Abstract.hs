@@ -1,7 +1,7 @@
 module Evolutics.Code.Abstract
        (Code, codeRoot, Annotation, commentsBefore, commentsAfter,
         Comment, commentCore, commentStartColumn, createCode,
-        createAnnotation, createComment)
+        createAnnotation, createComment, mapCommentStartColumns)
        where
 import qualified Evolutics.Code.Comment as Comment
 import qualified Evolutics.Code.Core as Core
@@ -25,3 +25,20 @@ createAnnotation before after
 createComment :: Locations.Column -> Comment.Comment -> Comment
 createComment startColumn core
   = Comment{commentCore = core, commentStartColumn = startColumn}
+
+mapComments :: (Comment -> Comment) -> Annotation -> Annotation
+mapComments function annotation
+  = annotation{commentsBefore = before', commentsAfter = after'}
+  where before' = apply before
+        apply = map function
+        before = commentsBefore annotation
+        after' = apply after
+        after = commentsAfter annotation
+
+mapCommentStartColumns ::
+                       (Locations.Column -> Locations.Column) -> Annotation -> Annotation
+mapCommentStartColumns function = mapComments mapComment
+  where mapComment comment
+          = comment{commentStartColumn = startColumn'}
+          where startColumn' = function startColumn
+                startColumn = commentStartColumn comment

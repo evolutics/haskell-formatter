@@ -1,9 +1,10 @@
 module Evolutics.Code.Core
        ((Exts.=~=), Exts.amap, Exts.ann, Exts.Comment(..),
         Exts.defaultParseMode, Exts.exactPrint, Exts.fileName,
-        Exts.fromParseResult, Exts.mkSrcSpan, Exts.Module,
-        Exts.parseFileContents, Exts.parseFileContentsWithComments,
-        Exts.parseFilename, Exts.ParseResult(..), Exts.prettyPrint,
+        Exts.fromParseResult, Exts.getPointLoc, Exts.mkSrcSpan,
+        Exts.Module, Exts.parseFileContents,
+        Exts.parseFileContentsWithComments, Exts.parseFilename,
+        Exts.ParseResult(..), Exts.prettyPrint, Exts.SrcInfo,
         Exts.srcInfoPoints, Exts.srcInfoSpan, Exts.SrcLoc(..),
         Exts.SrcSpan, Exts.srcSpanEnd, Exts.srcSpanEndLine,
         Exts.SrcSpanInfo, Exts.srcSpanStart, Exts.srcSpanStartLine,

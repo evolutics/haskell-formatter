@@ -1,7 +1,7 @@
 module Evolutics.Code.Locations
        (Portioned, portion, Line(..), Column, formatMessage, mapPortions,
         successorLine, startLine, endLine, firstColumn, startColumn,
-        createPosition, comparePortions, stringPortion)
+        createPosition, startPosition, comparePortions, stringPortion)
        where
 import qualified Data.Function as Function
 import qualified Evolutics.Code.Core as Core
@@ -57,6 +57,9 @@ createPosition :: FilePath -> Line -> Column -> Core.SrcLoc
 createPosition file (Line line) (Column column)
   = Core.SrcLoc{Core.srcFilename = file, Core.srcLine = line,
                 Core.srcColumn = column}
+
+startPosition :: (Portioned a) => a -> Core.SrcLoc
+startPosition = Core.getPointLoc . portion
 
 comparePortions :: (Portioned a, Portioned b) => a -> b -> Ordering
 comparePortions leftPortioned rightPortioned
