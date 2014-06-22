@@ -12,16 +12,13 @@ import qualified Evolutics.Code.Locations as Locations
 import qualified Evolutics.Code.Shifting as Shifting
 import qualified Evolutics.Tools.Functions as Functions
 
-data AnnotatedRoot = AnnotatedRoot (Core.Module ElementAnnotation)
+data MergedCode = MergedCode (Core.Module MergedAnnotation)
 
-data ElementAnnotation = ElementAnnotation [Abstract.Comment]
-                                           Core.SrcSpanInfo
+data MergedAnnotation = MergedAnnotation Abstract.Annotation
+                                         Core.SrcSpan
 
 data Reservation = Reservation (Map.Map Locations.Line
-                                  [ReservedComment])
-
-data ReservedComment = ReservedComment Comment.Comment
-                                       Locations.Column
+                                  [Abstract.Comment])
 
 integrateComments ::
                   Abstract.Code -> Concrete.Commentless -> Concrete.Commented
@@ -31,15 +28,8 @@ integrateComments abstract commentless
           = Concrete.commentlessRoot movedCommentless
         movedCommentless = Shifting.shiftCode shifting commentless
         shifting = reservationShifting reservation
-        reservation = makeReservation annotatedRoot
-        annotatedRoot
-          = AnnotatedRoot $
-              if abstractRoot Core.=~= commentlessRoot then
-                Functions.halfZipWith ElementAnnotation abstractRoot
-                  commentlessRoot
-                else error unequalStructuresMessage
-        abstractRoot = Abstract.codeRoot abstract
-        commentlessRoot = Concrete.commentlessRoot commentless
+        reservation = makeReservation mergedRoot
+        mergedRoot = mergeParts abstract commentless
         comments = concretizeComments file reservation
         file = Core.fileName $ Locations.portion movedCommentless
 
@@ -52,7 +42,7 @@ reservationShifting
 accummulateReservation ::
                          (Monoid.Monoid m) =>
                          (Locations.Line ->
-                            Locations.Line -> Shifting.LineShift -> [ReservedComment] -> m)
+                            Locations.Line -> Shifting.LineShift -> [Abstract.Comment] -> m)
                            -> Reservation -> m
 accummulateReservation create (Reservation reservation)
   = snd $
@@ -66,39 +56,45 @@ accummulateReservation create (Reservation reservation)
                 part = create line shiftedLine shiftedShift' comments
                 shiftedLine = Shifting.shiftLine shiftedShift line
 
-commentsShift :: [ReservedComment] -> Shifting.LineShift
-commentsShift = Monoid.mconcat . map (commentShift . commentCore)
-  where commentCore (ReservedComment core _) = core
+commentsShift :: [Abstract.Comment] -> Shifting.LineShift
+commentsShift
+  = Monoid.mconcat . map (commentShift . Abstract.commentCore)
 
 commentShift :: Comment.Comment -> Shifting.LineShift
 commentShift = Shifting.LineShift . length . Comment.wrappedLines
 
-makeReservation :: AnnotatedRoot -> Reservation
-makeReservation (AnnotatedRoot root)
+makeReservation :: MergedCode -> Reservation
+makeReservation (MergedCode root)
   = Reservation $ Foldable.foldl' reserve Map.empty root
-  where reserve reservation annotation
+  where reserve reservation mergedAnnotation
           = Map.unionWith mergeReservations reservation reservationNow
-          where Reservation reservationNow = elementReservation annotation
+          where Reservation reservationNow
+                  = annotationReservation mergedAnnotation
 
 mergeReservations ::
-                  [ReservedComment] -> [ReservedComment] -> [ReservedComment]
+                  [Abstract.Comment] -> [Abstract.Comment] -> [Abstract.Comment]
 mergeReservations = (++)
 
-elementReservation :: ElementAnnotation -> Reservation
-elementReservation (ElementAnnotation comments nestedPortion)
-  = Reservation $ foldr reserve Map.empty comments
-  where reserve abstract
-          = Map.insertWith mergeReservations movedLine [reserved]
-          where movedLine
-                  = case Abstract.commentDisplacement abstract of
-                        Abstract.Before -> lineIfBefore
-                        Abstract.After -> lineIfAfter
-                reserved = ReservedComment core startColumn
-                core = Abstract.commentCore abstract
+annotationReservation :: MergedAnnotation -> Reservation
+annotationReservation (MergedAnnotation annotation portion)
+  = Reservation reservation
+  where reservation = before `Map.union` after
+        before
+          = Map.singleton lineIfBefore $ Abstract.commentsBefore annotation
         lineIfBefore = Locations.startLine portion
-        portion = Locations.portion nestedPortion
+        after
+          = Map.singleton lineIfAfter $ Abstract.commentsAfter annotation
         lineIfAfter = Locations.successorLine $ Locations.endLine portion
-        startColumn = Locations.startColumn portion
+
+mergeParts :: Abstract.Code -> Concrete.Commentless -> MergedCode
+mergeParts abstract commentless = MergedCode merged
+  where merged
+          = if abstractRoot Core.=~= commentlessRoot then
+              Functions.halfZipWith merge abstractRoot commentlessRoot else
+              error unequalStructuresMessage
+        abstractRoot = Abstract.codeRoot abstract
+        commentlessRoot = Concrete.commentlessRoot commentless
+        merge annotation = MergedAnnotation annotation . Locations.portion
 
 unequalStructuresMessage :: String
 unequalStructuresMessage
@@ -107,9 +103,11 @@ unequalStructuresMessage
 concretizeComments :: FilePath -> Reservation -> [Core.Comment]
 concretizeComments file = accummulateReservation create
   where create _ baseLine _ = snd . List.foldl' merge (baseLine, [])
-        merge (startLine, concretePart) (ReservedComment core startColumn)
+        merge (startLine, concretePart) comment
           = (followingLine, concretePart ++ [concrete])
           where followingLine = Shifting.shiftLine shift startLine
                 shift = commentShift core
+                core = Abstract.commentCore comment
                 concrete = Concrete.createComment core startPosition
                 startPosition = Locations.createPosition file startLine startColumn
+                startColumn = Abstract.commentStartColumn comment

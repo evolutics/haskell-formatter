@@ -1,10 +1,9 @@
 module Evolutics.Code.Locations
        (Portioned, portion, Line(..), Column, formatMessage, mapPortions,
-        successorLine, startLine, endLine, startColumn, createPosition,
-        comparePortions, stringPortion)
+        successorLine, startLine, endLine, firstColumn, startColumn,
+        createPosition, comparePortions, stringPortion)
        where
 import qualified Data.Function as Function
-import qualified Data.List as List
 import qualified Evolutics.Code.Core as Core
 import qualified Evolutics.Tools.Newlines as Newlines
 
@@ -44,6 +43,9 @@ startLine = Line . Core.startLine
 
 endLine :: Core.SrcSpan -> Line
 endLine = Line . Core.srcSpanEndLine
+
+firstColumn :: Column
+firstColumn = Column 1
 
 startColumn :: Core.SrcSpan -> Column
 startColumn = Column . Core.startColumn

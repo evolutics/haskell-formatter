@@ -1,22 +1,27 @@
 module Evolutics.Code.Abstract
-       (Code, codeRoot, Comment, commentDisplacement, commentCore,
-        Displacement(..), createCode, createComment)
+       (Code, codeRoot, Annotation, commentsBefore, commentsAfter,
+        Comment, commentCore, commentStartColumn, createCode,
+        createAnnotation, createComment)
        where
 import qualified Evolutics.Code.Comment as Comment
-import qualified Evolutics.Code.Concrete as Concrete
 import qualified Evolutics.Code.Core as Core
+import qualified Evolutics.Code.Locations as Locations
 
-data Code = Code{codeRoot :: Core.Module [Comment]}
+data Code = Code{codeRoot :: Core.Module Annotation}
 
-data Comment = Comment{commentDisplacement :: Displacement,
-                       commentCore :: Comment.Comment}
+data Annotation = Annotation{commentsBefore :: [Comment],
+                             commentsAfter :: [Comment]}
 
-data Displacement = Before
-                  | After
+data Comment = Comment{commentCore :: Comment.Comment,
+                       commentStartColumn :: Locations.Column}
 
-createCode :: Core.Module [Comment] -> Code
+createCode :: Core.Module Annotation -> Code
 createCode root = Code{codeRoot = root}
 
-createComment :: Displacement -> Comment.Comment -> Comment
-createComment displacement core
-  = Comment{commentDisplacement = displacement, commentCore = core}
+createAnnotation :: [Comment] -> [Comment] -> Annotation
+createAnnotation before after
+  = Annotation{commentsBefore = before, commentsAfter = after}
+
+createComment :: Locations.Column -> Comment.Comment -> Comment
+createComment startColumn core
+  = Comment{commentCore = core, commentStartColumn = startColumn}

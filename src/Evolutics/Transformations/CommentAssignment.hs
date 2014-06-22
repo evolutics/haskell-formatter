@@ -9,25 +9,28 @@ import qualified Evolutics.Code.Locations as Locations
 assignComments :: Concrete.Commented -> Abstract.Code
 assignComments concrete = Abstract.createCode newRoot
   where newRoot = Core.amap integrateRest intermediateRoot
-        integrateRest = (++ map (abstractComment Abstract.After) rest)
+        integrateRest annotation
+          = Abstract.createAnnotation (Abstract.commentsBefore annotation) $
+              Abstract.commentsAfter annotation ++ abstractComments rest
         (rest, intermediateRoot)
-          = Traversable.mapAccumL processElement comments oldRoot
+          = Traversable.mapAccumL createAnnotation comments oldRoot
         comments = Concrete.comments concrete
         oldRoot = Concrete.commentedRoot concrete
 
-abstractComment ::
-                Abstract.Displacement -> Core.Comment -> Abstract.Comment
-abstractComment displacement
-  = Abstract.createComment displacement . Concrete.commentCore
+abstractComments :: [Core.Comment] -> [Abstract.Comment]
+abstractComments = map abstractComment
+  where abstractComment
+          = Abstract.createComment Locations.firstColumn .
+              Concrete.commentCore
 
-processElement ::
-               [Core.Comment] ->
-                 Core.SrcSpanInfo -> ([Core.Comment], [Abstract.Comment])
-processElement concreteComments nestedPortion
-  = (remainder, abstractComments)
-  where (choice, remainder)
-          = span (follows nestedPortion) concreteComments
-        abstractComments = map (abstractComment Abstract.Before) choice
+createAnnotation ::
+                 [Core.Comment] ->
+                   Core.SrcSpanInfo -> ([Core.Comment], Abstract.Annotation)
+createAnnotation comments nestedPortion = (rest, annotation)
+  where (choice, rest) = span (follows nestedPortion) comments
+        annotation = Abstract.createAnnotation before after
+        before = abstractComments choice
+        after = []
 
 follows :: Core.SrcSpanInfo -> Core.Comment -> Bool
 follows nestedPortion comment
