@@ -1,4 +1,4 @@
-module Evolutics.Code.Core
+module Evolutics.Code.Source
        ((Exts.=~=), Exts.amap, Exts.ann, Exts.Comment(..),
         Exts.defaultParseMode, Exts.exactPrint, Exts.fileName,
         Exts.fromParseResult, Exts.getPointLoc, Exts.mkSrcSpan,

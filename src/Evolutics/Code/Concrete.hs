@@ -4,40 +4,41 @@ module Evolutics.Code.Concrete
         commentCore)
        where
 import qualified Evolutics.Code.Comment as Comment
-import qualified Evolutics.Code.Core as Core
 import qualified Evolutics.Code.Locations as Locations
+import qualified Evolutics.Code.Source as Source
 
 data Commented = Commented{commentedRoot ::
-                           Core.Module Core.SrcSpanInfo,
-                           comments :: [Core.Comment]}
+                           Source.Module Source.SrcSpanInfo,
+                           comments :: [Source.Comment]}
 
 data Commentless = Commentless{commentlessRoot ::
-                               Core.Module Core.SrcSpanInfo}
+                               Source.Module Source.SrcSpanInfo}
 
 instance Show Commented where
         show commented
-          = Core.exactPrint (commentedRoot commented) $ comments commented
+          = Source.exactPrint (commentedRoot commented) $ comments commented
 
 instance Locations.Portioned Commentless where
         portion = Locations.portion . commentlessRoot
 
-instance Locations.Portioned Core.Comment where
-        portion (Core.Comment _ commentPortion _) = commentPortion
+instance Locations.Portioned Source.Comment where
+        portion (Source.Comment _ commentPortion _) = commentPortion
 
 createCommented ::
-                Core.Module Core.SrcSpanInfo -> [Core.Comment] -> Commented
+                Source.Module Source.SrcSpanInfo -> [Source.Comment] -> Commented
 createCommented root comments
   = Commented{commentedRoot = root, comments = comments}
 
-createCommentless :: Core.Module Core.SrcSpanInfo -> Commentless
+createCommentless ::
+                  Source.Module Source.SrcSpanInfo -> Commentless
 createCommentless root = Commentless{commentlessRoot = root}
 
 makeCommentless :: Commented -> Commentless
 makeCommentless = createCommentless . commentedRoot
 
-createComment :: Comment.Comment -> Core.SrcLoc -> Core.Comment
+createComment :: Comment.Comment -> Source.SrcLoc -> Source.Comment
 createComment core startPosition
-  = Core.Comment isMultiLine portion content
+  = Source.Comment isMultiLine portion content
   where isMultiLine
           = case Comment.kind core of
                 Comment.Ordinary -> False
@@ -46,14 +47,14 @@ createComment core startPosition
         wrappedComment = show core
         content = Comment.content core
 
-commentCore :: Core.Comment -> Comment.Comment
+commentCore :: Source.Comment -> Comment.Comment
 commentCore core = Comment.create kind content
   where kind = commentKind core
         content = commentContent core
 
-commentKind :: Core.Comment -> Comment.Kind
-commentKind (Core.Comment False _ _) = Comment.Ordinary
-commentKind (Core.Comment True _ _) = Comment.Nested
+commentKind :: Source.Comment -> Comment.Kind
+commentKind (Source.Comment False _ _) = Comment.Ordinary
+commentKind (Source.Comment True _ _) = Comment.Nested
 
-commentContent :: Core.Comment -> String
-commentContent (Core.Comment _ _ content) = content
+commentContent :: Source.Comment -> String
+commentContent (Source.Comment _ _ content) = content

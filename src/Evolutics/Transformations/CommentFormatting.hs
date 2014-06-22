@@ -2,9 +2,9 @@ module Evolutics.Transformations.CommentFormatting (formatComments)
        where
 import qualified Data.Function as Function
 import qualified Evolutics.Code.Abstract as Abstract
-import qualified Evolutics.Code.Core as Core
 import qualified Evolutics.Code.Locations as Locations
 import qualified Evolutics.Code.Merged as Merged
+import qualified Evolutics.Code.Source as Source
 import qualified Evolutics.Tools.Functions as Functions
 
 formatComments :: Merged.Code -> Merged.Code

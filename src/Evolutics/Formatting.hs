@@ -1,9 +1,9 @@
 module Evolutics.Formatting (formatSource) where
 import qualified Data.Maybe as Maybe
 import qualified Evolutics.Code.Concrete as Concrete
-import qualified Evolutics.Code.Core as Core
 import qualified Evolutics.Code.Locations as Locations
 import qualified Evolutics.Code.Merged as Merged
+import qualified Evolutics.Code.Source as Source
 import qualified Evolutics.Transformations.CommentAssignment
        as CommentAssignment
 import qualified Evolutics.Transformations.CommentFormatting
@@ -15,16 +15,16 @@ import qualified Evolutics.Transformations.ElementArrangement
 
 formatSource :: Maybe FilePath -> String -> Either String String
 formatSource maybeFile
-  = format . Core.parseFileContentsWithComments parseMode
-  where format (Core.ParseFailed position message)
+  = format . Source.parseFileContentsWithComments parseMode
+  where format (Source.ParseFailed position message)
           = Left $ Locations.formatMessage position message
-        format (Core.ParseOk (root, comments))
+        format (Source.ParseOk (root, comments))
           = Right . show . formatCode $
               Concrete.createCommented root comments
         parseMode
           = case maybeFile of
-                Nothing -> Core.defaultParseMode
-                Just file -> Core.defaultParseMode{Core.parseFilename = file}
+                Nothing -> Source.defaultParseMode
+                Just file -> Source.defaultParseMode{Source.parseFilename = file}
 
 formatCode :: Concrete.Commented -> Concrete.Commented
 formatCode commented = CommentIntegration.integrateComments merged'

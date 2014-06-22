@@ -5,8 +5,8 @@ module Evolutics.Code.Shifting
 import qualified Data.Map.Strict as Map
 import qualified Data.Monoid as Monoid
 import qualified Evolutics.Code.Concrete as Concrete
-import qualified Evolutics.Code.Core as Core
 import qualified Evolutics.Code.Locations as Locations
+import qualified Evolutics.Code.Source as Source
 
 data LineShifting = LineShifting (Map.Map Locations.Line LineShift)
 
@@ -30,13 +30,13 @@ shiftCode shifting commentless
         unshiftedRoot = Concrete.commentlessRoot commentless
 
 shiftNestedPortion ::
-                   LineShifting -> Core.SrcSpanInfo -> Core.SrcSpanInfo
+                   LineShifting -> Source.SrcSpanInfo -> Source.SrcSpanInfo
 shiftNestedPortion = Locations.mapPortions . shiftPortion
 
-shiftPortion :: LineShifting -> Core.SrcSpan -> Core.SrcSpan
+shiftPortion :: LineShifting -> Source.SrcSpan -> Source.SrcSpan
 shiftPortion shifting portion
-  = portion{Core.srcSpanStartLine = start',
-            Core.srcSpanEndLine = end'}
+  = portion{Source.srcSpanStartLine = start',
+            Source.srcSpanEndLine = end'}
   where Locations.Line start' = shift start
         shift = applyLineShifting shifting
         start = Locations.startLine portion

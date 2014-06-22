@@ -7,10 +7,10 @@ import qualified Data.Monoid as Monoid
 import qualified Evolutics.Code.Abstract as Abstract
 import qualified Evolutics.Code.Comment as Comment
 import qualified Evolutics.Code.Concrete as Concrete
-import qualified Evolutics.Code.Core as Core
 import qualified Evolutics.Code.Locations as Locations
 import qualified Evolutics.Code.Merged as Merged
 import qualified Evolutics.Code.Shifting as Shifting
+import qualified Evolutics.Code.Source as Source
 
 data Reservation = Reservation (Map.Map Locations.Line
                                   [Abstract.Comment])
@@ -25,7 +25,7 @@ integrateComments merged
         reservation = makeReservation merged
         commentless = Merged.makeCommentless merged
         comments = concretizeComments file reservation
-        file = Core.fileName $ Locations.portion movedCommentless
+        file = Source.fileName $ Locations.portion movedCommentless
 
 reservationShifting :: Reservation -> Shifting.LineShifting
 reservationShifting
@@ -80,7 +80,7 @@ reservePart part = Reservation reservation
           = Map.singleton lineIfAfter $ Abstract.commentsAfter annotation
         lineIfAfter = Locations.successorLine $ Locations.endLine portion
 
-concretizeComments :: FilePath -> Reservation -> [Core.Comment]
+concretizeComments :: FilePath -> Reservation -> [Source.Comment]
 concretizeComments file = accummulateReservation create
   where create _ baseLine _ = snd . List.foldl' merge (baseLine, [])
         merge (startLine, concretePart) comment
