@@ -3,19 +3,15 @@ module Evolutics.Transformations.CommentIntegration
 import qualified Data.Foldable as Foldable
 import qualified Data.List as List
 import qualified Data.Map.Strict as Map
+import qualified Data.Maybe as Maybe
 import qualified Data.Monoid as Monoid
 import qualified Evolutics.Code.Abstract as Abstract
 import qualified Evolutics.Code.Comment as Comment
 import qualified Evolutics.Code.Concrete as Concrete
 import qualified Evolutics.Code.Core as Core
 import qualified Evolutics.Code.Locations as Locations
+import qualified Evolutics.Code.Merged as Merged
 import qualified Evolutics.Code.Shifting as Shifting
-import qualified Evolutics.Tools.Functions as Functions
-
-data MergedCode = MergedCode (Core.Module MergedAnnotation)
-
-data MergedAnnotation = MergedAnnotation Abstract.Annotation
-                                         Core.SrcSpan
 
 data Reservation = Reservation (Map.Map Locations.Line
                                   [Abstract.Comment])
@@ -28,8 +24,10 @@ integrateComments abstract commentless
           = Concrete.commentlessRoot movedCommentless
         movedCommentless = Shifting.shiftCode shifting commentless
         shifting = reservationShifting reservation
-        reservation = makeReservation mergedRoot
-        mergedRoot = mergeParts abstract commentless
+        reservation = makeReservation mergedCode
+        mergedCode
+          = Maybe.fromMaybe (error unequalStructuresMessage) maybeMerged
+        maybeMerged = Merged.createCode abstract commentless
         comments = concretizeComments file reservation
         file = Core.fileName $ Locations.portion movedCommentless
 
@@ -63,38 +61,28 @@ commentsShift
 commentShift :: Comment.Comment -> Shifting.LineShift
 commentShift = Shifting.LineShift . length . Comment.wrappedLines
 
-makeReservation :: MergedCode -> Reservation
-makeReservation (MergedCode root)
-  = Reservation $ Foldable.foldl' reserve Map.empty root
-  where reserve reservation mergedAnnotation
+makeReservation :: Merged.Code -> Reservation
+makeReservation
+  = Reservation . Foldable.foldl' reserve Map.empty . Merged.codeRoot
+  where reserve reservation part
           = Map.unionWith mergeReservations reservation reservationNow
-          where Reservation reservationNow
-                  = annotationReservation mergedAnnotation
+          where Reservation reservationNow = mergePart part
 
 mergeReservations ::
                   [Abstract.Comment] -> [Abstract.Comment] -> [Abstract.Comment]
 mergeReservations = (++)
 
-annotationReservation :: MergedAnnotation -> Reservation
-annotationReservation (MergedAnnotation annotation portion)
-  = Reservation reservation
+mergePart :: Merged.Part -> Reservation
+mergePart part = Reservation reservation
   where reservation = before `Map.union` after
         before
           = Map.singleton lineIfBefore $ Abstract.commentsBefore annotation
         lineIfBefore = Locations.startLine portion
+        portion = Locations.portion part
+        annotation = Merged.annotation part
         after
           = Map.singleton lineIfAfter $ Abstract.commentsAfter annotation
         lineIfAfter = Locations.successorLine $ Locations.endLine portion
-
-mergeParts :: Abstract.Code -> Concrete.Commentless -> MergedCode
-mergeParts abstract commentless = MergedCode merged
-  where merged
-          = if abstractRoot Core.=~= commentlessRoot then
-              Functions.halfZipWith merge abstractRoot commentlessRoot else
-              error unequalStructuresMessage
-        abstractRoot = Abstract.codeRoot abstract
-        commentlessRoot = Concrete.commentlessRoot commentless
-        merge annotation = MergedAnnotation annotation . Locations.portion
 
 unequalStructuresMessage :: String
 unequalStructuresMessage
