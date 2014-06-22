@@ -8,10 +8,11 @@ data Kind = Ordinary
           | Nested
 
 instance Show Comment where
-        show Comment{kind = Ordinary, content = commentContent}
-          = "--" ++ commentContent
-        show Comment{kind = Nested, content = commentContent}
-          = "{-" ++ commentContent ++ "-}"
+        show comment
+          = case kind comment of
+                Ordinary -> "--" ++ commentContent
+                Nested -> "{-" ++ commentContent ++ "-}"
+          where commentContent = content comment
 
 create :: Kind -> String -> Comment
 create commentKind commentContent

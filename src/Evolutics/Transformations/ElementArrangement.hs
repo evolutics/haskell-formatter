@@ -4,8 +4,7 @@ import qualified Evolutics.Code.Concrete as Concrete
 import qualified Evolutics.Code.Core as Core
 
 arrangeElements :: Concrete.Commentless -> Concrete.Commentless
-arrangeElements
-  = Concrete.createCommentless .
-      Core.fromParseResult .
-        Core.parseFileContents .
-          Core.prettyPrint . Concrete.commentlessRoot
+arrangeElements commentless
+  = commentless{Concrete.commentlessRoot =
+                  Core.fromParseResult . Core.parseFileContents . Core.prettyPrint $
+                    Concrete.commentlessRoot commentless}

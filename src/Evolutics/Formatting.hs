@@ -31,7 +31,7 @@ formatCode commented = CommentIntegration.integrateComments merged'
   where merged' = CommentFormatting.formatComments merged
         merged
           = Maybe.fromMaybe (error unequalStructuresMessage) maybeMerged
-        maybeMerged = Merged.createCode abstract commentless
+        maybeMerged = Merged.mergeCode abstract commentless
         abstract = CommentAssignment.assignComments commented
         commentless
           = ElementArrangement.arrangeElements $

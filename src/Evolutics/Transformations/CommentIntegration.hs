@@ -62,20 +62,20 @@ makeReservation
   = Reservation . Foldable.foldl' reserve Map.empty . Merged.codeRoot
   where reserve reservation part
           = Map.unionWith mergeReservations reservation reservationNow
-          where Reservation reservationNow = mergePart part
+          where Reservation reservationNow = reservePart part
 
 mergeReservations ::
                   [Abstract.Comment] -> [Abstract.Comment] -> [Abstract.Comment]
 mergeReservations = (++)
 
-mergePart :: Merged.Part -> Reservation
-mergePart part = Reservation reservation
+reservePart :: Merged.Part -> Reservation
+reservePart part = Reservation reservation
   where reservation = before `Map.union` after
         before
           = Map.singleton lineIfBefore $ Abstract.commentsBefore annotation
         lineIfBefore = Locations.startLine portion
         portion = Locations.portion part
-        annotation = Merged.annotation part
+        annotation = Merged.partAnnotation part
         after
           = Map.singleton lineIfAfter $ Abstract.commentsAfter annotation
         lineIfAfter = Locations.successorLine $ Locations.endLine portion

@@ -24,7 +24,7 @@ createLineShifting = LineShifting
 shiftCode ::
           LineShifting -> Concrete.Commentless -> Concrete.Commentless
 shiftCode shifting commentless
-  = Concrete.createCommentless shiftedRoot
+  = commentless{Concrete.commentlessRoot = shiftedRoot}
   where shiftedRoot
           = fmap (shiftNestedPortion shifting) unshiftedRoot
         unshiftedRoot = Concrete.commentlessRoot commentless
@@ -35,13 +35,13 @@ shiftNestedPortion = Locations.mapPortions . shiftPortion
 
 shiftPortion :: LineShifting -> Core.SrcSpan -> Core.SrcSpan
 shiftPortion shifting portion
-  = portion{Core.srcSpanStartLine = shiftedStart,
-            Core.srcSpanEndLine = shiftedEnd}
-  where Locations.Line shiftedStart = shift originalStart
+  = portion{Core.srcSpanStartLine = start',
+            Core.srcSpanEndLine = end'}
+  where Locations.Line start' = shift start
         shift = applyLineShifting shifting
-        originalStart = Locations.startLine portion
-        Locations.Line shiftedEnd = shift originalEnd
-        originalEnd = Locations.endLine portion
+        start = Locations.startLine portion
+        Locations.Line end' = shift end
+        end = Locations.endLine portion
 
 applyLineShifting ::
                   LineShifting -> Locations.Line -> Locations.Line

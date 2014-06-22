@@ -15,8 +15,8 @@ data Commentless = Commentless{commentlessRoot ::
                                Core.Module Core.SrcSpanInfo}
 
 instance Show Commented where
-        show Commented{commentedRoot = root, comments = comments}
-          = Core.exactPrint root comments
+        show commented
+          = Core.exactPrint (commentedRoot commented) $ comments commented
 
 instance Locations.Portioned Commentless where
         portion = Locations.portion . commentlessRoot

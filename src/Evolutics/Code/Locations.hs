@@ -31,17 +31,17 @@ mapPortions ::
             (Core.SrcSpan -> Core.SrcSpan) ->
               Core.SrcSpanInfo -> Core.SrcSpanInfo
 mapPortions function nestedPortion
-  = nestedPortion{Core.srcInfoSpan = mappedParent,
-                  Core.srcInfoPoints = mappedChildren}
-  where mappedParent = function parent
+  = nestedPortion{Core.srcInfoSpan = parent',
+                  Core.srcInfoPoints = children'}
+  where parent' = function parent
         parent = Core.srcInfoSpan nestedPortion
-        mappedChildren = map function children
+        children' = map function children
         children = Core.srcInfoPoints nestedPortion
 
 successorLine :: Line -> Line
 successorLine (Line line) = Line $ succ line
 
-startLine :: Core.SrcSpan -> Line
+startLine :: (Core.SrcInfo a) => a -> Line
 startLine = Line . Core.startLine
 
 endLine :: Core.SrcSpan -> Line
@@ -50,7 +50,7 @@ endLine = Line . Core.srcSpanEndLine
 firstColumn :: Column
 firstColumn = Column 1
 
-startColumn :: Core.SrcSpan -> Column
+startColumn :: (Core.SrcInfo a) => a -> Column
 startColumn = Column . Core.startColumn
 
 createPosition :: FilePath -> Line -> Column -> Core.SrcLoc
@@ -73,9 +73,7 @@ stringPortion :: Core.SrcLoc -> String -> Core.SrcSpan
 stringPortion startPosition string
   = Core.mkSrcSpan startPosition endPosition
   where endPosition
-          = Core.SrcLoc{Core.srcFilename = file, Core.srcLine = endLine,
-                        Core.srcColumn = endColumn}
-        file = Core.fileName startPosition
+          = startPosition{Core.srcLine = endLine, Core.srcColumn = endColumn}
         endLine = startLine + lineCount - 1
         startLine = Core.startLine startPosition
         lineCount = length lines

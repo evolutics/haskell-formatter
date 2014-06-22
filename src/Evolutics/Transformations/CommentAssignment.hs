@@ -7,15 +7,15 @@ import qualified Evolutics.Code.Core as Core
 import qualified Evolutics.Code.Locations as Locations
 
 assignComments :: Concrete.Commented -> Abstract.Code
-assignComments concrete = Abstract.createCode newRoot
-  where newRoot = Core.amap integrateRest intermediateRoot
+assignComments concrete = Abstract.createCode root''
+  where root'' = Core.amap integrateRest root'
         integrateRest annotation
-          = Abstract.createAnnotation (Abstract.commentsBefore annotation) $
-              Abstract.commentsAfter annotation ++ abstractComments rest
-        (rest, intermediateRoot)
-          = Traversable.mapAccumL createAnnotation comments oldRoot
+          = annotation{Abstract.commentsAfter =
+                         Abstract.commentsAfter annotation ++ abstractComments rest}
+        (rest, root')
+          = Traversable.mapAccumL createAnnotation comments root
         comments = Concrete.comments concrete
-        oldRoot = Concrete.commentedRoot concrete
+        root = Concrete.commentedRoot concrete
 
 abstractComments :: [Core.Comment] -> [Abstract.Comment]
 abstractComments = map abstractComment
