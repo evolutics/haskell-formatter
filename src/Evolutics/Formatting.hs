@@ -6,6 +6,8 @@ import qualified Evolutics.Code.Locations as Locations
 import qualified Evolutics.Code.Merged as Merged
 import qualified Evolutics.Transformations.CommentAssignment
        as CommentAssignment
+import qualified Evolutics.Transformations.CommentFormatting
+       as CommentFormatting
 import qualified Evolutics.Transformations.CommentIntegration
        as CommentIntegration
 import qualified Evolutics.Transformations.ElementArrangement
@@ -25,8 +27,9 @@ formatSource maybeFile
                 Just file -> Core.defaultParseMode{Core.parseFilename = file}
 
 formatCode :: Concrete.Commented -> Concrete.Commented
-formatCode commented = CommentIntegration.integrateComments merged
-  where merged
+formatCode commented = CommentIntegration.integrateComments merged'
+  where merged' = CommentFormatting.formatComments merged
+        merged
           = Maybe.fromMaybe (error unequalStructuresMessage) maybeMerged
         maybeMerged = Merged.createCode abstract commentless
         abstract = CommentAssignment.assignComments commented
