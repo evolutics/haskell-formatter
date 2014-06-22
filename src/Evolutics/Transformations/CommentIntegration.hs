@@ -3,7 +3,6 @@ module Evolutics.Transformations.CommentIntegration
 import qualified Data.Foldable as Foldable
 import qualified Data.List as List
 import qualified Data.Map.Strict as Map
-import qualified Data.Maybe as Maybe
 import qualified Data.Monoid as Monoid
 import qualified Evolutics.Code.Abstract as Abstract
 import qualified Evolutics.Code.Comment as Comment
@@ -16,18 +15,15 @@ import qualified Evolutics.Code.Shifting as Shifting
 data Reservation = Reservation (Map.Map Locations.Line
                                   [Abstract.Comment])
 
-integrateComments ::
-                  Abstract.Code -> Concrete.Commentless -> Concrete.Commented
-integrateComments abstract commentless
+integrateComments :: Merged.Code -> Concrete.Commented
+integrateComments merged
   = Concrete.createCommented movedCommentlessRoot comments
   where movedCommentlessRoot
           = Concrete.commentlessRoot movedCommentless
         movedCommentless = Shifting.shiftCode shifting commentless
         shifting = reservationShifting reservation
-        reservation = makeReservation mergedCode
-        mergedCode
-          = Maybe.fromMaybe (error unequalStructuresMessage) maybeMerged
-        maybeMerged = Merged.createCode abstract commentless
+        reservation = makeReservation merged
+        commentless = Merged.makeCommentless merged
         comments = concretizeComments file reservation
         file = Core.fileName $ Locations.portion movedCommentless
 
@@ -83,10 +79,6 @@ mergePart part = Reservation reservation
         after
           = Map.singleton lineIfAfter $ Abstract.commentsAfter annotation
         lineIfAfter = Locations.successorLine $ Locations.endLine portion
-
-unequalStructuresMessage :: String
-unequalStructuresMessage
-  = "The structures of the abstract and concrete code are unequal."
 
 concretizeComments :: FilePath -> Reservation -> [Core.Comment]
 concretizeComments file = accummulateReservation create

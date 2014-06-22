@@ -1,5 +1,6 @@
 module Evolutics.Code.Merged
-       (Code, codeRoot, Part, annotation, createCode) where
+       (Code, codeRoot, Part, annotation, createCode, makeCommentless)
+       where
 import qualified Evolutics.Code.Abstract as Abstract
 import qualified Evolutics.Code.Concrete as Concrete
 import qualified Evolutics.Code.Core as Core
@@ -27,3 +28,7 @@ createCode _ _ = Nothing
 createPart :: Abstract.Annotation -> Core.SrcSpanInfo -> Part
 createPart annotation nestedPortion
   = Part{annotation = annotation, nestedPortion = nestedPortion}
+
+makeCommentless :: Code -> Concrete.Commentless
+makeCommentless
+  = Concrete.createCommentless . fmap nestedPortion . codeRoot

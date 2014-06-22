@@ -1,7 +1,9 @@
 module Evolutics.Formatting (formatSource) where
+import qualified Data.Maybe as Maybe
 import qualified Evolutics.Code.Concrete as Concrete
 import qualified Evolutics.Code.Core as Core
 import qualified Evolutics.Code.Locations as Locations
+import qualified Evolutics.Code.Merged as Merged
 import qualified Evolutics.Transformations.CommentAssignment
        as CommentAssignment
 import qualified Evolutics.Transformations.CommentIntegration
@@ -23,9 +25,15 @@ formatSource maybeFile
                 Just file -> Core.defaultParseMode{Core.parseFilename = file}
 
 formatCode :: Concrete.Commented -> Concrete.Commented
-formatCode concreteCommented
-  = CommentIntegration.integrateComments abstract concreteCommentless
-  where abstract = CommentAssignment.assignComments concreteCommented
-        concreteCommentless
+formatCode commented = CommentIntegration.integrateComments merged
+  where merged
+          = Maybe.fromMaybe (error unequalStructuresMessage) maybeMerged
+        maybeMerged = Merged.createCode abstract commentless
+        abstract = CommentAssignment.assignComments commented
+        commentless
           = ElementArrangement.arrangeElements $
-              Concrete.dropComments concreteCommented
+              Concrete.makeCommentless commented
+
+unequalStructuresMessage :: String
+unequalStructuresMessage
+  = "The structures of the abstract and concrete code are unequal."

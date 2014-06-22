@@ -1,6 +1,6 @@
 module Evolutics.Code.Concrete
        (Commented, commentedRoot, comments, Commentless, commentlessRoot,
-        createCommented, createCommentless, dropComments, createComment,
+        createCommented, createCommentless, makeCommentless, createComment,
         commentCore)
        where
 import qualified Evolutics.Code.Comment as Comment
@@ -32,9 +32,8 @@ createCommented root comments
 createCommentless :: Core.Module Core.SrcSpanInfo -> Commentless
 createCommentless root = Commentless{commentlessRoot = root}
 
-dropComments :: Commented -> Commentless
-dropComments Commented{commentedRoot = root}
-  = createCommentless root
+makeCommentless :: Commented -> Commentless
+makeCommentless = createCommentless . commentedRoot
 
 createComment :: Comment.Comment -> Core.SrcLoc -> Core.Comment
 createComment core startPosition
