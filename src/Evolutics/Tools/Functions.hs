@@ -1,6 +1,6 @@
 module Evolutics.Tools.Functions
        (doubleArgument, untilRight, iterateUntilNothing, findJust,
-        halfZipWith)
+        halfZipWith, mapAccummulateLeft1)
        where
 import qualified Control.Monad as Monad
 import qualified Data.Foldable as Foldable
@@ -41,3 +41,13 @@ halfZipWith merge base extension
   where process (extensionElement : list) baseElement
           = (list, merge baseElement extensionElement)
         extensionList = Foldable.toList extension
+
+mapAccummulateLeft1 ::
+                      (Traversable.Traversable t) =>
+                      (a -> b -> (a, b)) -> (b -> a) -> t b -> (Maybe a, t b)
+mapAccummulateLeft1 process createBase
+  = Traversable.mapAccumL function base
+  where function maybeBefore element = (Just after, element')
+          where (after, element') = process before element
+                before = Maybe.fromMaybe (createBase element) maybeBefore
+        base = Nothing
