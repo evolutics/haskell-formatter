@@ -15,8 +15,29 @@ category:            Development
 build-type:          Simple
 cabal-version:       >=1.8
 
+library
+  exposed-modules:     Evolutics.Formatting
+  other-modules:
+                       Evolutics.Code.Abstract,
+                       Evolutics.Code.Comment,
+                       Evolutics.Code.Concrete,
+                       Evolutics.Code.Locations,
+                       Evolutics.Code.Merged,
+                       Evolutics.Code.Shifting,
+                       Evolutics.Code.Source,
+                       Evolutics.Tools.Functions,
+                       Evolutics.Tools.Lists,
+                       Evolutics.Tools.Newlines,
+                       Evolutics.Tools.Splitting,
+                       Evolutics.Transformations.CommentAssignment,
+                       Evolutics.Transformations.CommentFormatting,
+                       Evolutics.Transformations.CommentIntegration,
+                       Evolutics.Transformations.ElementArrangement
+  build-depends:       base, containers, haskell-src-exts, split
+  hs-source-dirs:      src/library
+
 executable haskell-formatter
   main-is:             Main.hs
   -- other-modules:       
-  build-depends:       base ==4.6.*, containers ==0.5.*, split ==0.2.*, haskell-src-exts ==1.15.*
-  hs-source-dirs:      src
+  build-depends:       base, haskell-formatter
+  hs-source-dirs:      src/executable
