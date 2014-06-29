@@ -41,3 +41,15 @@ executable haskell-formatter
   -- other-modules:       
   build-depends:       base, haskell-formatter
   hs-source-dirs:      src/executable
+
+test-suite test
+  type:                exitcode-stdio-1.0
+  main-is:             Main.hs
+  build-depends:       base,
+                       containers,
+                       directory-tree,
+                       filepath,
+                       haskell-formatter,
+                       tasty,
+                       tasty-hunit
+  hs-source-dirs:      testsuite
