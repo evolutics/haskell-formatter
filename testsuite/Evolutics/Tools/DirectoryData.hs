@@ -28,7 +28,7 @@ createTree create keys
 createLeafMaps ::
                  (Monoid.Monoid a) =>
                  Set.Set FilePath ->
-                   MapTree.MapTree FilePath (Either Exception.IOException a) ->
+                   MapTree.MapForest FilePath (Either Exception.IOException a) ->
                      MapTree.MapTree FilePath ([Exception], Map.Map FilePath a)
 createLeafMaps expectedKeys
   = MapTree.summarizeLeaves create . fmap prepare
@@ -54,22 +54,21 @@ checkKeys expectedKeys actualKeys
 collectFiles ::
              (FilePath -> IO a) ->
                FilePath ->
-                 IO (MapTree.MapTree FilePath (Either Exception.IOException a))
+                 IO (MapTree.MapForest FilePath (Either Exception.IOException a))
 collectFiles create
   = fmap (transformRawTree . Tree.dirTree) .
       Tree.readDirectoryWith create
 
 transformRawTree ::
                  Tree.DirTree a ->
-                   MapTree.MapTree FilePath (Either Exception.IOException a)
-transformRawTree root = MapTree.Node $ transformForest [root]
-  where transformForest = Map.fromList . map bind
-        bind tree = (label, children)
-          where label = Tree.name tree
-                children
-                  = case tree of
+                   MapTree.MapForest FilePath (Either Exception.IOException a)
+transformRawTree root = transform [root]
+  where transform = MapTree.MapForest . Map.fromList . map bind
+        bind rawTree = (label, tree)
+          where label = Tree.name rawTree
+                tree
+                  = case rawTree of
                         Tree.Failed{Tree.err = exception} -> MapTree.Leaf . Left $
                                                                exception
                         Tree.File{Tree.file = value} -> MapTree.Leaf $ Right value
-                        Tree.Dir{Tree.contents = forest} -> MapTree.Node $
-                                                              transformForest forest
+                        Tree.Dir{Tree.contents = forest} -> MapTree.Node $ transform forest
