@@ -1,28 +1,32 @@
-module Evolutics.Tools.FileTests (directoryTestTree) where
+module Evolutics.Tools.FileTests (fileTestTree) where
 import qualified Data.Map.Strict as Map
-import qualified Data.Set as Set
+import qualified Data.Monoid as Monoid
 import qualified Test.Tasty as Tasty
 import qualified Evolutics.Tools.DirectoryData as DirectoryData
 import qualified Evolutics.Tools.MapTree as MapTree
 
+fileTestTree ::
+             (Map.Map FilePath String -> [Tasty.TestTree]) ->
+               Tasty.TestName -> FilePath -> IO Tasty.TestTree
+fileTestTree = directoryTestTree readFile
+
 directoryTestTree ::
-                  Set.Set FilePath ->
-                    (Map.Map FilePath String -> [Tasty.TestTree]) ->
-                      Tasty.TestName -> FilePath -> IO Tasty.TestTree
-directoryTestTree keys createTests name
+                    (Monoid.Monoid a) =>
+                    (FilePath -> IO a) ->
+                      (Map.Map FilePath a -> [Tasty.TestTree]) ->
+                        Tasty.TestName -> FilePath -> IO Tasty.TestTree
+directoryTestTree create createTests name
   = fmap (checkedTestTree createTests name) .
-      DirectoryData.createTree readFile keys
+      DirectoryData.createTree create
 
 checkedTestTree ::
-                (Map.Map FilePath String -> [Tasty.TestTree]) ->
-                  Tasty.TestName ->
-                    MapTree.MapTree FilePath
-                      ([DirectoryData.Exception], Map.Map FilePath String)
-                      -> Tasty.TestTree
-checkedTestTree createTests = testTree createCheckedTest
-  where createCheckedTest ([], leafMap) = createTests leafMap
-        createCheckedTest (exceptions, _)
-          = error . unlines $ map show exceptions
+                  (Show a) =>
+                  (b -> [Tasty.TestTree]) ->
+                    Tasty.TestName ->
+                      MapTree.MapTree FilePath (Either a b) -> Tasty.TestTree
+checkedTestTree createTests = testTree createCheckedTests
+  where createCheckedTests (Left exception) = error $ show exception
+        createCheckedTests (Right leafMap) = createTests leafMap
 
 testTree ::
          (a -> [Tasty.TestTree]) ->
@@ -32,6 +36,5 @@ testTree createTests name (MapTree.Leaf value)
   = Tasty.testGroup name $ createTests value
 testTree createTests name
   (MapTree.Node (MapTree.MapForest children))
-  = Tasty.testGroup name $
-      mapMapOrdered (testTree createTests) children
-  where mapMapOrdered function = Map.elems . Map.mapWithKey function
+  = Tasty.testGroup name $ mapOrder (testTree createTests) children
+  where mapOrder function = Map.elems . Map.mapWithKey function
