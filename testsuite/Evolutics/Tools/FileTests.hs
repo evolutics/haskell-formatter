@@ -1,4 +1,5 @@
 module Evolutics.Tools.FileTests (fileTestTree) where
+import qualified Control.Exception as Exception
 import qualified Data.Map.Strict as Map
 import qualified Data.Monoid as Monoid
 import qualified Test.Tasty as Tasty
@@ -6,27 +7,20 @@ import qualified Evolutics.Tools.DirectoryData as DirectoryData
 import qualified Evolutics.Tools.MapTree as MapTree
 
 fileTestTree ::
-             (Map.Map FilePath String -> [Tasty.TestTree]) ->
-               Tasty.TestName -> FilePath -> IO Tasty.TestTree
+             (Either Exception.IOException (Map.Map FilePath String) ->
+                [Tasty.TestTree])
+               -> Tasty.TestName -> FilePath -> IO Tasty.TestTree
 fileTestTree = directoryTestTree readFile
 
 directoryTestTree ::
                     (Monoid.Monoid a) =>
                     (FilePath -> IO a) ->
-                      (Map.Map FilePath a -> [Tasty.TestTree]) ->
-                        Tasty.TestName -> FilePath -> IO Tasty.TestTree
+                      (Either Exception.IOException (Map.Map FilePath a) ->
+                         [Tasty.TestTree])
+                        -> Tasty.TestName -> FilePath -> IO Tasty.TestTree
 directoryTestTree create createTests name
-  = fmap (checkedTestTree createTests name) .
+  = fmap (testTree createTests name) .
       DirectoryData.createTree create
-
-checkedTestTree ::
-                  (Show a) =>
-                  (b -> [Tasty.TestTree]) ->
-                    Tasty.TestName ->
-                      MapTree.MapTree FilePath (Either a b) -> Tasty.TestTree
-checkedTestTree createTests = testTree createCheckedTests
-  where createCheckedTests (Left exception) = error $ show exception
-        createCheckedTests (Right leafMap) = createTests leafMap
 
 testTree ::
          (a -> [Tasty.TestTree]) ->
