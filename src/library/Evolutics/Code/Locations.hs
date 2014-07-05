@@ -22,6 +22,9 @@ instance Portioned Source.SrcSpanInfo where
 instance (Portioned a) => Portioned (Source.Module a) where
         portion = portion . Source.ann
 
+instance Portioned Source.Comment where
+        portion (Source.Comment _ commentPortion _) = commentPortion
+
 formatMessage :: Source.SrcLoc -> String -> String
 formatMessage position message
   = Source.prettyPrint position ++ separator ++ message
@@ -73,17 +76,17 @@ comparePortions leftPortioned rightPortioned
           | otherwise = EQ
 
 stringPortion :: Source.SrcLoc -> String -> Source.SrcSpan
-stringPortion startPosition string
-  = Source.mkSrcSpan startPosition endPosition
+stringPortion startPosition' string
+  = Source.mkSrcSpan startPosition' endPosition
   where endPosition
-          = startPosition{Source.srcLine = endLine,
-                          Source.srcColumn = endColumn}
-        endLine = startLine + lineCount - 1
-        startLine = Source.startLine startPosition
-        lineCount = length lines
-        lines = Newlines.splitSeparatedLines string
+          = startPosition'{Source.srcLine = endLine',
+                           Source.srcColumn = endColumn}
+        endLine' = startLine' + lineCount - 1
+        startLine' = Source.startLine startPosition'
+        lineCount = length stringLines
+        stringLines = Newlines.splitSeparatedLines string
         endColumn = lastLineStartColumn + lastLineLength - 1
-        lastLineStartColumn = if hasSingleLine then startColumn else 1
+        lastLineStartColumn = if hasSingleLine then startColumn' else 1
         hasSingleLine = lineCount == 1
-        startColumn = Source.startColumn startPosition
-        lastLineLength = length $ last lines
+        startColumn' = Source.startColumn startPosition'
+        lastLineLength = length $ last stringLines

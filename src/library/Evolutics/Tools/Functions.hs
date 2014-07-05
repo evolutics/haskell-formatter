@@ -1,14 +1,11 @@
 module Evolutics.Tools.Functions
-       (doubleArgument, untilRight, iterateUntilNothing, findJust,
-        halfZipWith, mapAccummulateLeft1)
+       (untilRight, iterateUntilNothing, findJust, halfZipWith,
+        mapAccummulateLeft1)
        where
 import qualified Control.Monad as Monad
 import qualified Data.Foldable as Foldable
 import qualified Data.Maybe as Maybe
 import qualified Data.Traversable as Traversable
-
-doubleArgument :: (a -> a -> b) -> a -> b
-doubleArgument function argument = function argument argument
 
 untilRight :: (a -> Either a b) -> a -> b
 untilRight function base
@@ -35,11 +32,15 @@ findMap predicate function
   = Foldable.find predicate . fmap function
 
 halfZipWith ::
-              (Traversable.Traversable t) => (a -> b -> c) -> t a -> t b -> t c
+              (Traversable.Traversable t, Foldable.Foldable f) =>
+              (a -> b -> c) -> t a -> f b -> Maybe (t c)
 halfZipWith merge base extension
-  = snd $ Traversable.mapAccumL process extensionList base
-  where process (extensionElement : list) baseElement
-          = (list, merge baseElement extensionElement)
+  = Traversable.sequenceA zippedMaybe
+  where (_, zippedMaybe)
+          = Traversable.mapAccumL process extensionList base
+        process [] _ = ([], Nothing)
+        process (extensionElement : list) baseElement
+          = (list, Just $ merge baseElement extensionElement)
         extensionList = Foldable.toList extension
 
 mapAccummulateLeft1 ::

@@ -17,8 +17,8 @@ transformFilesOrStandardStreams transform files
 transformFileUnlessFailure ::
                            IO String ->
                              (String -> Either String String) -> (String -> IO ()) -> IO ()
-transformFileUnlessFailure read transform write
-  = do string <- read
+transformFileUnlessFailure input transform output
+  = do string <- input
        case transform string of
            Left message -> IO.hPutStrLn IO.stderr message
-           Right string' -> write string'
+           Right string' -> output string'

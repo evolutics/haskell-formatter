@@ -21,13 +21,10 @@ instance Show Commented where
 instance Locations.Portioned Commentless where
         portion = Locations.portion . commentlessRoot
 
-instance Locations.Portioned Source.Comment where
-        portion (Source.Comment _ commentPortion _) = commentPortion
-
 createCommented ::
                 Source.Module Source.SrcSpanInfo -> [Source.Comment] -> Commented
-createCommented root comments
-  = Commented{commentedRoot = root, comments = comments}
+createCommented root commentList
+  = Commented{commentedRoot = root, comments = commentList}
 
 createCommentless ::
                   Source.Module Source.SrcSpanInfo -> Commentless

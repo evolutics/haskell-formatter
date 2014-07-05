@@ -8,9 +8,9 @@ data Splitting a = Splitting{delimiters :: [[a]],
                              delimiterPolicy :: Internals.DelimPolicy}
 
 separate :: (Eq a) => [[a]] -> [a] -> [[a]]
-separate delimiters
+separate delimiterList
   = split
-      Splitting{delimiters = delimiters,
+      Splitting{delimiters = delimiterList,
                 delimiterPolicy = Internals.Drop}
 
 split :: (Eq a) => Splitting a -> [a] -> [[a]]
@@ -37,8 +37,8 @@ rawSplit separators = Functions.untilRight move . (,) []
 findFirstSeparator ::
                      (Eq a) => [[a]] -> [a] -> Maybe ([a], [a], [a])
 findFirstSeparator separators
-  = Functions.findJust split . Lists.partitions
-  where split (left, right)
+  = Functions.findJust splitAgain . Lists.partitions
+  where splitAgain (left, right)
           = fmap (prepend left) $ stripFirstPrefix separators right
         prepend left (middle, right) = (left, middle, right)
 

@@ -21,7 +21,7 @@ createCode root = Code{codeRoot = root}
 
 mergeCode :: Abstract.Code -> Concrete.Commentless -> Maybe Code
 mergeCode abstract commentless
-  | abstractRoot Source.=~= commentlessRoot = Just $ createCode root
+  | abstractRoot Source.=~= commentlessRoot = fmap createCode root
   where root
           = Functions.halfZipWith createPart abstractRoot commentlessRoot
         abstractRoot = Abstract.codeRoot abstract
