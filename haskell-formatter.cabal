@@ -33,7 +33,7 @@ library
                        Evolutics.Transformations.CommentFormatting,
                        Evolutics.Transformations.CommentIntegration,
                        Evolutics.Transformations.ElementArrangement
-  build-depends:       base, containers, haskell-src-exts, split
+  build-depends:       base, containers, haskell-src-exts
   hs-source-dirs:      src/library
   ghc-options:         -Wall -Werror
 

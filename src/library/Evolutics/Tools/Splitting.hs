@@ -1,27 +1,29 @@
 module Evolutics.Tools.Splitting (separate) where
 import qualified Data.List as List
-import qualified Data.List.Split.Internals as Internals
 import qualified Evolutics.Tools.Functions as Functions
 import qualified Evolutics.Tools.Lists as Lists
 
 data Splitting a = Splitting{delimiters :: [[a]],
-                             delimiterPolicy :: Internals.DelimPolicy}
+                             delimiterPolicy :: DelimiterPolicy}
+
+data DelimiterPolicy = Drop
+                     | Separate
+                     | MergeLeft
+                     | MergeRight
 
 separate :: (Eq a) => [[a]] -> [a] -> [[a]]
 separate delimiterList
   = split
-      Splitting{delimiters = delimiterList,
-                delimiterPolicy = Internals.Drop}
+      Splitting{delimiters = delimiterList, delimiterPolicy = Drop}
 
 split :: (Eq a) => Splitting a -> [a] -> [[a]]
 split splitting list = processedDelimiters
   where processedDelimiters
           = case delimiterPolicy splitting of
-                Internals.Drop -> Lists.takeEvery period raw
-                Internals.Keep -> raw
-                Internals.KeepLeft -> Lists.concatenateRuns period raw
-                Internals.KeepRight -> Lists.concatenateShiftedRuns period shift
-                                         raw
+                Drop -> Lists.takeEvery period raw
+                Separate -> raw
+                MergeLeft -> Lists.concatenateRuns period raw
+                MergeRight -> Lists.concatenateShiftedRuns period shift raw
                   where shift = 1
         period = 2
         raw = rawSplit (delimiters splitting) list
