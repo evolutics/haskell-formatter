@@ -1,10 +1,7 @@
 module Evolutics.Code.Concrete
        (Commented, commentedRoot, comments, Commentless, commentlessRoot,
-        createCommented, createCommentless, makeCommentless, createComment,
-        commentCore)
+        createCommented, createCommentless, makeCommentless)
        where
-import qualified Evolutics.Code.Comment as Comment
-import qualified Evolutics.Code.Locations as Locations
 import qualified Evolutics.Code.Source as Source
 
 data Commented = Commented{commentedRoot ::
@@ -18,8 +15,8 @@ instance Show Commented where
         show commented
           = Source.exactPrint (commentedRoot commented) $ comments commented
 
-instance Locations.Portioned Commentless where
-        portion = Locations.portion . commentlessRoot
+instance Source.Portioned Commentless where
+        getPortion = Source.getPortion . commentlessRoot
 
 createCommented ::
                 Source.Module Source.SrcSpanInfo -> [Source.Comment] -> Commented
@@ -32,26 +29,3 @@ createCommentless root = Commentless{commentlessRoot = root}
 
 makeCommentless :: Commented -> Commentless
 makeCommentless = createCommentless . commentedRoot
-
-createComment :: Comment.Comment -> Source.SrcLoc -> Source.Comment
-createComment core startPosition
-  = Source.Comment isMultiLine portion content
-  where isMultiLine
-          = case Comment.kind core of
-                Comment.Ordinary -> False
-                Comment.Nested -> True
-        portion = Locations.stringPortion startPosition wrappedComment
-        wrappedComment = show core
-        content = Comment.content core
-
-commentCore :: Source.Comment -> Comment.Comment
-commentCore core = Comment.create kind content
-  where kind = commentKind core
-        content = commentContent core
-
-commentKind :: Source.Comment -> Comment.Kind
-commentKind (Source.Comment False _ _) = Comment.Ordinary
-commentKind (Source.Comment True _ _) = Comment.Nested
-
-commentContent :: Source.Comment -> String
-commentContent (Source.Comment _ _ content) = content

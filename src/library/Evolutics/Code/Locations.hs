@@ -1,92 +1,33 @@
 module Evolutics.Code.Locations
-       (Portioned, portion, Line(..), Column, formatMessage, mapPortions,
-        successorLine, startLine, endLine, firstColumn, startColumn,
-        createPosition, startPosition, comparePortions, stringPortion)
+       (formatMessage, getStartPosition, getEndPosition, comparePortions)
        where
-import qualified Data.Function as Function
+import Prelude hiding (getLine)
 import qualified Evolutics.Code.Source as Source
-import qualified Evolutics.Tools.Newlines as Newlines
-
-class Portioned a where
-
-        portion :: a -> Source.SrcSpan
-
-data Line = Line Int
-          deriving (Eq, Ord)
-
-data Column = Column Int
-
-instance Portioned Source.SrcSpanInfo where
-        portion = Source.srcInfoSpan
-
-instance (Portioned a) => Portioned (Source.Module a) where
-        portion = portion . Source.ann
-
-instance Portioned Source.Comment where
-        portion (Source.Comment _ commentPortion _) = commentPortion
 
 formatMessage :: Source.SrcLoc -> String -> String
 formatMessage position message
   = Source.prettyPrint position ++ separator ++ message
   where separator = ": "
 
-mapPortions ::
-            (Source.SrcSpan -> Source.SrcSpan) ->
-              Source.SrcSpanInfo -> Source.SrcSpanInfo
-mapPortions function nestedPortion
-  = nestedPortion{Source.srcInfoSpan = parent',
-                  Source.srcInfoPoints = children'}
-  where parent' = function parent
-        parent = Source.srcInfoSpan nestedPortion
-        children' = map function children
-        children = Source.srcInfoPoints nestedPortion
+getStartPosition :: Source.SrcSpan -> Source.SrcLoc
+getStartPosition
+  = getPosition Source.getStartLine Source.getStartColumn
 
-successorLine :: Line -> Line
-successorLine (Line line) = Line $ succ line
+getPosition ::
+            (Source.SrcSpan -> Source.Line) ->
+              (Source.SrcSpan -> Source.Column) ->
+                Source.SrcSpan -> Source.SrcLoc
+getPosition getLine getColumn portion
+  = Source.createPosition file line column
+  where file = Source.fileName portion
+        line = getLine portion
+        column = getColumn portion
 
-startLine :: (Source.SrcInfo a) => a -> Line
-startLine = Line . Source.startLine
+getEndPosition :: Source.SrcSpan -> Source.SrcLoc
+getEndPosition = getPosition Source.getEndLine Source.getEndColumn
 
-endLine :: Source.SrcSpan -> Line
-endLine = Line . Source.srcSpanEndLine
-
-firstColumn :: Column
-firstColumn = Column 1
-
-startColumn :: (Source.SrcInfo a) => a -> Column
-startColumn = Column . Source.startColumn
-
-createPosition :: FilePath -> Line -> Column -> Source.SrcLoc
-createPosition file (Line line) (Column column)
-  = Source.SrcLoc{Source.srcFilename = file, Source.srcLine = line,
-                  Source.srcColumn = column}
-
-startPosition :: (Portioned a) => a -> Source.SrcLoc
-startPosition = Source.getPointLoc . portion
-
-comparePortions :: (Portioned a, Portioned b) => a -> b -> Ordering
-comparePortions leftPortioned rightPortioned
-  = if Function.on (==) Source.fileName left right then
-      compareIgnoringFile else EQ
-  where left = portion leftPortioned
-        right = portion rightPortioned
-        compareIgnoringFile
-          | Source.srcSpanEnd left < Source.srcSpanStart right = LT
-          | Source.srcSpanStart left > Source.srcSpanEnd right = GT
-          | otherwise = EQ
-
-stringPortion :: Source.SrcLoc -> String -> Source.SrcSpan
-stringPortion startPosition' string
-  = Source.mkSrcSpan startPosition' endPosition
-  where endPosition
-          = startPosition'{Source.srcLine = endLine',
-                           Source.srcColumn = endColumn}
-        endLine' = startLine' + lineCount - 1
-        startLine' = Source.startLine startPosition'
-        lineCount = length stringLines
-        stringLines = Newlines.splitSeparatedLines string
-        endColumn = lastLineStartColumn + lastLineLength - 1
-        lastLineStartColumn = if hasSingleLine then startColumn' else 1
-        hasSingleLine = lineCount == 1
-        startColumn' = Source.startColumn startPosition'
-        lastLineLength = length $ last stringLines
+comparePortions :: Source.SrcSpan -> Source.SrcSpan -> Ordering
+comparePortions left right
+  | getEndPosition left < getStartPosition right = LT
+  | getStartPosition left > getEndPosition right = GT
+  | otherwise = EQ

@@ -5,10 +5,9 @@ module Evolutics.Code.Shifting
 import qualified Data.Map.Strict as Map
 import qualified Data.Monoid as Monoid
 import qualified Evolutics.Code.Concrete as Concrete
-import qualified Evolutics.Code.Locations as Locations
 import qualified Evolutics.Code.Source as Source
 
-data LineShifting = LineShifting (Map.Map Locations.Line LineShift)
+data LineShifting = LineShifting (Map.Map Source.Line LineShift)
 
 data LineShift = LineShift Int
 
@@ -17,8 +16,7 @@ instance Monoid.Monoid LineShift where
         mappend (LineShift left) (LineShift right)
           = LineShift $ left + right
 
-createLineShifting ::
-                   Map.Map Locations.Line LineShift -> LineShifting
+createLineShifting :: Map.Map Source.Line LineShift -> LineShifting
 createLineShifting = LineShifting
 
 shiftCode ::
@@ -31,28 +29,16 @@ shiftCode shifting commentless
 
 shiftNestedPortion ::
                    LineShifting -> Source.SrcSpanInfo -> Source.SrcSpanInfo
-shiftNestedPortion = Locations.mapPortions . shiftPortion
+shiftNestedPortion = Source.mapNestedPortion . applyLineShifting
 
-shiftPortion :: LineShifting -> Source.SrcSpan -> Source.SrcSpan
-shiftPortion shifting portion
-  = portion{Source.srcSpanStartLine = start',
-            Source.srcSpanEndLine = end'}
-  where Locations.Line start' = shift start
-        shift = applyLineShifting shifting
-        start = Locations.startLine portion
-        Locations.Line end' = shift end
-        end = Locations.endLine portion
-
-applyLineShifting ::
-                  LineShifting -> Locations.Line -> Locations.Line
+applyLineShifting :: LineShifting -> Source.Line -> Source.Line
 applyLineShifting shifting line = shiftLine shift line
   where shift = lookupLineShift shifting line
 
-shiftLine :: LineShift -> Locations.Line -> Locations.Line
-shiftLine (LineShift shift) (Locations.Line line)
-  = Locations.Line $ line + shift
+shiftLine :: LineShift -> Source.Line -> Source.Line
+shiftLine (LineShift shift) line = Source.add shift line
 
-lookupLineShift :: LineShifting -> Locations.Line -> LineShift
+lookupLineShift :: LineShifting -> Source.Line -> LineShift
 lookupLineShift (LineShifting shifting) line
   = case Map.lookupLE line shifting of
         Just (_, shift) -> shift

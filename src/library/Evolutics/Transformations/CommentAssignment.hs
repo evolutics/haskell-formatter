@@ -20,8 +20,7 @@ assignComments concrete = Abstract.createCode root''
 abstractComments :: [Source.Comment] -> [Abstract.Comment]
 abstractComments = map abstractComment
   where abstractComment
-          = Abstract.createComment Locations.firstColumn .
-              Concrete.commentCore
+          = Abstract.createComment Source.zero . Source.commentCore
 
 createAnnotation ::
                  [Source.Comment] ->
@@ -34,4 +33,6 @@ createAnnotation comments nestedPortion = (rest, annotation)
 
 follows :: Source.SrcSpanInfo -> Source.Comment -> Bool
 follows nestedPortion comment
-  = Locations.comparePortions nestedPortion comment == GT
+  = Locations.comparePortions elementPortion commentPortion == GT
+  where elementPortion = Source.getPortion nestedPortion
+        commentPortion = Source.getPortion comment
