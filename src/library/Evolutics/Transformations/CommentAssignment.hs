@@ -3,7 +3,8 @@ module Evolutics.Transformations.CommentAssignment (assignComments)
 import qualified Data.Traversable as Traversable
 import qualified Evolutics.Code.Abstract as Abstract
 import qualified Evolutics.Code.Concrete as Concrete
-import qualified Evolutics.Code.Locations as Locations
+import qualified Evolutics.Code.Helper as Helper
+import qualified Evolutics.Code.Location as Location
 import qualified Evolutics.Code.Source as Source
 
 assignComments :: Concrete.Commented -> Abstract.Code
@@ -20,19 +21,19 @@ assignComments concrete = Abstract.createCode root''
 abstractComments :: [Source.Comment] -> [Abstract.Comment]
 abstractComments = map abstractComment
   where abstractComment
-          = Abstract.createComment Source.zero . Source.commentCore
+          = Abstract.createComment Location.zero . Source.commentCore
 
 createAnnotation ::
                  [Source.Comment] ->
-                   Source.SrcSpanInfo -> ([Source.Comment], Abstract.Annotation)
+                   Location.SrcSpanInfo -> ([Source.Comment], Abstract.Annotation)
 createAnnotation comments nestedPortion = (rest, annotation)
   where (choice, rest) = span (follows nestedPortion) comments
         annotation = Abstract.createAnnotation before after
         before = abstractComments choice
         after = []
 
-follows :: Source.SrcSpanInfo -> Source.Comment -> Bool
+follows :: Location.SrcSpanInfo -> Source.Comment -> Bool
 follows nestedPortion comment
-  = Locations.comparePortions elementPortion commentPortion == GT
-  where elementPortion = Source.getPortion nestedPortion
-        commentPortion = Source.getPortion comment
+  = Helper.comparePortions elementPortion commentPortion == GT
+  where elementPortion = Location.getPortion nestedPortion
+        commentPortion = Location.getPortion comment

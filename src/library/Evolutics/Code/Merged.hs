@@ -4,16 +4,17 @@ module Evolutics.Code.Merged
        where
 import qualified Evolutics.Code.Abstract as Abstract
 import qualified Evolutics.Code.Concrete as Concrete
+import qualified Evolutics.Code.Location as Location
 import qualified Evolutics.Code.Source as Source
 import qualified Evolutics.Tools.Functions as Functions
 
 data Code = Code{codeRoot :: Source.Module Part}
 
 data Part = Part{partAnnotation :: Abstract.Annotation,
-                 partNestedPortion :: Source.SrcSpanInfo}
+                 partNestedPortion :: Location.SrcSpanInfo}
 
-instance Source.Portioned Part where
-        getPortion = Source.getPortion . partNestedPortion
+instance Location.Portioned Part where
+        getPortion = Location.getPortion . partNestedPortion
 
 createCode :: Source.Module Part -> Code
 createCode root = Code{codeRoot = root}
@@ -31,7 +32,7 @@ makeCommentless :: Code -> Concrete.Commentless
 makeCommentless
   = Concrete.createCommentless . fmap partNestedPortion . codeRoot
 
-createPart :: Abstract.Annotation -> Source.SrcSpanInfo -> Part
+createPart :: Abstract.Annotation -> Location.SrcSpanInfo -> Part
 createPart annotation nestedPortion
   = Part{partAnnotation = annotation,
          partNestedPortion = nestedPortion}

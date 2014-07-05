@@ -2,29 +2,30 @@ module Evolutics.Code.Concrete
        (Commented, commentedRoot, comments, Commentless, commentlessRoot,
         createCommented, createCommentless, makeCommentless)
        where
+import qualified Evolutics.Code.Location as Location
 import qualified Evolutics.Code.Source as Source
 
 data Commented = Commented{commentedRoot ::
-                           Source.Module Source.SrcSpanInfo,
+                           Source.Module Location.SrcSpanInfo,
                            comments :: [Source.Comment]}
 
 data Commentless = Commentless{commentlessRoot ::
-                               Source.Module Source.SrcSpanInfo}
+                               Source.Module Location.SrcSpanInfo}
 
 instance Show Commented where
         show commented
           = Source.exactPrint (commentedRoot commented) $ comments commented
 
-instance Source.Portioned Commentless where
-        getPortion = Source.getPortion . commentlessRoot
+instance Location.Portioned Commentless where
+        getPortion = Location.getPortion . commentlessRoot
 
 createCommented ::
-                Source.Module Source.SrcSpanInfo -> [Source.Comment] -> Commented
+                Source.Module Location.SrcSpanInfo -> [Source.Comment] -> Commented
 createCommented root commentList
   = Commented{commentedRoot = root, comments = commentList}
 
 createCommentless ::
-                  Source.Module Source.SrcSpanInfo -> Commentless
+                  Source.Module Location.SrcSpanInfo -> Commentless
 createCommentless root = Commentless{commentlessRoot = root}
 
 makeCommentless :: Commented -> Commentless

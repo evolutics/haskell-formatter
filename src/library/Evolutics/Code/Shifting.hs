@@ -5,9 +5,9 @@ module Evolutics.Code.Shifting
 import qualified Data.Map.Strict as Map
 import qualified Data.Monoid as Monoid
 import qualified Evolutics.Code.Concrete as Concrete
-import qualified Evolutics.Code.Source as Source
+import qualified Evolutics.Code.Location as Location
 
-data LineShifting = LineShifting (Map.Map Source.Line LineShift)
+data LineShifting = LineShifting (Map.Map Location.Line LineShift)
 
 data LineShift = LineShift Int
 
@@ -16,7 +16,8 @@ instance Monoid.Monoid LineShift where
         mappend (LineShift left) (LineShift right)
           = LineShift $ left + right
 
-createLineShifting :: Map.Map Source.Line LineShift -> LineShifting
+createLineShifting ::
+                   Map.Map Location.Line LineShift -> LineShifting
 createLineShifting = LineShifting
 
 shiftCode ::
@@ -28,17 +29,17 @@ shiftCode shifting commentless
         unshiftedRoot = Concrete.commentlessRoot commentless
 
 shiftNestedPortion ::
-                   LineShifting -> Source.SrcSpanInfo -> Source.SrcSpanInfo
-shiftNestedPortion = Source.mapNestedPortion . applyLineShifting
+                   LineShifting -> Location.SrcSpanInfo -> Location.SrcSpanInfo
+shiftNestedPortion = Location.mapNestedPortion . applyLineShifting
 
-applyLineShifting :: LineShifting -> Source.Line -> Source.Line
+applyLineShifting :: LineShifting -> Location.Line -> Location.Line
 applyLineShifting shifting line = shiftLine shift line
   where shift = lookupLineShift shifting line
 
-shiftLine :: LineShift -> Source.Line -> Source.Line
-shiftLine (LineShift shift) line = Source.add shift line
+shiftLine :: LineShift -> Location.Line -> Location.Line
+shiftLine (LineShift shift) line = Location.add shift line
 
-lookupLineShift :: LineShifting -> Source.Line -> LineShift
+lookupLineShift :: LineShifting -> Location.Line -> LineShift
 lookupLineShift (LineShifting shifting) line
   = case Map.lookupLE line shifting of
         Just (_, shift) -> shift

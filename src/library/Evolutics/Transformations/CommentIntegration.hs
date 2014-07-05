@@ -7,11 +7,12 @@ import qualified Data.Monoid as Monoid
 import qualified Evolutics.Code.Abstract as Abstract
 import qualified Evolutics.Code.Comment as Comment
 import qualified Evolutics.Code.Concrete as Concrete
+import qualified Evolutics.Code.Location as Location
 import qualified Evolutics.Code.Merged as Merged
 import qualified Evolutics.Code.Shifting as Shifting
 import qualified Evolutics.Code.Source as Source
 
-data Reservation = Reservation (Map.Map Source.Line
+data Reservation = Reservation (Map.Map Location.Line
                                   [Abstract.Comment])
 
 integrateComments :: Merged.Code -> Concrete.Commented
@@ -24,7 +25,7 @@ integrateComments merged
         reservation = makeReservation merged
         commentless = Merged.makeCommentless merged
         comments = concretizeComments file reservation
-        file = Source.fileName $ Source.getPortion movedCommentless
+        file = Location.fileName $ Location.getPortion movedCommentless
 
 reservationShifting :: Reservation -> Shifting.LineShifting
 reservationShifting
@@ -34,8 +35,8 @@ reservationShifting
 
 accummulateReservation ::
                          (Monoid.Monoid m) =>
-                         (Source.Line ->
-                            Source.Line -> Shifting.LineShift -> [Abstract.Comment] -> m)
+                         (Location.Line ->
+                            Location.Line -> Shifting.LineShift -> [Abstract.Comment] -> m)
                            -> Reservation -> m
 accummulateReservation create (Reservation reservation)
   = snd $
@@ -72,12 +73,12 @@ reservePart part = Reservation reservation
   where reservation = before `Map.union` after
         before
           = Map.singleton lineIfBefore $ Abstract.commentsBefore annotation
-        lineIfBefore = Source.getStartLine portion
-        portion = Source.getPortion part
+        lineIfBefore = Location.getStartLine portion
+        portion = Location.getPortion part
         annotation = Merged.partAnnotation part
         after
           = Map.singleton lineIfAfter $ Abstract.commentsAfter annotation
-        lineIfAfter = succ $ Source.getEndLine portion
+        lineIfAfter = succ $ Location.getEndLine portion
 
 concretizeComments :: FilePath -> Reservation -> [Source.Comment]
 concretizeComments file = accummulateReservation create
@@ -88,7 +89,7 @@ concretizeComments file = accummulateReservation create
                 shift = commentShift core
                 core = Abstract.commentCore comment
                 concrete = Source.createComment core portion
-                portion = Source.stringPortion startPosition wrappedComment
-                startPosition = Source.createPosition file startLine startColumn
+                portion = Location.stringPortion startPosition wrappedComment
+                startPosition = Location.createPosition file startLine startColumn
                 startColumn = Abstract.commentStartColumn comment
                 wrappedComment = show core
