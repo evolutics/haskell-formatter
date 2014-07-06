@@ -3,9 +3,11 @@ module Evolutics.Code.Comment
 import qualified Evolutics.Tools.Newlines as Newlines
 
 data Comment = Comment{kind :: Kind, content :: String}
+             deriving (Eq, Ord)
 
 data Kind = Ordinary
           | Nested
+          deriving (Eq, Ord, Show)
 
 instance Show Comment where
         show comment

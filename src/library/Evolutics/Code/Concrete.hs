@@ -8,9 +8,11 @@ import qualified Evolutics.Code.Source as Source
 data Commented = Commented{commentedRoot ::
                            Source.Module Location.SrcSpanInfo,
                            comments :: [Source.Comment]}
+               deriving Eq
 
 data Commentless = Commentless{commentlessRoot ::
                                Source.Module Location.SrcSpanInfo}
+                 deriving (Eq, Ord, Show)
 
 instance Show Commented where
         show commented

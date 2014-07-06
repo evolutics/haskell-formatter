@@ -14,6 +14,7 @@ import qualified Evolutics.Code.Source as Source
 
 data Reservation = Reservation (Map.Map Location.Line
                                   [Abstract.Comment])
+                 deriving (Eq, Ord, Show)
 
 integrateComments :: Merged.Code -> Concrete.Commented
 integrateComments merged

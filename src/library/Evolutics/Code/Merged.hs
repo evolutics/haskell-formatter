@@ -9,9 +9,11 @@ import qualified Evolutics.Code.Source as Source
 import qualified Evolutics.Tools.Functions as Functions
 
 data Code = Code{codeRoot :: Source.Module Part}
+          deriving (Eq, Ord, Show)
 
 data Part = Part{partAnnotation :: Abstract.Annotation,
                  partNestedPortion :: Location.SrcSpanInfo}
+          deriving (Eq, Ord, Show)
 
 instance Location.Portioned Part where
         getPortion = Location.getPortion . partNestedPortion

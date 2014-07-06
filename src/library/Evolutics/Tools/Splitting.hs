@@ -5,11 +5,13 @@ import qualified Evolutics.Tools.Lists as Lists
 
 data Splitting a = Splitting{delimiters :: [[a]],
                              delimiterPolicy :: DelimiterPolicy}
+                 deriving (Eq, Ord, Show)
 
 data DelimiterPolicy = Drop
                      | Separate
                      | MergeLeft
                      | MergeRight
+                     deriving (Eq, Ord, Show)
 
 separate :: (Eq a) => [[a]] -> [a] -> [[a]]
 separate delimiterList

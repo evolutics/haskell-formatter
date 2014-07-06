@@ -8,12 +8,15 @@ import qualified Evolutics.Code.Location as Location
 import qualified Evolutics.Code.Source as Source
 
 data Code = Code{codeRoot :: Source.Module Annotation}
+          deriving (Eq, Ord, Show)
 
 data Annotation = Annotation{commentsBefore :: [Comment],
                              commentsAfter :: [Comment]}
+                deriving (Eq, Ord, Show)
 
 data Comment = Comment{commentCore :: Comment.Comment,
                        commentStartColumn :: Location.Column}
+             deriving (Eq, Ord, Show)
 
 createCode :: Source.Module Annotation -> Code
 createCode root = Code{codeRoot = root}

@@ -8,8 +8,10 @@ import qualified Evolutics.Code.Concrete as Concrete
 import qualified Evolutics.Code.Location as Location
 
 data LineShifting = LineShifting (Map.Map Location.Line LineShift)
+                  deriving (Eq, Ord, Show)
 
 data LineShift = LineShift Int
+               deriving (Eq, Ord, Show)
 
 instance Monoid.Monoid LineShift where
         mempty = LineShift 0

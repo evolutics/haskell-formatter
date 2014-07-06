@@ -5,8 +5,10 @@ import qualified Data.Monoid as Monoid
 
 data MapTree k a = Leaf a
                  | Node (MapForest k a)
+                 deriving (Eq, Ord, Show)
 
 data MapForest k a = MapForest (Map.Map k (MapTree k a))
+                   deriving (Eq, Ord, Show)
 
 instance Functor (MapTree k) where
         fmap function (Leaf value) = Leaf $ function value
