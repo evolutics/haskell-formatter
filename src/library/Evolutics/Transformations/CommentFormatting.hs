@@ -10,7 +10,7 @@ import qualified Evolutics.Tools.Functions as Functions
 formatComments :: Merged.Code -> Merged.Code
 formatComments merged = merged{Merged.codeRoot = root'}
   where (_, root')
-          = Functions.mapAccummulateLeft1 indent startPosition root
+          = Functions.mapAccumulateLeft1 indent startPosition root
         indent indentation part
           = (indentation', part{Merged.partAnnotation = annotation'})
           where indentation'

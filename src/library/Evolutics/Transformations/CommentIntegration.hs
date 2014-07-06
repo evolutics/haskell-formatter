@@ -30,20 +30,20 @@ integrateComments merged
 
 reservationShifting :: Reservation -> Shifting.LineShifting
 reservationShifting
-  = Shifting.createLineShifting . accummulateReservation create
+  = Shifting.createLineShifting . accumulateReservation create
   where create line _ shiftedShift _
           = Map.singleton line shiftedShift
 
-accummulateReservation ::
-                         (Monoid.Monoid m) =>
-                         (Location.Line ->
-                            Location.Line -> Shifting.LineShift -> [Abstract.Comment] -> m)
-                           -> Reservation -> m
-accummulateReservation create (Reservation reservation)
+accumulateReservation ::
+                        (Monoid.Monoid m) =>
+                        (Location.Line ->
+                           Location.Line -> Shifting.LineShift -> [Abstract.Comment] -> m)
+                          -> Reservation -> m
+accumulateReservation create (Reservation reservation)
   = snd $
-      Map.foldlWithKey' accummulate (Monoid.mempty, Monoid.mempty)
+      Map.foldlWithKey' accumulate (Monoid.mempty, Monoid.mempty)
         reservation
-  where accummulate (shiftedShift, structure) line comments
+  where accumulate (shiftedShift, structure) line comments
           = (shiftedShift', structure')
           where shiftedShift' = Monoid.mappend shiftedShift unshiftedShift
                 unshiftedShift = commentsShift comments
@@ -82,7 +82,7 @@ reservePart part = Reservation reservation
         lineIfAfter = succ $ Location.getEndLine portion
 
 concretizeComments :: FilePath -> Reservation -> [Source.Comment]
-concretizeComments file = accummulateReservation create
+concretizeComments file = accumulateReservation create
   where create _ baseLine _ = snd . List.foldl' merge (baseLine, [])
         merge (startLine, concretePart) comment
           = (followingLine, concretePart ++ [concrete])
