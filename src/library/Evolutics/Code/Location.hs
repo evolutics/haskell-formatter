@@ -1,9 +1,13 @@
 module Evolutics.Code.Location
        (SrcLoc.fileName, SrcLoc.SrcLoc, SrcLoc.SrcSpan,
-        SrcLoc.SrcSpanInfo, zero, add, Portioned, getPortion, Line, Column,
-        getStartLine, getStartColumn, getEndLine, getEndColumn,
-        createPosition, mapNestedPortion, stringPortion)
+        SrcLoc.SrcSpanInfo, zero, add, distance, Portioned, getPortion,
+        Line, Column, getLine, getColumn, createPosition,
+        SrcLoc.getPointLoc, getEndPosition, mapNestedPortion,
+        stringPortion, getStartLine, getStartColumn, getEndLine,
+        getEndColumn)
        where
+import Prelude hiding (getLine)
+import qualified Data.Function as Function
 import qualified Language.Haskell.Exts.Annotated.Syntax as Syntax
 import qualified Language.Haskell.Exts.Comments as Comments
 import qualified Language.Haskell.Exts.SrcLoc as SrcLoc
@@ -16,6 +20,9 @@ class (Enum a) => Natural a where
         add :: (Integral b) => b -> a -> a
         add difference ordered
           = toEnum $ fromIntegral difference + fromEnum ordered
+
+        distance :: a -> a -> a
+        distance single = toEnum . abs . Function.on (-) fromEnum single
 
 class Portioned a where
 
@@ -50,22 +57,22 @@ instance (Portioned a) => Portioned (Syntax.Module a) where
 instance Portioned Comments.Comment where
         getPortion (Comments.Comment _ commentPortion _) = commentPortion
 
-getStartLine :: (SrcLoc.SrcInfo a) => a -> Line
-getStartLine = Line . SrcLoc.startLine
+getLine :: SrcLoc.SrcLoc -> Line
+getLine = Line . SrcLoc.srcLine
 
-getStartColumn :: (SrcLoc.SrcInfo a) => a -> Column
-getStartColumn = Column . SrcLoc.startColumn
-
-getEndLine :: SrcLoc.SrcSpan -> Line
-getEndLine = Line . SrcLoc.srcSpanEndLine
-
-getEndColumn :: SrcLoc.SrcSpan -> Column
-getEndColumn = Column . SrcLoc.srcSpanEndColumn
+getColumn :: SrcLoc.SrcLoc -> Column
+getColumn = Column . SrcLoc.srcColumn
 
 createPosition :: FilePath -> Line -> Column -> SrcLoc.SrcLoc
 createPosition file (Line line) (Column column)
   = SrcLoc.SrcLoc{SrcLoc.srcFilename = file, SrcLoc.srcLine = line,
                   SrcLoc.srcColumn = column}
+
+getEndPosition :: SrcLoc.SrcSpan -> SrcLoc.SrcLoc
+getEndPosition portion = createPosition file line column
+  where file = SrcLoc.fileName portion
+        line = Line $ SrcLoc.srcSpanEndLine portion
+        column = Column $ SrcLoc.srcSpanEndColumn portion
 
 mapNestedPortion ::
                  (Line -> Line) -> SrcLoc.SrcSpanInfo -> SrcLoc.SrcSpanInfo
@@ -100,3 +107,15 @@ stringPortion startPosition string
         hasSingleLine = lineCount == 1
         startColumn = getStartColumn startPosition
         lastLineLength = length $ last stringLines
+
+getStartLine :: (SrcLoc.SrcInfo a) => a -> Line
+getStartLine = getLine . SrcLoc.getPointLoc
+
+getStartColumn :: (SrcLoc.SrcInfo a) => a -> Column
+getStartColumn = getColumn . SrcLoc.getPointLoc
+
+getEndLine :: SrcLoc.SrcSpan -> Line
+getEndLine = getLine . getEndPosition
+
+getEndColumn :: SrcLoc.SrcSpan -> Column
+getEndColumn = getColumn . getEndPosition

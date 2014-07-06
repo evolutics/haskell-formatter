@@ -2,7 +2,6 @@ module Evolutics.Transformations.CommentFormatting (formatComments)
        where
 import qualified Data.Function as Function
 import qualified Evolutics.Code.Abstract as Abstract
-import qualified Evolutics.Code.Helper as Helper
 import qualified Evolutics.Code.Location as Location
 import qualified Evolutics.Code.Merged as Merged
 import qualified Evolutics.Tools.Functions as Functions
@@ -21,5 +20,5 @@ formatComments merged = merged{Merged.codeRoot = root'}
                   = Abstract.mapCommentStartColumns mapStartColumn annotation
                 mapStartColumn = const $ Location.getStartColumn indentation'
                 annotation = Merged.partAnnotation part
-        startPosition = Helper.getStartPosition . Location.getPortion
+        startPosition = Location.getPointLoc . Location.getPortion
         root = Merged.codeRoot merged

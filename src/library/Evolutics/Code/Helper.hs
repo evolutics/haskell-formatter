@@ -1,7 +1,4 @@
-module Evolutics.Code.Helper
-       (formatMessage, getStartPosition, getEndPosition, comparePortions)
-       where
-import Prelude hiding (getLine)
+module Evolutics.Code.Helper (formatMessage, comparePortions) where
 import qualified Evolutics.Code.Location as Location
 import qualified Evolutics.Code.Source as Source
 
@@ -10,26 +7,8 @@ formatMessage position message
   = Source.prettyPrint position ++ separator ++ message
   where separator = ": "
 
-getStartPosition :: Location.SrcSpan -> Location.SrcLoc
-getStartPosition
-  = getPosition Location.getStartLine Location.getStartColumn
-
-getPosition ::
-            (Location.SrcSpan -> Location.Line) ->
-              (Location.SrcSpan -> Location.Column) ->
-                Location.SrcSpan -> Location.SrcLoc
-getPosition getLine getColumn portion
-  = Location.createPosition file line column
-  where file = Location.fileName portion
-        line = getLine portion
-        column = getColumn portion
-
-getEndPosition :: Location.SrcSpan -> Location.SrcLoc
-getEndPosition
-  = getPosition Location.getEndLine Location.getEndColumn
-
 comparePortions :: Location.SrcSpan -> Location.SrcSpan -> Ordering
 comparePortions left right
-  | getEndPosition left < getStartPosition right = LT
-  | getStartPosition left > getEndPosition right = GT
+  | Location.getEndPosition left < Location.getPointLoc right = LT
+  | Location.getPointLoc left > Location.getEndPosition right = GT
   | otherwise = EQ
