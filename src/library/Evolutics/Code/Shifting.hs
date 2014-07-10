@@ -39,7 +39,7 @@ applyLineShifting shifting line = shiftLine shift line
   where shift = lookupLineShift shifting line
 
 shiftLine :: LineShift -> Location.Line -> Location.Line
-shiftLine (LineShift shift) line = Location.add shift line
+shiftLine (LineShift shift) line = Location.plus shift line
 
 lookupLineShift :: LineShifting -> Location.Line -> LineShift
 lookupLineShift (LineShifting shifting) line

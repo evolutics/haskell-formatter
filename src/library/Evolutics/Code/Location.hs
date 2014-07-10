@@ -1,10 +1,9 @@
 module Evolutics.Code.Location
        (SrcLoc.fileName, SrcLoc.SrcLoc, SrcLoc.SrcSpan,
-        SrcLoc.SrcSpanInfo, zero, add, distance, Portioned, getPortion,
-        Line, Column, getLine, getColumn, createPosition,
-        SrcLoc.getPointLoc, getEndPosition, mapNestedPortion,
-        stringPortion, getStartLine, getStartColumn, getEndLine,
-        getEndColumn)
+        SrcLoc.SrcSpanInfo, base, plus, minus, Portioned, getPortion, Line,
+        Column, getLine, getColumn, createPosition, SrcLoc.getPointLoc,
+        getEndPosition, mapNestedPortion, stringPortion, getStartLine,
+        getStartColumn, getEndLine, getEndColumn)
        where
 import Prelude hiding (getLine)
 import qualified Data.Function as Function
@@ -15,14 +14,14 @@ import qualified Evolutics.Tools.Newlines as Newlines
 
 class (Enum a) => Natural a where
 
-        zero :: a
+        base :: a
 
-        add :: (Integral b) => b -> a -> a
-        add difference ordered
-          = toEnum $ fromIntegral difference + fromEnum ordered
+        plus :: (Integral b) => b -> a -> a
+        plus difference natural
+          = toEnum $ fromIntegral difference + fromEnum natural
 
-        distance :: a -> a -> a
-        distance single = toEnum . abs . Function.on (-) fromEnum single
+        minus :: (Num b) => a -> a -> b
+        minus minuend = fromIntegral . Function.on (-) fromEnum minuend
 
 class Portioned a where
 
@@ -43,10 +42,10 @@ instance Enum Column where
         fromEnum (Column column) = column
 
 instance Natural Line where
-        zero = Line 1
+        base = Line 1
 
 instance Natural Column where
-        zero = Column 1
+        base = Column 1
 
 instance Portioned SrcLoc.SrcSpanInfo where
         getPortion = SrcLoc.srcInfoSpan
@@ -98,12 +97,12 @@ stringPortion startPosition string
   where endPosition = createPosition file endLine endColumn
         file = SrcLoc.fileName startPosition
         endLine = sumPredecessor lineCount startLine
-        sumPredecessor difference = pred . add difference
+        sumPredecessor difference = pred . plus difference
         lineCount = length stringLines
         stringLines = Newlines.splitSeparatedLines string
         startLine = getStartLine startPosition
         endColumn = sumPredecessor lastLineLength lastLineStartColumn
-        lastLineStartColumn = if hasSingleLine then startColumn else zero
+        lastLineStartColumn = if hasSingleLine then startColumn else base
         hasSingleLine = lineCount == 1
         startColumn = getStartColumn startPosition
         lastLineLength = length $ last stringLines

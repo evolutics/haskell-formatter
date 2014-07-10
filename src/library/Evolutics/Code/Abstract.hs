@@ -3,6 +3,8 @@ module Evolutics.Code.Abstract
         Comment, commentCore, commentStartColumn, createCode,
         createAnnotation, createComment, mapCommentStartColumns)
        where
+import qualified Data.Function as Function
+import qualified Data.Monoid as Monoid
 import qualified Evolutics.Code.Comment as Comment
 import qualified Evolutics.Code.Location as Location
 import qualified Evolutics.Code.Source as Source
@@ -17,6 +19,13 @@ data Annotation = Annotation{commentsBefore :: [Comment],
 data Comment = Comment{commentCore :: Comment.Comment,
                        commentStartColumn :: Location.Column}
              deriving (Eq, Ord, Show)
+
+instance Monoid.Monoid Annotation where
+        mempty = createAnnotation [] []
+        mappend left right = createAnnotation before after
+          where before = merge commentsBefore
+                merge getComments = Function.on (++) getComments left right
+                after = merge commentsAfter
 
 createCode :: Source.Module Annotation -> Code
 createCode root = Code{codeRoot = root}
