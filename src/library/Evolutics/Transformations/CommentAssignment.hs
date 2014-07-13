@@ -4,17 +4,18 @@ import qualified Data.Foldable as Foldable
 import qualified Data.Function as Function
 import qualified Data.List as List
 import qualified Data.Map.Strict as Map
+import qualified Data.Maybe as Maybe
+import qualified Data.Monoid as Monoid
 import qualified Data.Traversable as Traversable
 import qualified Evolutics.Code.Abstract as Abstract
 import qualified Evolutics.Code.Comment as Comment
 import qualified Evolutics.Code.Concrete as Concrete
-import qualified Evolutics.Code.Helper as Helper
 import qualified Evolutics.Code.Location as Location
 import qualified Evolutics.Code.Source as Source
 
 data Assignment = Assignment (Map.Map Location.SrcSpan
-                                [Source.Comment])
-                deriving (Eq, Show)
+                                Abstract.Annotation)
+                deriving (Eq, Ord, Show)
 
 assignComments :: Concrete.Commented -> Abstract.Code
 assignComments commented = snd $ spread assignment commentless
@@ -28,73 +29,87 @@ spread (Assignment assignment) commentless
   where (unassigned, abstractRoot)
           = Traversable.mapAccumL move assignment concreteRoot
         move rest nestedPortion = (rest', annotation)
-          where (maybeComments, rest')
+          where (maybeAnnotation, rest')
                   = Map.updateLookupWithKey remove portion rest
                 remove = const . const Nothing
                 portion = Location.getPortion nestedPortion
-                annotation = createAnnotation portion comments
-                comments = Foldable.concat maybeComments
+                annotation = Foldable.fold maybeAnnotation
         concreteRoot = Concrete.commentlessRoot commentless
-
-createAnnotation ::
-                 Location.SrcSpan -> [Source.Comment] -> Abstract.Annotation
-createAnnotation portion = Foldable.foldMap single
-  where single concreteComment
-          = case Helper.portionDisplacement commentPortion portion of
-                LT -> Abstract.createAnnotation [abstractComment] []
-                EQ -> Abstract.createAnnotation [abstractComment] []
-                GT -> Abstract.createAnnotation [] [abstractComment]
-          where commentPortion = Location.getPortion concreteComment
-                abstractComment = Abstract.createComment Location.base commentCore
-                commentCore = Source.commentCore concreteComment
 
 createAssignment :: Concrete.Commented -> Assignment
 createAssignment commented
-  = Assignment $ Map.fromListWith (flip (++)) orderedAssignments
+  = Assignment $ Map.fromListWith Monoid.mappend orderedAssignments
   where orderedAssignments = concat untilLast ++ lastAssignment
         ((maybeLast, afterLast), untilLast)
-          = List.mapAccumL assign (Nothing, comments) orderedPortions
-        assign (maybePredecessor, rest) successor
-          = ((Just successor, rest'), bindings)
-          where (after, before, rest') = assignNext successor rest
+          = Traversable.mapAccumL assign (Nothing, orderedComments)
+              orderedPortions
+        assign (maybeLower, rest) upper = ((Just upper, rest'), bindings)
+          where (after, before, rest') = assignNext upper rest
                 bindings
-                  = case maybePredecessor of
-                        Nothing -> [(successor, after ++ before)]
-                        Just predecessor -> [(predecessor, after), (successor, before)]
-        comments = Concrete.comments commented
-        orderedPortions = portionsOrderedByStartEnd commented
+                  = [(Maybe.fromMaybe upper maybeLower, after), (upper, before)]
+        (orderedPortions, orderedComments) = orderedByStartEnd commented
         lastAssignment
           = case maybeLast of
                 Nothing -> []
-                Just lastPortion -> [(lastPortion, afterLast)]
+                Just lastPortion -> [(lastPortion, after)]
+                  where after = Abstract.createAnnotation [] boxesAfter
+                        boxesAfter = createBoxes afterLast
 
 assignNext ::
            Location.SrcSpan ->
              [Source.Comment] ->
-               ([Source.Comment], [Source.Comment], [Source.Comment])
-assignNext portion comments = (after, before, rest)
-  where (after, before) = orderByLocation untilPortion
+               (Abstract.Annotation, Abstract.Annotation, [Source.Comment])
+assignNext portion orderedComments = (after, before, rest)
+  where after = Abstract.createAnnotation [] boxesAfter
+        (boxesAfter, _, boxesBefore) = divideBoxes boxes
+        boxes = createBoxes untilPortion
         (untilPortion, rest)
-          = List.partition ((<= portion) . Location.getPortion) comments
+          = span ((<= portion) . Location.getPortion) orderedComments
+        before = Abstract.createAnnotation boxesBefore []
 
-orderByLocation ::
-                [Source.Comment] -> ([Source.Comment], [Source.Comment])
-orderByLocation comments = decide ([], []) ordered
-  where decide division [] = division
-        decide (after, undecided) rest@(comment : more)
-          = case displacement of
-                Comment.BeforeElement -> (after, undecided ++ rest)
-                Comment.AfterElement -> decide (after ++ extended, []) more
-                Comment.None -> decide (after, extended) more
-          where displacement
-                  = Comment.annotationDisplacement $ Source.commentCore comment
-                extended = undecided ++ [comment]
-        ordered
-          = List.sortBy (Function.on compare Location.getPortion) comments
+divideBoxes ::
+            [Abstract.Box] -> ([Abstract.Box], [Abstract.Box], [Abstract.Box])
+divideBoxes = divide [] []
+  where divide after spaces [] = (after, spaces, [])
+        divide after spaces
+          rest@(commentBox@(Abstract.CommentBox comment) : unwrapped)
+          = case (after, spaces) of
+                (_ : _, []) -> ifAfter
+                _ -> case displacement of
+                         Comment.BeforeElement -> ifBefore
+                         Comment.AfterElement -> ifAfter
+                         Comment.None -> ifBefore
+          where ifAfter
+                  = divide (after ++ spaces ++ [commentBox]) [] unwrapped
+                displacement = Comment.annotationDisplacement core
+                core = Abstract.commentCore comment
+                ifBefore = (after, spaces, rest)
+        divide after spaces (Abstract.EmptyLine : unwrapped)
+          = divide after (spaces ++ [Abstract.EmptyLine]) unwrapped
 
-portionsOrderedByStartEnd ::
-                          Concrete.Commented -> [Location.SrcSpan]
-portionsOrderedByStartEnd commented
-  = map Location.getPortion nestedPortions
-  where nestedPortions = List.sort $ Foldable.toList root
+createBoxes :: [Source.Comment] -> [Abstract.Box]
+createBoxes = concat . snd . Traversable.mapAccumL create Nothing
+  where create maybeEndLine concreteComment = (Just endLine', boxes)
+          where endLine' = Location.getEndLine portion
+                portion = Location.getPortion concreteComment
+                boxes = emptyLines ++ commentBoxes
+                emptyLines
+                  = case maybeEndLine of
+                        Nothing -> []
+                        Just endLine -> if lineDistance > 1 then [Abstract.EmptyLine] else
+                                          []
+                          where lineDistance = Location.minus startLine endLine :: Integer
+                                startLine = Location.getStartLine portion
+                commentBoxes = [Abstract.CommentBox abstractComment]
+                abstractComment = Abstract.createComment Location.base commentCore
+                commentCore = Source.commentCore concreteComment
+
+orderedByStartEnd ::
+                  Concrete.Commented -> ([Location.SrcSpan], [Source.Comment])
+orderedByStartEnd commented = (orderedPortions, orderedComments)
+  where orderedPortions = map Location.getPortion nestedPortions
+        nestedPortions = List.sort $ Foldable.toList root
         root = Concrete.commentedRoot commented
+        orderedComments
+          = List.sortBy (Function.on compare Location.getPortion) comments
+        comments = Concrete.comments commented

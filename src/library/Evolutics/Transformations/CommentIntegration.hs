@@ -13,7 +13,7 @@ import qualified Evolutics.Code.Shifting as Shifting
 import qualified Evolutics.Code.Source as Source
 
 data Reservation = Reservation (Map.Map Location.Line
-                                  [Abstract.Comment])
+                                  [Abstract.Box])
                  deriving (Eq, Ord, Show)
 
 integrateComments :: Merged.Code -> Concrete.Commented
@@ -25,7 +25,7 @@ integrateComments merged
         shifting = reservationShifting reservation
         reservation = makeReservation merged
         commentless = Merged.makeCommentless merged
-        comments = concretizeComments file reservation
+        comments = createComments file reservation
         file = Location.fileName $ Location.getPortion movedCommentless
 
 reservationShifting :: Reservation -> Shifting.LineShifting
@@ -37,26 +37,29 @@ reservationShifting
 accumulateReservation ::
                         (Monoid.Monoid m) =>
                         (Location.Line ->
-                           Location.Line -> Shifting.LineShift -> [Abstract.Comment] -> m)
+                           Location.Line -> Shifting.LineShift -> [Abstract.Box] -> m)
                           -> Reservation -> m
 accumulateReservation create (Reservation reservation)
   = snd $
       Map.foldlWithKey' accumulate (Monoid.mempty, Monoid.mempty)
         reservation
-  where accumulate (shiftedShift, structure) line comments
+  where accumulate (shiftedShift, structure) line boxes
           = (shiftedShift', structure')
           where shiftedShift' = Monoid.mappend shiftedShift unshiftedShift
-                unshiftedShift = commentsShift comments
+                unshiftedShift = boxesShift boxes
                 structure' = Monoid.mappend structure part
-                part = create line shiftedLine shiftedShift' comments
+                part = create line shiftedLine shiftedShift' boxes
                 shiftedLine = Shifting.shiftLine shiftedShift line
 
-commentsShift :: [Abstract.Comment] -> Shifting.LineShift
-commentsShift
-  = Monoid.mconcat . map (commentShift . Abstract.commentCore)
+boxesShift :: [Abstract.Box] -> Shifting.LineShift
+boxesShift = Monoid.mconcat . map boxShift
 
-commentShift :: Comment.Comment -> Shifting.LineShift
-commentShift = Shifting.LineShift . length . Comment.wrappedLines
+boxShift :: Abstract.Box -> Shifting.LineShift
+boxShift (Abstract.CommentBox comment)
+  = commentShift $ Abstract.commentCore comment
+  where commentShift
+          = Shifting.LineShift . length . Comment.wrappedLines
+boxShift Abstract.EmptyLine = Shifting.LineShift 1
 
 makeReservation :: Merged.Code -> Reservation
 makeReservation
@@ -66,31 +69,39 @@ makeReservation
           where Reservation reservationNow = reservePart part
 
 mergeReservations ::
-                  [Abstract.Comment] -> [Abstract.Comment] -> [Abstract.Comment]
+                  [Abstract.Box] -> [Abstract.Box] -> [Abstract.Box]
 mergeReservations = (++)
 
 reservePart :: Merged.Part -> Reservation
 reservePart part = Reservation reservation
   where reservation = before `Map.union` after
         before
-          = Map.singleton lineIfBefore $ Abstract.commentsBefore annotation
+          = Map.singleton lineIfBefore $ Abstract.boxesBefore annotation
         lineIfBefore = Location.getStartLine portion
         portion = Location.getPortion part
         annotation = Merged.partAnnotation part
-        after
-          = Map.singleton lineIfAfter $ Abstract.commentsAfter annotation
+        after = Map.singleton lineIfAfter $ Abstract.boxesAfter annotation
         lineIfAfter = succ $ Location.getEndLine portion
 
-concretizeComments :: FilePath -> Reservation -> [Source.Comment]
-concretizeComments file = accumulateReservation create
+createComments :: FilePath -> Reservation -> [Source.Comment]
+createComments file = accumulateReservation create
   where create _ baseLine _ = snd . List.foldl' merge (baseLine, [])
-        merge (startLine, concretePart) comment
-          = (followingLine, concretePart ++ [concrete])
+        merge (startLine, concretePart) box
+          = (followingLine, concretePart ++ comments)
           where followingLine = Shifting.shiftLine shift startLine
-                shift = commentShift core
-                core = Abstract.commentCore comment
-                concrete = Source.createComment core portion
-                portion = Location.stringPortion startPosition wrappedComment
-                startPosition = Location.createPosition file startLine startColumn
-                startColumn = Abstract.commentStartColumn comment
-                wrappedComment = show core
+                shift = boxShift box
+                comments
+                  = case box of
+                        Abstract.CommentBox comment -> [createComment file startLine
+                                                          comment]
+                        Abstract.EmptyLine -> []
+
+createComment ::
+              FilePath -> Location.Line -> Abstract.Comment -> Source.Comment
+createComment file startLine comment
+  = Source.createComment core portion
+  where core = Abstract.commentCore comment
+        portion = Location.stringPortion startPosition wrappedComment
+        startPosition = Location.createPosition file startLine startColumn
+        startColumn = Abstract.commentStartColumn comment
+        wrappedComment = show core
