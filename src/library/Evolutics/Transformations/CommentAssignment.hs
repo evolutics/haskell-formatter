@@ -96,8 +96,7 @@ createBoxes = concat . snd . Traversable.mapAccumL create Nothing
                 emptyLines
                   = case maybeEndLine of
                         Nothing -> []
-                        Just endLine -> if lineDistance > 1 then [Abstract.EmptyLine] else
-                                          []
+                        Just endLine -> [Abstract.EmptyLine | lineDistance > 1]
                           where lineDistance = Location.minus startLine endLine :: Integer
                                 startLine = Location.getStartLine portion
                 commentBoxes = [Abstract.CommentBox abstractComment]

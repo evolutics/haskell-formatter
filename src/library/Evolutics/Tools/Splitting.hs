@@ -31,20 +31,13 @@ split splitting list = processedDelimiters
         raw = rawSplit (delimiters splitting) list
 
 rawSplit :: (Eq a) => [[a]] -> [a] -> [[a]]
-rawSplit separators = Functions.untilRight move . (,) []
-  where move (splitLists, restList)
-          = case findFirstSeparator separators restList of
-                Nothing -> Right $ splitLists ++ [restList]
-                Just (left, separator, right) -> Left
-                                                   (splitLists ++ [left, separator], right)
-
-findFirstSeparator ::
-                     (Eq a) => [[a]] -> [a] -> Maybe ([a], [a], [a])
-findFirstSeparator separators
-  = Functions.findJust splitAgain . Lists.partitions
-  where splitAgain (left, right)
-          = fmap (prepend left) $ stripFirstPrefix separators right
-        prepend left (middle, right) = (left, middle, right)
+rawSplit separators = move [] []
+  where move parts left [] = parts ++ [left]
+        move parts left right@(element : rest)
+          = case stripFirstPrefix separators right of
+                Nothing -> move parts (left ++ [element]) rest
+                Just (separator, suffix) -> move (parts ++ [left, separator]) []
+                                              suffix
 
 stripFirstPrefix :: (Eq a) => [[a]] -> [a] -> Maybe ([a], [a])
 stripFirstPrefix prefixes list = Functions.findJust strip prefixes
