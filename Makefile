@@ -1,12 +1,11 @@
-SOURCE = src
-MAIN = Main.hs
-NAME = HaskellFormatter
-TRASH = ~/.local/share/Trash/files
+SOURCE_FILES = Setup.hs src testsuite
+GENERATED_FILES = dist
 
 all:
-	hlint $(SOURCE)
-	cd $(SOURCE); ghc --make $(MAIN) -o ../$(NAME) -fforce-recomp
+	hlint $(SOURCE_FILES)
+	cabal configure --enable-tests
+	cabal build
+	cabal test
 
 clean:
-	find $(SOURCE) \( -name "*.hi" -o -name "*.o" \) -execdir mv -b {} \
-		$(TRASH) \;
+	rm -fr $(GENERATED_FILES)
