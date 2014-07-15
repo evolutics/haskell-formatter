@@ -1,5 +1,6 @@
 module Evolutics.Tools.Splitting (separate) where
 import qualified Data.List as List
+import qualified Data.Monoid as Monoid
 import qualified Evolutics.Tools.Functions as Functions
 import qualified Evolutics.Tools.Lists as Lists
 
@@ -32,11 +33,13 @@ split splitting list = processedDelimiters
 
 rawSplit :: (Eq a) => [[a]] -> [a] -> [[a]]
 rawSplit separators = move [] []
-  where move parts left [] = parts ++ [left]
+  where move parts left [] = Monoid.mappend parts [left]
         move parts left right@(element : rest)
           = case stripFirstPrefix separators right of
-                Nothing -> move parts (left ++ [element]) rest
-                Just (separator, suffix) -> move (parts ++ [left, separator]) []
+                Nothing -> move parts (Monoid.mappend left [element]) rest
+                Just (separator, suffix) -> move
+                                              (Monoid.mappend parts [left, separator])
+                                              []
                                               suffix
 
 stripFirstPrefix :: (Eq a) => [[a]] -> [a] -> Maybe ([a], [a])

@@ -1,6 +1,7 @@
 module Main (main) where
 import qualified Control.Exception as Exception
 import qualified Data.Map.Strict as Map
+import qualified Data.Monoid as Monoid
 import qualified Data.Set as Set
 import qualified System.FilePath as FilePath
 import qualified Test.Tasty as Tasty
@@ -28,9 +29,9 @@ create (Right testMap)
         input = testMap Map.! inputKey
         expectedOutput = testMap Map.! outputKey
         message
-          = "The filenames are " ++
-              setString actualKeys ++
-                " instead of " ++ setString expectedKeys ++ "."
+          = Monoid.mconcat
+              ["The filenames are ", setString actualKeys, " instead of ",
+               setString expectedKeys, "."]
         setString = show . Set.elems
 
 failure :: Tasty.TestName -> String -> [Tasty.TestTree]
@@ -54,6 +55,7 @@ fileTests input expectedOutput
 testFormatting :: FilePath -> String -> String -> HUnit.Assertion
 testFormatting inputFile input expectedOutput
   = case Formatting.formatSource (Just inputFile) input of
-        Left message -> HUnit.assertFailure $
-                          "Unexpected formatter failure: " ++ show message
+        Left message -> HUnit.assertFailure .
+                          Monoid.mappend "Unexpected formatter failure: "
+                          $ show message
         Right actualOutput -> actualOutput HUnit.@?= expectedOutput

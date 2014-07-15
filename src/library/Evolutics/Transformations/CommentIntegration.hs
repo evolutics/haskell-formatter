@@ -52,7 +52,7 @@ accumulateReservation create (Reservation reservation)
                 shiftedLine = Shifting.shiftLine shiftedShift line
 
 boxesShift :: [Abstract.Box] -> Shifting.LineShift
-boxesShift = Monoid.mconcat . map boxShift
+boxesShift = Monoid.mconcat . fmap boxShift
 
 boxShift :: Abstract.Box -> Shifting.LineShift
 boxShift (Abstract.CommentBox comment)
@@ -87,7 +87,7 @@ createComments :: FilePath -> Reservation -> [Source.Comment]
 createComments file = accumulateReservation create
   where create _ baseLine _ = snd . List.foldl' merge (baseLine, [])
         merge (startLine, concretePart) box
-          = (followingLine, concretePart ++ comments)
+          = (followingLine, Monoid.mappend concretePart comments)
           where followingLine = Shifting.shiftLine shift startLine
                 shift = boxShift box
                 comments

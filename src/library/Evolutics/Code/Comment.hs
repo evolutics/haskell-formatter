@@ -3,6 +3,7 @@ module Evolutics.Code.Comment
         create, wrappedLines, annotationDisplacement)
        where
 import qualified Data.Char as Char
+import qualified Data.Monoid as Monoid
 import qualified Evolutics.Tools.Newlines as Newlines
 
 data Comment = Comment{kind :: Kind, content :: String}
@@ -20,8 +21,8 @@ data AnnotationDisplacement = BeforeElement
 instance Show Comment where
         show comment
           = case kind comment of
-                Ordinary -> "--" ++ commentContent
-                Nested -> "{-" ++ commentContent ++ "-}"
+                Ordinary -> Monoid.mappend "--" commentContent
+                Nested -> Monoid.mconcat ["{-", commentContent, "-}"]
           where commentContent = content comment
 
 create :: Kind -> String -> Comment
@@ -37,6 +38,7 @@ annotationDisplacement comment
         ('|' : _) -> BeforeElement
         ('^' : _) -> AfterElement
         _ -> None
-  where unwrappedContent = dropWhile Char.isSpace left ++ right
+  where unwrappedContent
+          = dropWhile Char.isSpace $ Monoid.mappend left right
         (left, right) = splitAt spaceLimit $ content comment
         spaceLimit = 1

@@ -81,7 +81,7 @@ mapNestedPortion function nestedPortion
   where parent' = mapPortionFunction parent
         mapPortionFunction = mapPortion function
         parent = SrcLoc.srcInfoSpan nestedPortion
-        children' = map mapPortionFunction children
+        children' = fmap mapPortionFunction children
         children = SrcLoc.srcInfoPoints nestedPortion
 
 mapPortion :: (Line -> Line) -> SrcLoc.SrcSpan -> SrcLoc.SrcSpan

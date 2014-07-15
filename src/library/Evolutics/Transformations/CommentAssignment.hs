@@ -39,7 +39,8 @@ spread (Assignment assignment) commentless
 createAssignment :: Concrete.Commented -> Assignment
 createAssignment commented
   = Assignment $ Map.fromListWith Monoid.mappend orderedAssignments
-  where orderedAssignments = concat untilLast ++ lastAssignment
+  where orderedAssignments
+          = Monoid.mappend (concat untilLast) lastAssignment
         ((maybeLast, afterLast), untilLast)
           = Traversable.mapAccumL assign (Nothing, orderedComments)
               orderedPortions
@@ -80,19 +81,21 @@ divideBoxes = divide [] []
                          Comment.AfterElement -> ifAfter
                          Comment.None -> ifBefore
           where ifAfter
-                  = divide (after ++ spaces ++ [commentBox]) [] unwrapped
+                  = divide (Monoid.mconcat [after, spaces, [commentBox]]) []
+                      unwrapped
                 displacement = Comment.annotationDisplacement core
                 core = Abstract.commentCore comment
                 ifBefore = (after, spaces, rest)
         divide after spaces (Abstract.EmptyLine : unwrapped)
-          = divide after (spaces ++ [Abstract.EmptyLine]) unwrapped
+          = divide after (Monoid.mappend spaces [Abstract.EmptyLine])
+              unwrapped
 
 createBoxes :: [Source.Comment] -> [Abstract.Box]
 createBoxes = concat . snd . Traversable.mapAccumL create Nothing
   where create maybeEndLine concreteComment = (Just endLine', boxes)
           where endLine' = Location.getEndLine portion
                 portion = Location.getPortion concreteComment
-                boxes = emptyLines ++ commentBoxes
+                boxes = Monoid.mappend emptyLines commentBoxes
                 emptyLines
                   = case maybeEndLine of
                         Nothing -> []
@@ -106,7 +109,7 @@ createBoxes = concat . snd . Traversable.mapAccumL create Nothing
 orderedByStartEnd ::
                   Concrete.Commented -> ([Location.SrcSpan], [Source.Comment])
 orderedByStartEnd commented = (orderedPortions, orderedComments)
-  where orderedPortions = map Location.getPortion nestedPortions
+  where orderedPortions = fmap Location.getPortion nestedPortions
         nestedPortions = List.sort $ Foldable.toList root
         root = Concrete.commentedRoot commented
         orderedComments

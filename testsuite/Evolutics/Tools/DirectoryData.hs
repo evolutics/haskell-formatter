@@ -27,7 +27,7 @@ transformRawTree ::
                  Tree.DirTree a ->
                    MapTree.MapForest FilePath (Either Exception.IOException a)
 transformRawTree root = transform [root]
-  where transform = MapTree.MapForest . Map.fromList . map bind
+  where transform = MapTree.MapForest . Map.fromList . fmap bind
         bind rawTree = (label, tree)
           where label = Tree.name rawTree
                 tree

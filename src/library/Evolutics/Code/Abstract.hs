@@ -46,7 +46,7 @@ mapBoxes :: (Box -> Box) -> Annotation -> Annotation
 mapBoxes function annotation
   = annotation{boxesBefore = before', boxesAfter = after'}
   where before' = apply before
-        apply = map function
+        apply = fmap function
         before = boxesBefore annotation
         after' = apply after
         after = boxesAfter annotation
