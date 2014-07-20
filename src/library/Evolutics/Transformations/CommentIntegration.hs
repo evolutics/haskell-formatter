@@ -3,6 +3,7 @@ module Evolutics.Transformations.CommentIntegration
 import qualified Data.Foldable as Foldable
 import qualified Data.List as List
 import qualified Data.Map.Strict as Map
+import qualified Data.Maybe as Maybe
 import qualified Data.Monoid as Monoid
 import qualified Evolutics.Code.Abstract as Abstract
 import qualified Evolutics.Code.Comment as Comment
@@ -11,10 +12,27 @@ import qualified Evolutics.Code.Location as Location
 import qualified Evolutics.Code.Merged as Merged
 import qualified Evolutics.Code.Shifting as Shifting
 import qualified Evolutics.Code.Source as Source
+import qualified Evolutics.Tools.Lists as Lists
 
 data Reservation = Reservation (Map.Map Location.Line
                                   [Abstract.Box])
                  deriving (Eq, Ord, Show)
+
+instance Monoid.Monoid Reservation where
+        mempty = Reservation Map.empty
+        mappend (Reservation leftReservation)
+          (Reservation rightReservation) = Reservation merged
+          where merged = Map.unionWith merge leftReservation rightReservation
+                merge left right = Monoid.mconcat [left, between, right]
+                  where between
+                          = [Abstract.EmptyLine |
+                             isJustComment (Lists.maybeLast left) &&
+                               isJustComment (Maybe.listToMaybe right)]
+                isJustComment maybeBox
+                  = case maybeBox of
+                        Nothing -> False
+                        Just (Abstract.CommentBox _) -> True
+                        Just Abstract.EmptyLine -> False
 
 integrateComments :: Merged.Code -> Concrete.Commented
 integrateComments merged
@@ -62,15 +80,7 @@ boxShift (Abstract.CommentBox comment)
 boxShift Abstract.EmptyLine = Shifting.LineShift 1
 
 makeReservation :: Merged.Code -> Reservation
-makeReservation
-  = Reservation . Foldable.foldl' reserve Map.empty . Merged.codeRoot
-  where reserve reservation part
-          = Map.unionWith mergeReservations reservation reservationNow
-          where Reservation reservationNow = reservePart part
-
-mergeReservations ::
-                  [Abstract.Box] -> [Abstract.Box] -> [Abstract.Box]
-mergeReservations = (++)
+makeReservation = Foldable.foldMap reservePart . Merged.codeRoot
 
 reservePart :: Merged.Part -> Reservation
 reservePart part = Reservation reservation
