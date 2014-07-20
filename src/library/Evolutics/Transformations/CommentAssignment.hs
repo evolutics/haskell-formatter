@@ -101,7 +101,7 @@ createBoxes = concat . snd . Traversable.mapAccumL create Nothing
                         Nothing -> []
                         Just endLine -> [Abstract.EmptyLine | lineDistance > 1]
                           where lineDistance = Location.minus startLine endLine :: Integer
-                                startLine = Location.getStartLine portion
+                startLine = Location.getStartLine portion
                 commentBoxes = [Abstract.CommentBox abstractComment]
                 abstractComment = Abstract.createComment Location.base commentCore
                 commentCore = Source.commentCore concreteComment

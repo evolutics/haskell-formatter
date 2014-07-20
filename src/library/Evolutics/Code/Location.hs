@@ -10,6 +10,7 @@ import qualified Data.Function as Function
 import qualified Language.Haskell.Exts.Annotated.Syntax as Syntax
 import qualified Language.Haskell.Exts.Comments as Comments
 import qualified Language.Haskell.Exts.SrcLoc as SrcLoc
+import qualified Evolutics.Tools.Lists as Lists
 import qualified Evolutics.Tools.Newlines as Newlines
 
 class (Enum a) => Natural a where
@@ -102,10 +103,10 @@ stringPortion startPosition string
         stringLines = Newlines.splitSeparatedLines string
         startLine = getStartLine startPosition
         endColumn = sumPredecessor lastLineLength lastLineStartColumn
+        lastLineLength = maybe 0 length $ Lists.maybeLast stringLines
         lastLineStartColumn = if hasSingleLine then startColumn else base
         hasSingleLine = lineCount == 1
         startColumn = getStartColumn startPosition
-        lastLineLength = length $ last stringLines
 
 getStartLine :: (SrcLoc.SrcInfo a) => a -> Line
 getStartLine = getLine . SrcLoc.getPointLoc

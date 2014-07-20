@@ -1,5 +1,10 @@
 module Evolutics.Tools.Lists
-       (takeEvery, concatenateRuns, concatenateShiftedRuns) where
+       (maybeLast, takeEvery, concatenateRuns, concatenateShiftedRuns)
+       where
+import qualified Data.Maybe as Maybe
+
+maybeLast :: [a] -> Maybe a
+maybeLast = Maybe.listToMaybe . reverse
 
 takeEvery :: Int -> [a] -> [a]
 takeEvery _ [] = []
