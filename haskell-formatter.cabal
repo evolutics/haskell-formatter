@@ -55,5 +55,5 @@ test-suite test
                        haskell-formatter,
                        tasty,
                        tasty-hunit
-  hs-source-dirs:      testsuite
+  hs-source-dirs:      testsuite/src
   ghc-options:         -Wall -Werror
