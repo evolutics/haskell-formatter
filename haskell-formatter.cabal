@@ -41,7 +41,11 @@ library
 executable haskell-formatter
   main-is:             Main.hs
   -- other-modules:       
-  build-depends:       base, haskell-formatter
+  build-depends:       base,
+                       directory,
+                       filepath,
+                       haskell-formatter,
+                       optparse-applicative
   hs-source-dirs:      src/executable
   ghc-options:         -Wall -Werror
 
