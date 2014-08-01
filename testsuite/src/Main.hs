@@ -20,10 +20,11 @@ directoryTree = FileTests.fileTestTree create name root
 create ::
        Either Exception.IOException (Map.Map FilePath String) ->
          [Tasty.TestTree]
-create (Left exception) = failure "IO exception" $ show exception
+create (Left exception)
+  = testingError "I/O exception" $ show exception
 create (Right testMap)
   = if actualKeys == expectedKeys then fileTests input expectedOutput
-      else failure "Set of filenames" message
+      else testingError "Set of filenames" message
   where actualKeys = Map.keysSet testMap
         expectedKeys = Set.fromList [inputKey, outputKey]
         input = testMap Map.! inputKey
@@ -34,8 +35,8 @@ create (Right testMap)
                setString expectedKeys, "."]
         setString = show . Set.elems
 
-failure :: Tasty.TestName -> String -> [Tasty.TestTree]
-failure name message
+testingError :: Tasty.TestName -> String -> [Tasty.TestTree]
+testingError name message
   = [HUnit.testCase name $ HUnit.assertFailure message]
 
 inputKey :: FilePath
@@ -55,7 +56,5 @@ fileTests input expectedOutput
 testFormatting :: FilePath -> String -> String -> HUnit.Assertion
 testFormatting inputFile input expectedOutput
   = case Formatting.formatSource (Just inputFile) input of
-        Left message -> HUnit.assertFailure .
-                          Monoid.mappend "Unexpected formatter failure: "
-                          $ show message
+        Left unexpectedError -> HUnit.assertFailure $ show unexpectedError
         Right actualOutput -> actualOutput HUnit.@?= expectedOutput

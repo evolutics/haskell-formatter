@@ -1,6 +1,6 @@
 module Evolutics.Code.Merged
-       (Code, codeRoot, Part, partAnnotation, createCode, mergeCode,
-        makeCommentless, createPart)
+       (Code, codeRoot, Part, partAnnotation, partNestedPortion,
+        createCode, mergeCode, makeCommentless, createPart)
        where
 import qualified Evolutics.Code.Abstract as Abstract
 import qualified Evolutics.Code.Concrete as Concrete

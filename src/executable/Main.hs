@@ -1,4 +1,5 @@
 module Main (main) where
+import qualified Control.Arrow as Arrow
 import qualified Data.Function as Function
 import qualified Options.Applicative as Applicative
 import qualified System.Directory as Directory
@@ -52,9 +53,9 @@ externalFormat arguments
         (Just inputPath, Just outputPath) -> if forceOverwriting then
                                                continue else
                                                do same <- sameExistentPaths inputPath outputPath
-                                                  if same then failWithMessage overwritingFailure
-                                                    else continue
-          where overwritingFailure
+                                                  if same then exitWithError overwritingError else
+                                                    continue
+          where overwritingError
                   = concat
                       ["The output path ", show outputPath,
                        " would overwrite the input path ", show inputPath, ". ",
@@ -66,8 +67,8 @@ externalFormat arguments
         forceOverwriting = force arguments
         continue = internalFormat maybeInput maybeOutput
 
-failWithMessage :: String -> IO ()
-failWithMessage message
+exitWithError :: String -> IO ()
+exitWithError message
   = do IO.hPutStrLn IO.stderr message
        Exit.exitFailure
 
@@ -88,16 +89,16 @@ sameExistentPaths left right
 
 internalFormat :: Maybe FilePath -> Maybe FilePath -> IO ()
 internalFormat inputPath outputPath
-  = eitherTransformOrFail readInput transform writeOutput
+  = transformUnlessError readInput transform writeOutput
   where readInput = maybe getContents readFile inputPath
         writeOutput = maybe putStr writeFile outputPath
-        transform = Formatting.formatSource inputPath
+        transform = Arrow.left show . Formatting.formatSource inputPath
 
-eitherTransformOrFail ::
-                      IO String ->
-                        (String -> Either String String) -> (String -> IO ()) -> IO ()
-eitherTransformOrFail readInput transform writeOutput
+transformUnlessError ::
+                     IO String ->
+                       (String -> Either String String) -> (String -> IO ()) -> IO ()
+transformUnlessError readInput transform writeOutput
   = do string <- readInput
        case transform string of
-           Left message -> failWithMessage message
+           Left message -> exitWithError message
            Right string' -> writeOutput string'
