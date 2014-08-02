@@ -1,4 +1,4 @@
-module Evolutics.Code.Location
+module Language.Haskell.Formatter.Code.Location
        (SrcLoc.fileName, SrcLoc.SrcLoc, SrcLoc.SrcSpan,
         SrcLoc.SrcSpanInfo, base, plus, minus, Portioned, getPortion, Line,
         Column, getLine, getColumn, createPosition, SrcLoc.getPointLoc,
@@ -10,8 +10,10 @@ import qualified Data.Function as Function
 import qualified Language.Haskell.Exts.Annotated.Syntax as Syntax
 import qualified Language.Haskell.Exts.Comments as Comments
 import qualified Language.Haskell.Exts.SrcLoc as SrcLoc
-import qualified Evolutics.Tools.Lists as Lists
-import qualified Evolutics.Tools.Newlines as Newlines
+import qualified Language.Haskell.Formatter.Toolkit.ListTool
+       as ListTool
+import qualified Language.Haskell.Formatter.Toolkit.Newline
+       as Newline
 
 class (Enum a) => Natural a where
 
@@ -100,10 +102,10 @@ stringPortion startPosition string
         endLine = sumPredecessor lineCount startLine
         sumPredecessor difference = pred . plus difference
         lineCount = length stringLines
-        stringLines = Newlines.splitSeparatedLines string
+        stringLines = Newline.splitSeparatedLines string
         startLine = getStartLine startPosition
         endColumn = sumPredecessor lastLineLength lastLineStartColumn
-        lastLineLength = maybe 0 length $ Lists.maybeLast stringLines
+        lastLineLength = maybe 0 length $ ListTool.maybeLast stringLines
         lastLineStartColumn = if hasSingleLine then startColumn else base
         hasSingleLine = lineCount == 1
         startColumn = getStartColumn startPosition

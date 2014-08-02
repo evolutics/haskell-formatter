@@ -1,5 +1,7 @@
-module Evolutics.Tools.Newlines (splitSeparatedLines) where
-import qualified Evolutics.Tools.Splitting as Splitting
+module Language.Haskell.Formatter.Toolkit.Newline
+       (splitSeparatedLines) where
+import qualified Language.Haskell.Formatter.Toolkit.Splitting
+       as Splitting
 
 splitSeparatedLines :: String -> [String]
 splitSeparatedLines = Splitting.separate newlines

@@ -1,13 +1,14 @@
-module Evolutics.Code.Abstract
+module Language.Haskell.Formatter.Code.Abstract
        (Code, codeRoot, Annotation, boxesBefore, boxesAfter, Box(..),
         Comment, commentCore, commentStartColumn, createCode,
         createAnnotation, createComment, mapCommentStartColumns)
        where
 import qualified Data.Function as Function
 import qualified Data.Monoid as Monoid
-import qualified Evolutics.Code.Comment as Comment
-import qualified Evolutics.Code.Location as Location
-import qualified Evolutics.Code.Source as Source
+import qualified Language.Haskell.Formatter.Code.Comment as Comment
+import qualified Language.Haskell.Formatter.Code.Location
+       as Location
+import qualified Language.Haskell.Formatter.Code.Source as Source
 
 data Code = Code{codeRoot :: Source.Module Annotation}
           deriving (Eq, Ord, Show)

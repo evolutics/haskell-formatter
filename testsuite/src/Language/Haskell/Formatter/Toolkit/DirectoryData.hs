@@ -1,9 +1,11 @@
-module Evolutics.Tools.DirectoryData (createTree) where
+module Language.Haskell.Formatter.Toolkit.DirectoryData
+       (createTree) where
 import qualified Control.Exception as Exception
 import qualified Data.Map.Strict as Map
 import qualified Data.Monoid as Monoid
+import qualified Language.Haskell.Formatter.Toolkit.MapTree
+       as MapTree
 import qualified System.Directory.Tree as Tree
-import qualified Evolutics.Tools.MapTree as MapTree
 
 createTree ::
              (Monoid.Monoid a) =>

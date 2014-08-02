@@ -1,10 +1,13 @@
-module Evolutics.Tools.FileTests (fileTestTree) where
+module Language.Haskell.Formatter.Toolkit.FileTesting
+       (fileTestTree) where
 import qualified Control.Exception as Exception
 import qualified Data.Map.Strict as Map
 import qualified Data.Monoid as Monoid
+import qualified Language.Haskell.Formatter.Toolkit.DirectoryData
+       as DirectoryData
+import qualified Language.Haskell.Formatter.Toolkit.MapTree
+       as MapTree
 import qualified Test.Tasty as Tasty
-import qualified Evolutics.Tools.DirectoryData as DirectoryData
-import qualified Evolutics.Tools.MapTree as MapTree
 
 fileTestTree ::
              (Either Exception.IOException (Map.Map FilePath String) ->

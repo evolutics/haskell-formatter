@@ -1,10 +1,11 @@
-module Evolutics.Code.Comment
+module Language.Haskell.Formatter.Code.Comment
        (Comment, kind, content, Kind(..), AnnotationDisplacement(..),
         create, wrappedLines, annotationDisplacement)
        where
 import qualified Data.Char as Char
 import qualified Data.Monoid as Monoid
-import qualified Evolutics.Tools.Newlines as Newlines
+import qualified Language.Haskell.Formatter.Toolkit.Newline
+       as Newline
 
 data Comment = Comment{kind :: Kind, content :: String}
              deriving (Eq, Ord)
@@ -30,7 +31,7 @@ create commentKind commentContent
   = Comment{kind = commentKind, content = commentContent}
 
 wrappedLines :: Comment -> [String]
-wrappedLines = Newlines.splitSeparatedLines . show
+wrappedLines = Newline.splitSeparatedLines . show
 
 annotationDisplacement :: Comment -> AnnotationDisplacement
 annotationDisplacement comment

@@ -16,24 +16,25 @@ build-type:          Simple
 cabal-version:       >=1.8
 
 library
-  exposed-modules:     Evolutics.Formatting
+  exposed-modules:     Language.Haskell.Formatter
   other-modules:
-                       Evolutics.Code.Abstract,
-                       Evolutics.Code.Comment,
-                       Evolutics.Code.Concrete,
-                       Evolutics.Code.Helper,
-                       Evolutics.Code.Location,
-                       Evolutics.Code.Merged,
-                       Evolutics.Code.Shifting,
-                       Evolutics.Code.Source,
-                       Evolutics.Tools.Functions,
-                       Evolutics.Tools.Lists,
-                       Evolutics.Tools.Newlines,
-                       Evolutics.Tools.Splitting,
-                       Evolutics.Transformations.CommentAssignment,
-                       Evolutics.Transformations.CommentFormatting,
-                       Evolutics.Transformations.CommentIntegration,
-                       Evolutics.Transformations.ElementArrangement
+                       Language.Haskell.Formatter.Code.Abstract,
+                       Language.Haskell.Formatter.Code.Comment,
+                       Language.Haskell.Formatter.Code.Concrete,
+                       Language.Haskell.Formatter.Code.Location,
+                       Language.Haskell.Formatter.Code.Merged,
+                       Language.Haskell.Formatter.Code.Source,
+                       Language.Haskell.Formatter.Default.CommentAssignment,
+                       Language.Haskell.Formatter.Default.CommentFormatting,
+                       Language.Haskell.Formatter.Default.CommentIntegration,
+                       Language.Haskell.Formatter.Default.ElementArrangement,
+                       Language.Haskell.Formatter.Default.Shifting,
+                       Language.Haskell.Formatter.Error,
+                       Language.Haskell.Formatter.Formatting,
+                       Language.Haskell.Formatter.Toolkit.FunctionTool,
+                       Language.Haskell.Formatter.Toolkit.ListTool,
+                       Language.Haskell.Formatter.Toolkit.Newline,
+                       Language.Haskell.Formatter.Toolkit.Splitting
   build-depends:       base, containers, haskell-src-exts
   hs-source-dirs:      src/library
   ghc-options:         -Wall -Werror

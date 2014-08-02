@@ -1,20 +1,25 @@
-module Evolutics.Formatting (formatSource) where
+module Language.Haskell.Formatter.Formatting (formatSource) where
 import qualified Control.Monad as Monad
 import qualified Data.Function as Function
-import qualified Evolutics.Code.Abstract as Abstract
-import qualified Evolutics.Code.Concrete as Concrete
-import qualified Evolutics.Code.Helper as Helper
-import qualified Evolutics.Code.Location as Location
-import qualified Evolutics.Code.Merged as Merged
-import qualified Evolutics.Code.Source as Source
-import qualified Evolutics.Transformations.CommentAssignment
+import qualified Language.Haskell.Formatter.Code.Abstract
+       as Abstract
+import qualified Language.Haskell.Formatter.Code.Concrete
+       as Concrete
+import qualified Language.Haskell.Formatter.Code.Merged as Merged
+import qualified Language.Haskell.Formatter.Code.Source as Source
+import qualified
+       Language.Haskell.Formatter.Default.CommentAssignment
        as CommentAssignment
-import qualified Evolutics.Transformations.CommentFormatting
+import qualified
+       Language.Haskell.Formatter.Default.CommentFormatting
        as CommentFormatting
-import qualified Evolutics.Transformations.CommentIntegration
+import qualified
+       Language.Haskell.Formatter.Default.CommentIntegration
        as CommentIntegration
-import qualified Evolutics.Transformations.ElementArrangement
+import qualified
+       Language.Haskell.Formatter.Default.ElementArrangement
        as ElementArrangement
+import qualified Language.Haskell.Formatter.Error as Error
 
 class Coded a where
 
@@ -32,32 +37,12 @@ instance Coded Concrete.Commentless where
 instance Coded Merged.Code where
         getCode = Monad.void . Merged.codeRoot
 
-data Error = ParseError Location.SrcLoc String
-           | CommentAssignmentAssertion
-           | ElementArrangementAssertion
-           | MergingAssertion
-           | CommentFormattingAssertion
-           | CommentIntegrationAssertion
-           deriving (Eq, Ord)
-
-instance Show Error where
-        show (ParseError position message)
-          = Helper.formatMessage position message
-        show CommentAssignmentAssertion
-          = "Assertion error of comment assignment."
-        show ElementArrangementAssertion
-          = "Assertion error of element arrangement."
-        show MergingAssertion = "Assertion error of merging."
-        show CommentFormattingAssertion
-          = "Assertion error of comment formatting."
-        show CommentIntegrationAssertion
-          = "Assertion error of comment integration."
-
-formatSource :: Maybe FilePath -> String -> Either Error String
+formatSource ::
+             Maybe FilePath -> String -> Either Error.Error String
 formatSource maybeFile
   = format . Source.parseFileContentsWithComments parseMode
   where format (Source.ParseFailed position message)
-          = Left $ ParseError position message
+          = Left $ Error.ParseError position message
         format (Source.ParseOk (root, comments))
           = formatCode code >>= Right . show
           where code = Concrete.createCommented root comments
@@ -66,7 +51,8 @@ formatSource maybeFile
                 Nothing -> Source.defaultParseMode
                 Just file -> Source.defaultParseMode{Source.parseFilename = file}
 
-formatCode :: Concrete.Commented -> Either Error Concrete.Commented
+formatCode ::
+           Concrete.Commented -> Either Error.Error Concrete.Commented
 formatCode commented
   = do abstract <- assignComments commented
        commentless <- arrangeElements $ Concrete.makeCommentless commented
@@ -75,10 +61,11 @@ formatCode commented
        commented' <- integrateComments merged'
        return commented'
 
-assignComments :: Concrete.Commented -> Either Error Abstract.Code
+assignComments ::
+               Concrete.Commented -> Either Error.Error Abstract.Code
 assignComments
   = transformAnnotations CommentAssignment.assignComments
-      CommentAssignmentAssertion
+      Error.CommentAssignmentAssertion
 
 transformAnnotations ::
                        (Coded a, Coded b) => (a -> b) -> c -> a -> Either c b
@@ -92,27 +79,29 @@ chooseEither left right isRight
   = if isRight then Right right else Left left
 
 arrangeElements ::
-                Concrete.Commentless -> Either Error Concrete.Commentless
+                Concrete.Commentless -> Either Error.Error Concrete.Commentless
 arrangeElements
   = transformAnnotations ElementArrangement.arrangeElements
-      ElementArrangementAssertion
+      Error.ElementArrangementAssertion
 
 mergeCode ::
-          Abstract.Code -> Concrete.Commentless -> Either Error Merged.Code
+          Abstract.Code ->
+            Concrete.Commentless -> Either Error.Error Merged.Code
 mergeCode abstract commentless
   = case Merged.mergeCode abstract commentless of
-        Nothing -> Left MergingAssertion
+        Nothing -> Left Error.MergingAssertion
         Just merged -> Right merged
 
-formatComments :: Merged.Code -> Either Error Merged.Code
+formatComments :: Merged.Code -> Either Error.Error Merged.Code
 formatComments code
-  = chooseEither CommentFormattingAssertion code' $
+  = chooseEither Error.CommentFormattingAssertion code' $
       Function.on (==) dropAnnotations code' code
   where dropAnnotations
           = fmap Merged.partNestedPortion . Merged.codeRoot
         code' = CommentFormatting.formatComments code
 
-integrateComments :: Merged.Code -> Either Error Concrete.Commented
+integrateComments ::
+                  Merged.Code -> Either Error.Error Concrete.Commented
 integrateComments
   = transformAnnotations CommentIntegration.integrateComments
-      CommentIntegrationAssertion
+      Error.CommentIntegrationAssertion

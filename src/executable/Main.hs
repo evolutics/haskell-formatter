@@ -1,12 +1,12 @@
 module Main (main) where
 import qualified Control.Arrow as Arrow
 import qualified Data.Function as Function
+import qualified Language.Haskell.Formatter as Formatter
 import qualified Options.Applicative as Applicative
 import qualified System.Directory as Directory
 import qualified System.Exit as Exit
 import qualified System.FilePath as FilePath
 import qualified System.IO as IO
-import qualified Evolutics.Formatting as Formatting
 
 data Arguments = Arguments{input :: Maybe FilePath,
                            output :: Maybe FilePath, force :: Bool}
@@ -92,7 +92,7 @@ internalFormat inputPath outputPath
   = transformUnlessError readInput transform writeOutput
   where readInput = maybe getContents readFile inputPath
         writeOutput = maybe putStr writeFile outputPath
-        transform = Arrow.left show . Formatting.formatSource inputPath
+        transform = Arrow.left show . Formatter.formatSource inputPath
 
 transformUnlessError ::
                      IO String ->

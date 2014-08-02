@@ -1,8 +1,11 @@
-module Evolutics.Tools.Splitting (separate) where
+module Language.Haskell.Formatter.Toolkit.Splitting (separate)
+       where
 import qualified Data.List as List
 import qualified Data.Monoid as Monoid
-import qualified Evolutics.Tools.Functions as Functions
-import qualified Evolutics.Tools.Lists as Lists
+import qualified Language.Haskell.Formatter.Toolkit.FunctionTool
+       as FunctionTool
+import qualified Language.Haskell.Formatter.Toolkit.ListTool
+       as ListTool
 
 data Splitting a = Splitting{delimiters :: [[a]],
                              delimiterPolicy :: DelimiterPolicy}
@@ -23,10 +26,10 @@ split :: (Eq a) => Splitting a -> [a] -> [[a]]
 split splitting list = processedDelimiters
   where processedDelimiters
           = case delimiterPolicy splitting of
-                Drop -> Lists.takeEvery period raw
+                Drop -> ListTool.takeEvery period raw
                 Separate -> raw
-                MergeLeft -> Lists.concatenateRuns period raw
-                MergeRight -> Lists.concatenateShiftedRuns period shift raw
+                MergeLeft -> ListTool.concatenateRuns period raw
+                MergeRight -> ListTool.concatenateShiftedRuns period shift raw
                   where shift = 1
         period = 2
         raw = rawSplit (delimiters splitting) list
@@ -43,6 +46,7 @@ rawSplit separators = move [] []
                                               suffix
 
 stripFirstPrefix :: (Eq a) => [[a]] -> [a] -> Maybe ([a], [a])
-stripFirstPrefix prefixes list = Functions.findJust strip prefixes
+stripFirstPrefix prefixes list
+  = FunctionTool.findJust strip prefixes
   where strip prefix
           = fmap ((,) prefix) $ List.stripPrefix prefix list

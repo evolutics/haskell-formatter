@@ -1,4 +1,4 @@
-module Evolutics.Tools.Functions
+module Language.Haskell.Formatter.Toolkit.FunctionTool
        (findJust, halfZipWith, mapAccumulateLeft1) where
 import qualified Control.Monad as Monad
 import qualified Data.Foldable as Foldable

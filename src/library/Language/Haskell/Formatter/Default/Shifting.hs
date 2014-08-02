@@ -1,11 +1,13 @@
-module Evolutics.Code.Shifting
+module Language.Haskell.Formatter.Default.Shifting
        (LineShifting, LineShift(..), createLineShifting, shiftCode,
         shiftLine)
        where
 import qualified Data.Map.Strict as Map
 import qualified Data.Monoid as Monoid
-import qualified Evolutics.Code.Concrete as Concrete
-import qualified Evolutics.Code.Location as Location
+import qualified Language.Haskell.Formatter.Code.Concrete
+       as Concrete
+import qualified Language.Haskell.Formatter.Code.Location
+       as Location
 
 data LineShifting = LineShifting (Map.Map Location.Line LineShift)
                   deriving (Eq, Ord, Show)

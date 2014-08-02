@@ -1,4 +1,4 @@
-module Evolutics.Tools.MapTree
+module Language.Haskell.Formatter.Toolkit.MapTree
        (MapTree(..), MapForest(..), summarizeLeaves) where
 import qualified Data.Map.Strict as Map
 import qualified Data.Monoid as Monoid

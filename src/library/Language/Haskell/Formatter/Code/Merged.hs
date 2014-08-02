@@ -1,12 +1,16 @@
-module Evolutics.Code.Merged
+module Language.Haskell.Formatter.Code.Merged
        (Code, codeRoot, Part, partAnnotation, partNestedPortion,
         createCode, mergeCode, makeCommentless, createPart)
        where
-import qualified Evolutics.Code.Abstract as Abstract
-import qualified Evolutics.Code.Concrete as Concrete
-import qualified Evolutics.Code.Location as Location
-import qualified Evolutics.Code.Source as Source
-import qualified Evolutics.Tools.Functions as Functions
+import qualified Language.Haskell.Formatter.Code.Abstract
+       as Abstract
+import qualified Language.Haskell.Formatter.Code.Concrete
+       as Concrete
+import qualified Language.Haskell.Formatter.Code.Location
+       as Location
+import qualified Language.Haskell.Formatter.Code.Source as Source
+import qualified Language.Haskell.Formatter.Toolkit.FunctionTool
+       as FunctionTool
 
 data Code = Code{codeRoot :: Source.Module Part}
           deriving (Eq, Ord, Show)
@@ -25,7 +29,7 @@ mergeCode :: Abstract.Code -> Concrete.Commentless -> Maybe Code
 mergeCode abstract commentless
   | abstractRoot Source.=~= commentlessRoot = fmap createCode root
   where root
-          = Functions.halfZipWith createPart abstractRoot commentlessRoot
+          = FunctionTool.halfZipWith createPart abstractRoot commentlessRoot
         abstractRoot = Abstract.codeRoot abstract
         commentlessRoot = Concrete.commentlessRoot commentless
 mergeCode _ _ = Nothing

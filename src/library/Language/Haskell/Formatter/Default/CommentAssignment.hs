@@ -1,5 +1,5 @@
-module Evolutics.Transformations.CommentAssignment (assignComments)
-       where
+module Language.Haskell.Formatter.Default.CommentAssignment
+       (assignComments) where
 import qualified Data.Foldable as Foldable
 import qualified Data.Function as Function
 import qualified Data.List as List
@@ -7,11 +7,14 @@ import qualified Data.Map.Strict as Map
 import qualified Data.Maybe as Maybe
 import qualified Data.Monoid as Monoid
 import qualified Data.Traversable as Traversable
-import qualified Evolutics.Code.Abstract as Abstract
-import qualified Evolutics.Code.Comment as Comment
-import qualified Evolutics.Code.Concrete as Concrete
-import qualified Evolutics.Code.Location as Location
-import qualified Evolutics.Code.Source as Source
+import qualified Language.Haskell.Formatter.Code.Abstract
+       as Abstract
+import qualified Language.Haskell.Formatter.Code.Comment as Comment
+import qualified Language.Haskell.Formatter.Code.Concrete
+       as Concrete
+import qualified Language.Haskell.Formatter.Code.Location
+       as Location
+import qualified Language.Haskell.Formatter.Code.Source as Source
 
 data Assignment = Assignment (Map.Map Location.SrcSpan
                                 Abstract.Annotation)

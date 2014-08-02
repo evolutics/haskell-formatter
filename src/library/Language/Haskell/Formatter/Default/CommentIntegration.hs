@@ -1,18 +1,23 @@
-module Evolutics.Transformations.CommentIntegration
+module Language.Haskell.Formatter.Default.CommentIntegration
        (integrateComments) where
 import qualified Data.Foldable as Foldable
 import qualified Data.List as List
 import qualified Data.Map.Strict as Map
 import qualified Data.Maybe as Maybe
 import qualified Data.Monoid as Monoid
-import qualified Evolutics.Code.Abstract as Abstract
-import qualified Evolutics.Code.Comment as Comment
-import qualified Evolutics.Code.Concrete as Concrete
-import qualified Evolutics.Code.Location as Location
-import qualified Evolutics.Code.Merged as Merged
-import qualified Evolutics.Code.Shifting as Shifting
-import qualified Evolutics.Code.Source as Source
-import qualified Evolutics.Tools.Lists as Lists
+import qualified Language.Haskell.Formatter.Code.Abstract
+       as Abstract
+import qualified Language.Haskell.Formatter.Code.Comment as Comment
+import qualified Language.Haskell.Formatter.Code.Concrete
+       as Concrete
+import qualified Language.Haskell.Formatter.Code.Location
+       as Location
+import qualified Language.Haskell.Formatter.Code.Merged as Merged
+import qualified Language.Haskell.Formatter.Code.Source as Source
+import qualified Language.Haskell.Formatter.Default.Shifting
+       as Shifting
+import qualified Language.Haskell.Formatter.Toolkit.ListTool
+       as ListTool
 
 data Reservation = Reservation (Map.Map Location.Line
                                   [Abstract.Box])
@@ -26,7 +31,7 @@ instance Monoid.Monoid Reservation where
                 merge left right = Monoid.mconcat [left, between, right]
                   where between
                           = [Abstract.EmptyLine |
-                             isJustComment (Lists.maybeLast left) &&
+                             isJustComment (ListTool.maybeLast left) &&
                                isJustComment (Maybe.listToMaybe right)]
                 isJustComment maybeBox
                   = case maybeBox of

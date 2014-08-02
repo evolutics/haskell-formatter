@@ -1,4 +1,4 @@
-module Evolutics.Code.Source
+module Language.Haskell.Formatter.Code.Source
        (Annotated.parseFileContents,
         Annotated.parseFileContentsWithComments, Comments.Comment,
         ExactPrint.exactPrint, Parser.defaultParseMode,
@@ -13,8 +13,9 @@ import qualified Language.Haskell.Exts.Annotated.Syntax as Syntax
 import qualified Language.Haskell.Exts.Comments as Comments
 import qualified Language.Haskell.Exts.Parser as Parser
 import qualified Language.Haskell.Exts.Pretty as Pretty
-import qualified Evolutics.Code.Comment as Comment
-import qualified Evolutics.Code.Location as Location
+import qualified Language.Haskell.Formatter.Code.Comment as Comment
+import qualified Language.Haskell.Formatter.Code.Location
+       as Location
 
 createComment ::
               Comment.Comment -> Location.SrcSpan -> Comments.Comment

@@ -1,15 +1,18 @@
-module Evolutics.Transformations.CommentFormatting (formatComments)
-       where
+module Language.Haskell.Formatter.Default.CommentFormatting
+       (formatComments) where
 import qualified Data.Function as Function
-import qualified Evolutics.Code.Abstract as Abstract
-import qualified Evolutics.Code.Location as Location
-import qualified Evolutics.Code.Merged as Merged
-import qualified Evolutics.Tools.Functions as Functions
+import qualified Language.Haskell.Formatter.Code.Abstract
+       as Abstract
+import qualified Language.Haskell.Formatter.Code.Location
+       as Location
+import qualified Language.Haskell.Formatter.Code.Merged as Merged
+import qualified Language.Haskell.Formatter.Toolkit.FunctionTool
+       as FunctionTool
 
 formatComments :: Merged.Code -> Merged.Code
 formatComments merged = merged{Merged.codeRoot = root'}
   where (_, root')
-          = Functions.mapAccumulateLeft1 indent startPosition root
+          = FunctionTool.mapAccumulateLeft1 indent startPosition root
         indent indentation part
           = (indentation', part{Merged.partAnnotation = annotation'})
           where indentation'

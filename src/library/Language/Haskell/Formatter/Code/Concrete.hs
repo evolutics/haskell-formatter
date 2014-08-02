@@ -1,9 +1,10 @@
-module Evolutics.Code.Concrete
+module Language.Haskell.Formatter.Code.Concrete
        (Commented, commentedRoot, comments, Commentless, commentlessRoot,
         createCommented, createCommentless, makeCommentless)
        where
-import qualified Evolutics.Code.Location as Location
-import qualified Evolutics.Code.Source as Source
+import qualified Language.Haskell.Formatter.Code.Location
+       as Location
+import qualified Language.Haskell.Formatter.Code.Source as Source
 
 data Commented = Commented{commentedRoot ::
                            Source.Module Location.SrcSpanInfo,

@@ -1,4 +1,4 @@
-module Evolutics.Tools.Lists
+module Language.Haskell.Formatter.Toolkit.ListTool
        (maybeLast, takeEvery, concatenateRuns, concatenateShiftedRuns)
        where
 import qualified Data.Maybe as Maybe
