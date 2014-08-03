@@ -6,6 +6,7 @@ import qualified Language.Haskell.Formatter.Code.Source as Source
 
 data Error = ParseError Location.SrcLoc String
            | CommentAssignmentAssertion
+           | ElementArrangementError
            | ElementArrangementAssertion
            | MergingAssertion
            | CommentFormattingAssertion
@@ -18,6 +19,7 @@ instance Show Error where
           where separator = ": "
         show CommentAssignmentAssertion
           = "Assertion error of comment assignment."
+        show ElementArrangementError = "Error of element arrangement."
         show ElementArrangementAssertion
           = "Assertion error of element arrangement."
         show MergingAssertion = "Assertion error of merging."

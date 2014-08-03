@@ -10,6 +10,8 @@ import qualified Language.Haskell.Formatter.Code.Merged as Merged
 import qualified Language.Haskell.Formatter.Code.Source as Source
 import qualified Language.Haskell.Formatter.Error as Error
 import qualified Language.Haskell.Formatter.Result as Result
+import qualified Language.Haskell.Formatter.Toolkit.FunctionTool
+       as FunctionTool
 
 class Coded a where
 
@@ -17,7 +19,8 @@ class Coded a where
 
 data Formatter = Formatter{assignComments ::
                            Concrete.Commented -> Abstract.Code,
-                           arrangeElements :: Concrete.Commentless -> Concrete.Commentless,
+                           arrangeElements ::
+                           Merged.Code -> Result.Result Concrete.Commentless,
                            formatComments :: Merged.Code -> Merged.Code,
                            integrateComments :: Merged.Code -> Concrete.Commented}
 
@@ -37,51 +40,55 @@ formatCode ::
            Formatter -> Concrete.Commented -> Result.Result Concrete.Commented
 formatCode formatter commented
   = do abstract <- checkedAssignComments formatter commented
-       commentless <- checkedArrangeElements formatter $
-                        Concrete.makeCommentless commented
        merged <- mergeCode abstract commentless
-       merged' <- checkedFormatComments formatter merged
-       commented' <- checkedIntegrateComments formatter merged'
+       commentless' <- checkedArrangeElements formatter merged
+       merged' <- mergeCode abstract commentless'
+       merged'' <- checkedFormatComments formatter merged'
+       commented' <- checkedIntegrateComments formatter merged''
        return commented'
+  where commentless = Concrete.makeCommentless commented
 
 checkedAssignComments ::
                       Formatter -> Concrete.Commented -> Result.Result Abstract.Code
 checkedAssignComments formatter
-  = transformAnnotations (assignComments formatter)
+  = transformAnnotations (return . assignComments formatter)
       Error.CommentAssignmentAssertion
 
 transformAnnotations ::
                        (Coded a, Coded b) =>
-                       (a -> b) -> Error.Error -> a -> Result.Result b
+                       (a -> Result.Result b) -> Error.Error -> a -> Result.Result b
 transformAnnotations transform unequalCase code
-  = Result.check unequalCase code' isSameCode
-  where code' = transform code
-        isSameCode = getCode code' == getCode code
-
-checkedArrangeElements ::
-                       Formatter ->
-                         Concrete.Commentless -> Result.Result Concrete.Commentless
-checkedArrangeElements formatter
-  = transformAnnotations (arrangeElements formatter)
-      Error.ElementArrangementAssertion
+  = do code' <- transform code
+       Result.check unequalCase code' $ isSameCode code' code
+  where isSameCode left right = getCode left == getCode right
 
 mergeCode ::
           Abstract.Code -> Concrete.Commentless -> Result.Result Merged.Code
 mergeCode abstract commentless
-  = Result.checkMaybe Error.MergingAssertion $
-      Merged.mergeCode abstract commentless
+  = Result.checkMaybe Error.MergingAssertion maybeMerged
+  where maybeMerged = fmap Merged.createCode maybeMergedRoot
+        maybeMergedRoot
+          = FunctionTool.halfZipWith Merged.createPart abstractRoot
+              commentlessRoot
+        abstractRoot = Abstract.codeRoot abstract
+        commentlessRoot = Concrete.commentlessRoot commentless
+
+checkedArrangeElements ::
+                       Formatter -> Merged.Code -> Result.Result Concrete.Commentless
+checkedArrangeElements formatter
+  = transformAnnotations (arrangeElements formatter)
+      Error.ElementArrangementAssertion
 
 checkedFormatComments ::
                       Formatter -> Merged.Code -> Result.Result Merged.Code
 checkedFormatComments formatter code
-  = Result.check Error.CommentFormattingAssertion code' $
-      Function.on (==) dropAnnotations code' code
-  where dropAnnotations
-          = fmap Merged.partNestedPortion . Merged.codeRoot
-        code' = formatComments formatter code
+  = Result.check Error.CommentFormattingAssertion code' isSame
+  where code' = formatComments formatter code
+        isSame = Function.on (==) dropAnnotations code' code
+        dropAnnotations = fmap Merged.partNestedPortion . Merged.codeRoot
 
 checkedIntegrateComments ::
                          Formatter -> Merged.Code -> Result.Result Concrete.Commented
 checkedIntegrateComments formatter
-  = transformAnnotations (integrateComments formatter)
+  = transformAnnotations (return . integrateComments formatter)
       Error.CommentIntegrationAssertion

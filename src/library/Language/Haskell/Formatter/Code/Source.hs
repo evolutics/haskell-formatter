@@ -2,8 +2,7 @@ module Language.Haskell.Formatter.Code.Source
        (Annotated.parseFileContents,
         Annotated.parseFileContentsWithComments, Comments.Comment,
         ExactPrint.exactPrint, Parser.defaultParseMode,
-        Parser.fromParseResult, Parser.parseFilename,
-        Parser.ParseResult(..), Pretty.prettyPrint, (Syntax.=~=),
+        Parser.parseFilename, Parser.ParseResult(..), Pretty.prettyPrint,
         Syntax.amap, Syntax.Module, createComment, commentCore)
        where
 import qualified Language.Haskell.Exts.Annotated as Annotated
