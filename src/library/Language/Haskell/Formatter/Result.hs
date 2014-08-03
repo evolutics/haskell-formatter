@@ -1,9 +1,9 @@
 module Language.Haskell.Formatter.Result
        (Result, toEither, fatalError, check, checkMaybe) where
+import Prelude hiding (error)
 import qualified Control.Applicative as Applicative
 import qualified Control.Monad as Monad
 import qualified Language.Haskell.Formatter.Error as Error
-import Prelude hiding (error)
 
 data Result a = Result (Either Error.Error a)
               deriving (Eq, Ord, Show)

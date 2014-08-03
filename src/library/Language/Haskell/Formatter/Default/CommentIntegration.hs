@@ -18,6 +18,8 @@ import qualified Language.Haskell.Formatter.Default.Shifting
        as Shifting
 import qualified Language.Haskell.Formatter.Toolkit.ListTool
        as ListTool
+import qualified Language.Haskell.Formatter.Toolkit.StreamName
+       as StreamName
 
 data Reservation = Reservation (Map.Map Location.Line
                                   [Abstract.Box])
@@ -48,8 +50,8 @@ integrateComments merged
         shifting = reservationShifting reservation
         reservation = makeReservation merged
         commentless = Merged.makeCommentless merged
-        comments = createComments file reservation
-        file = Location.fileName $ Location.getPortion movedCommentless
+        comments = createComments stream reservation
+        stream = Location.streamName $ Location.getPortion movedCommentless
 
 reservationShifting :: Reservation -> Shifting.LineShifting
 reservationShifting
@@ -98,8 +100,9 @@ reservePart part = Reservation reservation
         after = Map.singleton lineIfAfter $ Abstract.boxesAfter annotation
         lineIfAfter = succ $ Location.getEndLine portion
 
-createComments :: FilePath -> Reservation -> [Source.Comment]
-createComments file = accumulateReservation create
+createComments ::
+               StreamName.StreamName -> Reservation -> [Source.Comment]
+createComments stream = accumulateReservation create
   where create _ baseLine _ = snd . List.foldl' merge (baseLine, [])
         merge (startLine, concretePart) box
           = (followingLine, Monoid.mappend concretePart comments)
@@ -107,16 +110,18 @@ createComments file = accumulateReservation create
                 shift = boxShift box
                 comments
                   = case box of
-                        Abstract.CommentBox comment -> [createComment file startLine
+                        Abstract.CommentBox comment -> [createComment stream startLine
                                                           comment]
                         Abstract.EmptyLine -> []
 
 createComment ::
-              FilePath -> Location.Line -> Abstract.Comment -> Source.Comment
-createComment file startLine comment
+              StreamName.StreamName ->
+                Location.Line -> Abstract.Comment -> Source.Comment
+createComment stream startLine comment
   = Source.createComment core portion
   where core = Abstract.commentCore comment
         portion = Location.stringPortion startPosition wrappedComment
-        startPosition = Location.createPosition file startLine startColumn
+        startPosition
+          = Location.createPosition stream startLine startColumn
         startColumn = Abstract.commentStartColumn comment
         wrappedComment = show core

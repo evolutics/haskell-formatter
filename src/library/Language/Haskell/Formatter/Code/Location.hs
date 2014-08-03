@@ -1,9 +1,9 @@
 module Language.Haskell.Formatter.Code.Location
-       (SrcLoc.fileName, SrcLoc.SrcLoc, SrcLoc.SrcSpan,
-        SrcLoc.SrcSpanInfo, base, plus, minus, Portioned, getPortion, Line,
-        Column, getLine, getColumn, createPosition, SrcLoc.getPointLoc,
-        getEndPosition, mapNestedPortion, stringPortion, getStartLine,
-        getStartColumn, getEndLine, getEndColumn)
+       (SrcLoc.SrcLoc, SrcLoc.SrcSpan, SrcLoc.SrcSpanInfo, base, plus,
+        minus, Portioned, getPortion, Line, Column, streamName, getLine,
+        getColumn, createPosition, SrcLoc.getPointLoc, getEndPosition,
+        mapNestedPortion, stringPortion, getStartLine, getStartColumn,
+        getEndLine, getEndColumn)
        where
 import Prelude hiding (getLine)
 import qualified Data.Function as Function
@@ -14,6 +14,8 @@ import qualified Language.Haskell.Formatter.Toolkit.ListTool
        as ListTool
 import qualified Language.Haskell.Formatter.Toolkit.Newline
        as Newline
+import qualified Language.Haskell.Formatter.Toolkit.StreamName
+       as StreamName
 
 class (Enum a) => Natural a where
 
@@ -59,20 +61,24 @@ instance (Portioned a) => Portioned (Syntax.Module a) where
 instance Portioned Comments.Comment where
         getPortion (Comments.Comment _ commentPortion _) = commentPortion
 
+streamName :: (SrcLoc.SrcInfo a) => a -> StreamName.StreamName
+streamName = StreamName.createStreamName . SrcLoc.fileName
+
 getLine :: SrcLoc.SrcLoc -> Line
 getLine = Line . SrcLoc.srcLine
 
 getColumn :: SrcLoc.SrcLoc -> Column
 getColumn = Column . SrcLoc.srcColumn
 
-createPosition :: FilePath -> Line -> Column -> SrcLoc.SrcLoc
-createPosition file (Line line) (Column column)
-  = SrcLoc.SrcLoc{SrcLoc.srcFilename = file, SrcLoc.srcLine = line,
-                  SrcLoc.srcColumn = column}
+createPosition ::
+               StreamName.StreamName -> Line -> Column -> SrcLoc.SrcLoc
+createPosition stream (Line line) (Column column)
+  = SrcLoc.SrcLoc{SrcLoc.srcFilename = show stream,
+                  SrcLoc.srcLine = line, SrcLoc.srcColumn = column}
 
 getEndPosition :: SrcLoc.SrcSpan -> SrcLoc.SrcLoc
-getEndPosition portion = createPosition file line column
-  where file = SrcLoc.fileName portion
+getEndPosition portion = createPosition stream line column
+  where stream = streamName portion
         line = Line $ SrcLoc.srcSpanEndLine portion
         column = Column $ SrcLoc.srcSpanEndColumn portion
 
@@ -97,8 +103,8 @@ mapPortion function portion
 stringPortion :: SrcLoc.SrcLoc -> String -> SrcLoc.SrcSpan
 stringPortion startPosition string
   = SrcLoc.mkSrcSpan startPosition endPosition
-  where endPosition = createPosition file endLine endColumn
-        file = SrcLoc.fileName startPosition
+  where endPosition = createPosition stream endLine endColumn
+        stream = streamName startPosition
         endLine = sumPredecessor lineCount startLine
         sumPredecessor difference = pred . plus difference
         lineCount = length stringLines

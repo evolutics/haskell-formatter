@@ -1,5 +1,6 @@
 module Main (main) where
-import qualified Control.Arrow as Arrow
+import Prelude hiding (error)
+import qualified Data.Foldable as Foldable
 import qualified Data.Function as Function
 import qualified Language.Haskell.Formatter as Formatter
 import qualified Options.Applicative as Applicative
@@ -13,7 +14,12 @@ data Arguments = Arguments{input :: Maybe FilePath,
                deriving (Eq, Ord, Show)
 
 main :: IO ()
-main = Applicative.execParser usage >>= externalFormat
+main
+  = do arguments <- Applicative.execParser usage
+       maybeError <- externalFormat arguments
+       Foldable.mapM_ exitWithError maybeError
+  where exitWithError error
+          = IO.hPutStrLn IO.stderr error >> Exit.exitFailure
 
 usage :: Applicative.ParserInfo Arguments
 usage
@@ -27,50 +33,55 @@ argumentParser
   = Arguments Applicative.<$>
       Applicative.optional
         (Applicative.strOption $
-           Applicative.long "input" Applicative.<> Applicative.metavar "FILE"
+           Applicative.long "input" Applicative.<> Applicative.short 'i'
+             Applicative.<> Applicative.metavar "FILE"
              Applicative.<>
              Applicative.help
                "Input source code file (default: standard input)")
       Applicative.<*>
       Applicative.optional
         (Applicative.strOption $
-           Applicative.long "output" Applicative.<> Applicative.metavar "FILE"
+           Applicative.long "output" Applicative.<> Applicative.short 'o'
+             Applicative.<> Applicative.metavar "FILE"
              Applicative.<>
              Applicative.help
                "Output source code file (default: standard output)")
       Applicative.<*>
       Applicative.switch
-        (Applicative.long forceLongName Applicative.<>
+        (Applicative.long "force" Applicative.<>
+           Applicative.short forceStandardName
+           Applicative.<>
            Applicative.help
              "Allows the output file to overwrite the input file")
 
-forceLongName :: String
-forceLongName = "force"
+forceStandardName :: Char
+forceStandardName = 'f'
 
-externalFormat :: Arguments -> IO ()
+externalFormat :: Arguments -> IO (Maybe String)
 externalFormat arguments
+  = do maybeError <- checkArguments arguments
+       case maybeError of
+           Nothing -> internalFormat arguments
+           Just error -> return $ Just error
+
+checkArguments :: Arguments -> IO (Maybe String)
+checkArguments arguments
   = case (maybeInput, maybeOutput) of
         (Just inputPath, Just outputPath) -> if forceOverwriting then
-                                               continue else
+                                               return Nothing else
                                                do same <- sameExistentPaths inputPath outputPath
-                                                  if same then exitWithError overwritingError else
-                                                    continue
+                                                  return $
+                                                    if same then Just overwritingError else Nothing
           where overwritingError
                   = concat
                       ["The output path ", show outputPath,
                        " would overwrite the input path ", show inputPath, ". ",
-                       "Either use unequal paths or apply the ", show forceLongName,
+                       "Either use unequal paths or apply the ", show forceStandardName,
                        " option."]
-        _ -> continue
+        _ -> return Nothing
   where maybeInput = input arguments
         maybeOutput = output arguments
         forceOverwriting = force arguments
-        continue = internalFormat maybeInput maybeOutput
-
-exitWithError :: String -> IO ()
-exitWithError message
-  = do IO.hPutStrLn IO.stderr message
-       Exit.exitFailure
 
 sameExistentPaths :: FilePath -> FilePath -> IO Bool
 sameExistentPaths left right
@@ -87,18 +98,16 @@ sameExistentPaths left right
           = Applicative.liftA2 (||) (Directory.doesFileExist path) $
               Directory.doesDirectoryExist path
 
-internalFormat :: Maybe FilePath -> Maybe FilePath -> IO ()
-internalFormat inputPath outputPath
-  = transformUnlessError readInput transform writeOutput
-  where readInput = maybe getContents readFile inputPath
-        writeOutput = maybe putStr writeFile outputPath
-        transform = Arrow.left show . Formatter.format inputPath
-
-transformUnlessError ::
-                     IO String ->
-                       (String -> Either String String) -> (String -> IO ()) -> IO ()
-transformUnlessError readInput transform writeOutput
-  = do string <- readInput
-       case transform string of
-           Left message -> exitWithError message
-           Right string' -> writeOutput string'
+internalFormat :: Arguments -> IO (Maybe String)
+internalFormat arguments
+  = do inputString <- readInput
+       case Formatter.format stream inputString of
+           Left error -> return . Just $ show error
+           Right outputString -> writeOutput outputString >> return Nothing
+  where readInput = maybe getContents readFile maybeInput
+        maybeInput = input arguments
+        stream
+          = maybe Formatter.standardInput Formatter.createStreamName
+              maybeInput
+        writeOutput = maybe putStr writeFile maybeOutput
+        maybeOutput = output arguments

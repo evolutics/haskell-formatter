@@ -37,7 +37,8 @@ library
                        Language.Haskell.Formatter.Toolkit.FunctionTool,
                        Language.Haskell.Formatter.Toolkit.ListTool,
                        Language.Haskell.Formatter.Toolkit.Newline,
-                       Language.Haskell.Formatter.Toolkit.Splitting
+                       Language.Haskell.Formatter.Toolkit.Splitting,
+                       Language.Haskell.Formatter.Toolkit.StreamName
   build-depends:       base, containers, haskell-src-exts
   hs-source-dirs:      src/library
   ghc-options:         -Wall -Werror
