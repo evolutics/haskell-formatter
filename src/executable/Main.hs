@@ -92,7 +92,7 @@ internalFormat inputPath outputPath
   = transformUnlessError readInput transform writeOutput
   where readInput = maybe getContents readFile inputPath
         writeOutput = maybe putStr writeFile outputPath
-        transform = Arrow.left show . Formatter.formatSource inputPath
+        transform = Arrow.left show . Formatter.format inputPath
 
 transformUnlessError ::
                      IO String ->

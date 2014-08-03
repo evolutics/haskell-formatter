@@ -33,6 +33,7 @@ library
                        Language.Haskell.Formatter.Error,
                        Language.Haskell.Formatter.Formatter,
                        Language.Haskell.Formatter.Formatting,
+                       Language.Haskell.Formatter.Result,
                        Language.Haskell.Formatter.Toolkit.FunctionTool,
                        Language.Haskell.Formatter.Toolkit.ListTool,
                        Language.Haskell.Formatter.Toolkit.Newline,

@@ -9,6 +9,7 @@ import qualified Language.Haskell.Formatter.Code.Concrete
 import qualified Language.Haskell.Formatter.Code.Merged as Merged
 import qualified Language.Haskell.Formatter.Code.Source as Source
 import qualified Language.Haskell.Formatter.Error as Error
+import qualified Language.Haskell.Formatter.Result as Result
 
 class Coded a where
 
@@ -33,8 +34,7 @@ instance Coded Merged.Code where
         getCode = Monad.void . Merged.codeRoot
 
 formatCode ::
-           Formatter ->
-             Concrete.Commented -> Either Error.Error Concrete.Commented
+           Formatter -> Concrete.Commented -> Result.Result Concrete.Commented
 formatCode formatter commented
   = do abstract <- checkedAssignComments formatter commented
        commentless <- checkedArrangeElements formatter $
@@ -45,48 +45,43 @@ formatCode formatter commented
        return commented'
 
 checkedAssignComments ::
-                      Formatter -> Concrete.Commented -> Either Error.Error Abstract.Code
+                      Formatter -> Concrete.Commented -> Result.Result Abstract.Code
 checkedAssignComments formatter
   = transformAnnotations (assignComments formatter)
       Error.CommentAssignmentAssertion
 
 transformAnnotations ::
-                       (Coded a, Coded b) => (a -> b) -> c -> a -> Either c b
+                       (Coded a, Coded b) =>
+                       (a -> b) -> Error.Error -> a -> Result.Result b
 transformAnnotations transform unequalCase code
-  = chooseEither unequalCase code' isSameCode
+  = Result.check unequalCase code' isSameCode
   where code' = transform code
         isSameCode = getCode code' == getCode code
 
-chooseEither :: a -> b -> Bool -> Either a b
-chooseEither left right isRight
-  = if isRight then Right right else Left left
-
 checkedArrangeElements ::
                        Formatter ->
-                         Concrete.Commentless -> Either Error.Error Concrete.Commentless
+                         Concrete.Commentless -> Result.Result Concrete.Commentless
 checkedArrangeElements formatter
   = transformAnnotations (arrangeElements formatter)
       Error.ElementArrangementAssertion
 
 mergeCode ::
-          Abstract.Code ->
-            Concrete.Commentless -> Either Error.Error Merged.Code
+          Abstract.Code -> Concrete.Commentless -> Result.Result Merged.Code
 mergeCode abstract commentless
-  = case Merged.mergeCode abstract commentless of
-        Nothing -> Left Error.MergingAssertion
-        Just merged -> Right merged
+  = Result.checkMaybe Error.MergingAssertion $
+      Merged.mergeCode abstract commentless
 
 checkedFormatComments ::
-                      Formatter -> Merged.Code -> Either Error.Error Merged.Code
+                      Formatter -> Merged.Code -> Result.Result Merged.Code
 checkedFormatComments formatter code
-  = chooseEither Error.CommentFormattingAssertion code' $
+  = Result.check Error.CommentFormattingAssertion code' $
       Function.on (==) dropAnnotations code' code
   where dropAnnotations
           = fmap Merged.partNestedPortion . Merged.codeRoot
         code' = formatComments formatter code
 
 checkedIntegrateComments ::
-                         Formatter -> Merged.Code -> Either Error.Error Concrete.Commented
+                         Formatter -> Merged.Code -> Result.Result Concrete.Commented
 checkedIntegrateComments formatter
   = transformAnnotations (integrateComments formatter)
       Error.CommentIntegrationAssertion

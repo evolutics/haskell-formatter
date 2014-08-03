@@ -53,6 +53,6 @@ fileTests input expectedOutput
 
 testFormatting :: FilePath -> String -> String -> HUnit.Assertion
 testFormatting inputFile input expectedOutput
-  = case Formatter.formatSource (Just inputFile) input of
+  = case Formatter.format (Just inputFile) input of
         Left unexpectedError -> HUnit.assertFailure $ show unexpectedError
         Right actualOutput -> actualOutput HUnit.@?= expectedOutput
