@@ -9,14 +9,13 @@ all:
 
 	cabal configure --enable-tests
 	cabal build
+	cabal test
 
 #	Use "xargs" instead of "-exec", since
 #	1. the call should fail if any "-exec" fails and
 #	2. the behavior of multiple "{}" is undefined for a standard "find".
 	find $(FORMATTED_FILES) -type f -name '*.hs' -print0 | \
 		xargs -n 1 -0 -I {} $(FORMATTER_UTILITY) $(FORMATTER_ARGUMENTS)
-
-	cabal test
 
 clean:
 	rm -fr $(GENERATED_FILES)
