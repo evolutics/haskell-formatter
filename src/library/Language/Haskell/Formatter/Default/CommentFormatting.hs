@@ -6,10 +6,11 @@ import qualified Language.Haskell.Formatter.Code.Abstract
 import qualified Language.Haskell.Formatter.Code.Location
        as Location
 import qualified Language.Haskell.Formatter.Code.Merged as Merged
+import qualified Language.Haskell.Formatter.Result as Result
 import qualified Language.Haskell.Formatter.Toolkit.Visit as Visit
 
-formatComments :: Merged.Code -> Merged.Code
-formatComments merged = merged{Merged.codeRoot = root'}
+formatComments :: Merged.Code -> Result.Result Merged.Code
+formatComments merged = return merged{Merged.codeRoot = root'}
   where (_, root')
           = Visit.mapAccumulateLeftWithCreation indent startPosition root
         indent indentation part

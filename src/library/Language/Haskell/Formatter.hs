@@ -1,5 +1,5 @@
 module Language.Haskell.Formatter
-       (Error.Error, Formatting.format, StreamName.createStreamName,
+       (Error.Error(..), Formatting.format, StreamName.createStreamName,
         StreamName.standardInput)
        where
 import qualified Language.Haskell.Formatter.Error as Error

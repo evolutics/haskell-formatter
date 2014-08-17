@@ -1,5 +1,7 @@
 module Language.Haskell.Formatter.Result
-       (Result, toEither, fatalError, check, checkMaybe) where
+       (Result, toEither, fatalError, check, checkMaybe,
+        fatalAssertionError)
+       where
 import Prelude hiding (error)
 import qualified Control.Applicative as Applicative
 import qualified Control.Monad as Monad
@@ -34,3 +36,6 @@ checkMaybe error maybeSuccess
   = case maybeSuccess of
         Nothing -> fatalError error
         Just success -> return success
+
+fatalAssertionError :: String -> Result a
+fatalAssertionError = fatalError . Error.AssertionError

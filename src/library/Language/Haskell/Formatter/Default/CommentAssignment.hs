@@ -15,13 +15,15 @@ import qualified Language.Haskell.Formatter.Code.Concrete
 import qualified Language.Haskell.Formatter.Code.Location
        as Location
 import qualified Language.Haskell.Formatter.Code.Source as Source
+import qualified Language.Haskell.Formatter.Result as Result
 
 data Assignment = Assignment (Map.Map Location.SrcSpan
                                 Abstract.Annotation)
                 deriving (Eq, Ord, Show)
 
-assignComments :: Concrete.Commented -> Abstract.Code
-assignComments commented = snd $ spread assignment commentless
+assignComments :: Concrete.Commented -> Result.Result Abstract.Code
+assignComments commented
+  = return . snd $ spread assignment commentless
   where assignment = createAssignment commented
         commentless = Concrete.makeCommentless commented
 

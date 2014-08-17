@@ -16,6 +16,7 @@ import qualified Language.Haskell.Formatter.Code.Merged as Merged
 import qualified Language.Haskell.Formatter.Code.Source as Source
 import qualified Language.Haskell.Formatter.Default.Shifting
        as Shifting
+import qualified Language.Haskell.Formatter.Result as Result
 import qualified Language.Haskell.Formatter.Toolkit.ListTool
        as ListTool
 import qualified Language.Haskell.Formatter.Toolkit.StreamName
@@ -41,9 +42,10 @@ instance Monoid.Monoid Reservation where
                         Just (Abstract.CommentBox _) -> True
                         Just Abstract.EmptyLine -> False
 
-integrateComments :: Merged.Code -> Concrete.Commented
+integrateComments ::
+                  Merged.Code -> Result.Result Concrete.Commented
 integrateComments merged
-  = Concrete.createCommented movedCommentlessRoot comments
+  = return $ Concrete.createCommented movedCommentlessRoot comments
   where movedCommentlessRoot
           = Concrete.commentlessRoot movedCommentless
         movedCommentless = Shifting.shiftCode shifting commentless

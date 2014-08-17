@@ -102,7 +102,7 @@ internalFormat :: Arguments -> IO (Maybe String)
 internalFormat arguments
   = do inputString <- readInput
        case Formatter.format stream inputString of
-           Left error -> return . Just $ show error
+           Left error -> return . Just $ prepareError error
            Right outputString -> writeOutput outputString >> return Nothing
   where readInput = maybe getContents readFile maybeInput
         maybeInput = input arguments
@@ -111,3 +111,12 @@ internalFormat arguments
               maybeInput
         writeOutput = maybe putStr writeFile maybeOutput
         maybeOutput = output arguments
+
+prepareError :: Formatter.Error -> String
+prepareError parseError@(Formatter.ParseError _ _)
+  = show parseError
+prepareError assertionError@(Formatter.AssertionError _)
+  = unlines
+      ["Oops, an error occurred.",
+       "Feel free to report this, because it appears to be a bug. Thanks!",
+       "The exact error message follows.", "", show assertionError]

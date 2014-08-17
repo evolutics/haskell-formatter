@@ -4,7 +4,6 @@ import qualified Language.Haskell.Formatter.Code.Concrete
        as Concrete
 import qualified Language.Haskell.Formatter.Code.Merged as Merged
 import qualified Language.Haskell.Formatter.Code.Source as Source
-import qualified Language.Haskell.Formatter.Error as Error
 import qualified Language.Haskell.Formatter.Result as Result
 import qualified Language.Haskell.Formatter.Toolkit.Visit as Visit
 
@@ -12,11 +11,11 @@ arrangeElements ::
                 Merged.Code -> Result.Result Concrete.Commentless
 arrangeElements merged
   = case parseResult of
-        Source.ParseFailed _ _ -> Result.fatalError
-                                    Error.ElementArrangementError
+        Source.ParseFailed _ _ -> Result.fatalAssertionError
+                                    "The element arrangement failed to parse."
         Source.ParseOk arrangedButChanged -> case maybeArrangedOriginal of
-                                                 Nothing -> Result.fatalError
-                                                              Error.ElementArrangementError
+                                                 Nothing -> Result.fatalAssertionError
+                                                              "The element arrangement failed to merge."
                                                  Just arrangedOriginal -> return
                                                                             code{Concrete.commentlessRoot
                                                                                    =
