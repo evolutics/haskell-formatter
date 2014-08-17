@@ -6,8 +6,7 @@ import qualified Language.Haskell.Formatter.Code.Merged as Merged
 import qualified Language.Haskell.Formatter.Code.Source as Source
 import qualified Language.Haskell.Formatter.Error as Error
 import qualified Language.Haskell.Formatter.Result as Result
-import qualified Language.Haskell.Formatter.Toolkit.FunctionTool
-       as FunctionTool
+import qualified Language.Haskell.Formatter.Toolkit.Visit as Visit
 
 arrangeElements ::
                 Merged.Code -> Result.Result Concrete.Commentless
@@ -23,7 +22,7 @@ arrangeElements merged
                                                                                    =
                                                                                    arrangedOriginal}
           where maybeArrangedOriginal
-                  = FunctionTool.halfZipWith (flip const) original arrangedButChanged
+                  = Visit.halfZipWith (flip const) original arrangedButChanged
   where parseResult
           = Source.parseFileContents $ Source.prettyPrint original
         original = Concrete.commentlessRoot code

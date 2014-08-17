@@ -15,12 +15,8 @@ instance Functor (MapTree k) where
         fmap function (Node forest) = Node $ fmap function forest
 
 instance Functor (MapForest k) where
-        fmap function = mapRoots (fmap function)
-
-mapRoots ::
-         (MapTree k a -> MapTree k b) -> MapForest k a -> MapForest k b
-mapRoots function (MapForest children)
-  = MapForest $ fmap function children
+        fmap function (MapForest children)
+          = MapForest $ fmap (fmap function) children
 
 summarizeLeaves ::
                   (Ord k, Monoid.Monoid b) =>
@@ -36,6 +32,4 @@ summarizeLeaves = summarize Map.empty
                 distinguish (Leaf value) = Left value
                 distinguish (Node forest) = Right forest
                 labels' = Map.unionWith Monoid.mappend labels rights
-
-fromMap :: (a -> MapTree k b) -> Map.Map k a -> MapTree k b
-fromMap function = Node . MapForest . fmap function
+                fromMap function = Node . MapForest . fmap function

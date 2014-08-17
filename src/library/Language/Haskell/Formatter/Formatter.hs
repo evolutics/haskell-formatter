@@ -10,8 +10,7 @@ import qualified Language.Haskell.Formatter.Code.Merged as Merged
 import qualified Language.Haskell.Formatter.Code.Source as Source
 import qualified Language.Haskell.Formatter.Error as Error
 import qualified Language.Haskell.Formatter.Result as Result
-import qualified Language.Haskell.Formatter.Toolkit.FunctionTool
-       as FunctionTool
+import qualified Language.Haskell.Formatter.Toolkit.Visit as Visit
 
 class Coded a where
 
@@ -68,8 +67,7 @@ mergeCode abstract commentless
   = Result.checkMaybe Error.MergingAssertion maybeMerged
   where maybeMerged = fmap Merged.createCode maybeMergedRoot
         maybeMergedRoot
-          = FunctionTool.halfZipWith Merged.createPart abstractRoot
-              commentlessRoot
+          = Visit.halfZipWith Merged.createPart abstractRoot commentlessRoot
         abstractRoot = Abstract.codeRoot abstract
         commentlessRoot = Concrete.commentlessRoot commentless
 

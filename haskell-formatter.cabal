@@ -34,11 +34,11 @@ library
                        Language.Haskell.Formatter.Formatter,
                        Language.Haskell.Formatter.Formatting,
                        Language.Haskell.Formatter.Result,
-                       Language.Haskell.Formatter.Toolkit.FunctionTool,
                        Language.Haskell.Formatter.Toolkit.ListTool,
                        Language.Haskell.Formatter.Toolkit.Newline,
-                       Language.Haskell.Formatter.Toolkit.Splitting,
-                       Language.Haskell.Formatter.Toolkit.StreamName
+                       Language.Haskell.Formatter.Toolkit.Splitter,
+                       Language.Haskell.Formatter.Toolkit.StreamName,
+                       Language.Haskell.Formatter.Toolkit.Visit
   build-depends:       base, containers, haskell-src-exts
   hs-source-dirs:      src/library
   ghc-options:         -Wall -Werror

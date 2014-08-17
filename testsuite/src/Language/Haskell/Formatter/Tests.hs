@@ -1,4 +1,5 @@
 module Language.Haskell.Formatter.Tests (tests) where
+import qualified Control.Applicative as Applicative
 import qualified Control.Exception as Exception
 import qualified Data.Map.Strict as Map
 import qualified Data.Monoid as Monoid
@@ -11,7 +12,9 @@ import qualified Test.Tasty as Tasty
 import qualified Test.Tasty.HUnit as HUnit
 
 tests :: IO Tasty.TestTree
-tests = FileTesting.fileTestTree create name root
+tests
+  = Tasty.testGroup name Applicative.<$>
+      FileTesting.fileTestForest create root
   where name = "Tests based on files"
         root = "testsuite" FilePath.</> "resources" FilePath.</> "source"
 

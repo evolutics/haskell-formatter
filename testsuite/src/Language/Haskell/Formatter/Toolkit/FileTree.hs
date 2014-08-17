@@ -1,21 +1,10 @@
-module Language.Haskell.Formatter.Toolkit.DirectoryData
-       (createTree) where
+module Language.Haskell.Formatter.Toolkit.FileTree (collectFiles)
+       where
 import qualified Control.Exception as Exception
 import qualified Data.Map.Strict as Map
-import qualified Data.Monoid as Monoid
 import qualified Language.Haskell.Formatter.Toolkit.MapTree
        as MapTree
 import qualified System.Directory.Tree as Tree
-
-createTree ::
-             (Monoid.Monoid a) =>
-             (FilePath -> IO a) ->
-               FilePath ->
-                 IO
-                   (MapTree.MapTree FilePath
-                      (Either Exception.IOException (Map.Map FilePath a)))
-createTree create
-  = fmap MapTree.summarizeLeaves . collectFiles create
 
 collectFiles ::
              (FilePath -> IO a) ->
