@@ -1,15 +1,15 @@
-CHECKED_FILES = Setup.hs src testsuite
 FORMATTED_FILES = Setup.hs src testsuite/src
 FORMATTER_UTILITY = dist/build/haskell-formatter/haskell-formatter
 FORMATTER_ARGUMENTS = --force --input {} --output {}
 GENERATED_FILES = dist
 
 all:
-	hlint $(CHECKED_FILES)
-
 	cabal configure --enable-tests
 	cabal build
+
 	cabal test
+
+	cabal haddock --internal
 
 #	Use "xargs" instead of "-exec", since
 #	1. the call should fail if any "-exec" fails and

@@ -7,6 +7,8 @@ import qualified Data.Set as Set
 import qualified Language.Haskell.Formatter as Formatter
 import qualified Language.Haskell.Formatter.Toolkit.FileTesting
        as FileTesting
+import qualified Language.Haskell.Formatter.Toolkit.TestTool
+       as TestTool
 import qualified System.FilePath as FilePath
 import qualified Test.Tasty as Tasty
 import qualified Test.Tasty.HUnit as HUnit
@@ -22,10 +24,10 @@ create ::
        Either Exception.IOException (Map.Map FilePath String) ->
          [Tasty.TestTree]
 create (Left exception)
-  = testingError "I/O exception" $ show exception
+  = [TestTool.testingError "I/O exception" $ show exception]
 create (Right testMap)
   = if actualKeys == expectedKeys then fileTests input expectedOutput
-      else testingError "Set of filenames" message
+      else [TestTool.testingError "Set of filenames" message]
   where actualKeys = Map.keysSet testMap
         expectedKeys = Set.fromList [inputKey, outputKey]
         input = testMap Map.! inputKey
@@ -35,10 +37,6 @@ create (Right testMap)
               ["The filenames are ", setString actualKeys, " instead of ",
                setString expectedKeys, "."]
         setString = show . Set.elems
-
-testingError :: Tasty.TestName -> String -> [Tasty.TestTree]
-testingError name message
-  = [HUnit.testCase name $ HUnit.assertFailure message]
 
 inputKey :: FilePath
 inputKey = "Input.hs"

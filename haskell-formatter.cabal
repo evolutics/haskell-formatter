@@ -60,8 +60,11 @@ test-suite test
   build-depends:       base,
                        containers,
                        directory-tree,
+                       doctest,
+                       filemanip,
                        filepath,
                        haskell-formatter,
+                       hlint,
                        tasty,
                        tasty-hunit
   hs-source-dirs:      testsuite/src
