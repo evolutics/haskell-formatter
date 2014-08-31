@@ -7,18 +7,15 @@ import qualified Control.Exception as Exception
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import qualified Language.Haskell.Formatter as Formatter
-import qualified Language.Haskell.Formatter.Toolkit.FileTesting
-       as FileTesting
-import qualified Language.Haskell.Formatter.Toolkit.TestTool
-       as TestTool
+import qualified Language.Haskell.Formatter.Toolkit.FileTesting as FileTesting
+import qualified Language.Haskell.Formatter.Toolkit.TestTool as TestTool
 import qualified System.FilePath as FilePath
 import qualified Test.Tasty as Tasty
 import qualified Test.Tasty.HUnit as HUnit
 
 tests :: IO Tasty.TestTree
 tests
-  = Tasty.testGroup name Applicative.<$>
-      FileTesting.fileTestForest create root
+  = Tasty.testGroup name Applicative.<$> FileTesting.fileTestForest create root
   where name = "Tests based on files"
         root = "testsuite" FilePath.</> "resources" FilePath.</> "source"
 
@@ -28,8 +25,8 @@ create ::
 create (Left exception)
   = [TestTool.testingError "I/O exception" $ show exception]
 create (Right testMap)
-  = if actualKeys == expectedKeys then fileTests input expectedOutput
-      else [TestTool.testingError "Set of filenames" message]
+  = if actualKeys == expectedKeys then fileTests input expectedOutput else
+      [TestTool.testingError "Set of filenames" message]
   where actualKeys = Map.keysSet testMap
         expectedKeys = Set.fromList [inputKey, outputKey]
         input = testMap Map.! inputKey
@@ -51,8 +48,7 @@ fileTests input expectedOutput
   = [HUnit.testCase "Formatting once" base,
      HUnit.testCase "Idempotence" idempotence]
   where base = testFormatting inputKey input expectedOutput
-        idempotence
-          = testFormatting outputKey expectedOutput expectedOutput
+        idempotence = testFormatting outputKey expectedOutput expectedOutput
 
 testFormatting :: FilePath -> String -> String -> HUnit.Assertion
 testFormatting inputFile input expectedOutput

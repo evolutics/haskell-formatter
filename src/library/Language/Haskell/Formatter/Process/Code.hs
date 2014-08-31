@@ -14,11 +14,11 @@ type LocatableCode = Source.Module Location.SrcSpanInfo
 
 type CommentableCode = Source.Module Note.CommentNote
 
-type LocatableCommentableCode =
-     Source.Module Note.LocationCommentNote
+type LocatableCommentableCode = Source.Module Note.LocationCommentNote
 
 tryZipLocationsComments ::
-                        LocatableCode -> CommentableCode -> Maybe LocatableCommentableCode
+                        LocatableCode ->
+                          CommentableCode -> Maybe LocatableCommentableCode
 tryZipLocationsComments locatable commentable
   = if isActualCodeSame then maybeLocatableCommentable else Nothing
   where isActualCodeSame = locatable Source.=~= commentable

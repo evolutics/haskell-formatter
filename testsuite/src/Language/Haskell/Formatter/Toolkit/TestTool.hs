@@ -23,8 +23,7 @@ codeHintTest file = HUnit.testCase file assertion
         showLines = unlines . fmap show
 
 documentationTest :: [FilePath] -> FilePath -> Tasty.TestTree
-documentationTest searchFolders file
-  = HUnit.testCase file assertion
+documentationTest searchFolders file = HUnit.testCase file assertion
   where assertion = DocTest.doctest arguments
         arguments = [searchPathAppendix, file]
         searchPathAppendix = Monoid.mappend "-i" appendedPaths

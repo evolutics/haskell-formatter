@@ -24,12 +24,12 @@ maybeLast = Maybe.listToMaybe . reverse
     " ab c d\ne "
 -}
 mergeConsecutiveElements :: (a -> Bool) -> [a] -> [a]
-mergeConsecutiveElements isMerged
-  = snd . List.foldl' merge (False, [])
+mergeConsecutiveElements isMerged = snd . List.foldl' merge (False, [])
   where merge (isConsecutive, list) element = (isConsecutive', list')
           where isConsecutive' = isMerged element
                 list' = Monoid.mappend list merged
-                merged = if isConsecutive' && isConsecutive then [] else [element]
+                merged
+                  = if isConsecutive' && isConsecutive then [] else [element]
 
 {-| @takeEvery p l@ takes every @p@th element of @l@ from the first one.
 
@@ -48,8 +48,7 @@ takeEvery period list@(first : _)
     ["ab","cd","e"] -}
 concatenateRuns :: Word.Word -> [[a]] -> [[a]]
 concatenateRuns _ [] = []
-concatenateRuns period lists
-  = concat run : concatenateRuns period rest
+concatenateRuns period lists = concat run : concatenateRuns period rest
   where (run, rest) = splitAt (fromIntegral period) lists
 
 {-| @concatenateShiftedRuns p s l@ first takes @s@ lists of @l@, followed by

@@ -4,23 +4,20 @@ Description : Facade for the location handling of HSE
 See also "Language.Haskell.Formatter.Source".
 -}
 module Language.Haskell.Formatter.Location
-       (SrcLoc.SrcLoc, SrcLoc.SrcSpan, SrcLoc.SrcSpanInfo, base, plus,
-        minus, Portioned(..), Line, Column, streamName, getLine, getColumn,
+       (SrcLoc.SrcLoc, SrcLoc.SrcSpan, SrcLoc.SrcSpanInfo, base, plus, minus,
+        Portioned(..), Line, Column, streamName, getLine, getColumn,
         createPosition, SrcLoc.getPointLoc, getEndPosition,
-        replaceNestedPortionLines, stringPortion, getStartLine,
-        getStartColumn, getEndLine, getEndColumn)
+        replaceNestedPortionLines, stringPortion, getStartLine, getStartColumn,
+        getEndLine, getEndColumn)
        where
 import Prelude hiding (getLine)
 import qualified Data.Function as Function
 import qualified Language.Haskell.Exts.Annotated.Syntax as Syntax
 import qualified Language.Haskell.Exts.Comments as Comments
 import qualified Language.Haskell.Exts.SrcLoc as SrcLoc
-import qualified Language.Haskell.Formatter.Toolkit.ListTool
-       as ListTool
-import qualified Language.Haskell.Formatter.Toolkit.Newline
-       as Newline
-import qualified Language.Haskell.Formatter.Toolkit.StreamName
-       as StreamName
+import qualified Language.Haskell.Formatter.Toolkit.ListTool as ListTool
+import qualified Language.Haskell.Formatter.Toolkit.Newline as Newline
+import qualified Language.Haskell.Formatter.Toolkit.StreamName as StreamName
 
 class (Enum a) => Natural a where
 
@@ -75,11 +72,10 @@ getLine = Line . SrcLoc.srcLine
 getColumn :: SrcLoc.SrcLoc -> Column
 getColumn = Column . SrcLoc.srcColumn
 
-createPosition ::
-               StreamName.StreamName -> Line -> Column -> SrcLoc.SrcLoc
+createPosition :: StreamName.StreamName -> Line -> Column -> SrcLoc.SrcLoc
 createPosition stream (Line line) (Column column)
-  = SrcLoc.SrcLoc{SrcLoc.srcFilename = show stream,
-                  SrcLoc.srcLine = line, SrcLoc.srcColumn = column}
+  = SrcLoc.SrcLoc{SrcLoc.srcFilename = show stream, SrcLoc.srcLine = line,
+                  SrcLoc.srcColumn = column}
 
 getEndPosition :: SrcLoc.SrcSpan -> SrcLoc.SrcLoc
 getEndPosition portion = createPosition stream line column
@@ -88,7 +84,8 @@ getEndPosition portion = createPosition stream line column
         column = Column $ SrcLoc.srcSpanEndColumn portion
 
 replaceNestedPortionLines ::
-                          (Line -> Line) -> SrcLoc.SrcSpanInfo -> SrcLoc.SrcSpanInfo
+                          (Line -> Line) ->
+                            SrcLoc.SrcSpanInfo -> SrcLoc.SrcSpanInfo
 replaceNestedPortionLines function nestedPortion
   = nestedPortion{SrcLoc.srcInfoSpan = parent',
                   SrcLoc.srcInfoPoints = children'}
@@ -98,17 +95,14 @@ replaceNestedPortionLines function nestedPortion
         children' = fmap replace children
         children = SrcLoc.srcInfoPoints nestedPortion
 
-replacePortionLines ::
-                    (Line -> Line) -> SrcLoc.SrcSpan -> SrcLoc.SrcSpan
+replacePortionLines :: (Line -> Line) -> SrcLoc.SrcSpan -> SrcLoc.SrcSpan
 replacePortionLines function portion
-  = portion{SrcLoc.srcSpanStartLine = start,
-            SrcLoc.srcSpanEndLine = end}
+  = portion{SrcLoc.srcSpanStartLine = start, SrcLoc.srcSpanEndLine = end}
   where Line start = function $ getStartLine portion
         Line end = function $ getEndLine portion
 
 stringPortion :: SrcLoc.SrcLoc -> String -> SrcLoc.SrcSpan
-stringPortion startPosition string
-  = SrcLoc.mkSrcSpan startPosition endPosition
+stringPortion startPosition string = SrcLoc.mkSrcSpan startPosition endPosition
   where endPosition = createPosition stream endLine endColumn
         stream = streamName startPosition
         endLine = lastIndex lineCount startLine

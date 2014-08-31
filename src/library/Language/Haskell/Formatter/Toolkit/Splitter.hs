@@ -5,8 +5,7 @@ module Language.Haskell.Formatter.Toolkit.Splitter (separate) where
 import qualified Control.Applicative as Applicative
 import qualified Data.List as List
 import qualified Data.Monoid as Monoid
-import qualified Language.Haskell.Formatter.Toolkit.ListTool
-       as ListTool
+import qualified Language.Haskell.Formatter.Toolkit.ListTool as ListTool
 import qualified Language.Haskell.Formatter.Toolkit.Visit as Visit
 
 {-| Strategy to split a list on sublists. -}
@@ -56,7 +55,8 @@ rawSplit delimiters = move [] []
           = case stripFirstPrefix delimiters right of
                 Nothing -> move parts (Monoid.mappend left [first]) rest
                 Just (delimiter, suffix) -> move
-                                              (Monoid.mappend parts [left, delimiter])
+                                              (Monoid.mappend parts
+                                                 [left, delimiter])
                                               []
                                               suffix
 
@@ -69,5 +69,4 @@ rawSplit delimiters = move [] []
     Nothing -}
 stripFirstPrefix :: (Eq a) => [[a]] -> [a] -> Maybe ([a], [a])
 stripFirstPrefix prefixes list = Visit.findJust strip prefixes
-  where strip prefix
-          = (,) prefix Applicative.<$> List.stripPrefix prefix list
+  where strip prefix = (,) prefix Applicative.<$> List.stripPrefix prefix list

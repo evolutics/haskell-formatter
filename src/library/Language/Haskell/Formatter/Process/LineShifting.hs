@@ -14,8 +14,7 @@ type Shift = Int
 
 createShifter :: Map.Map Location.Line Shift -> Shifter
 createShifter relativeShifter = Shifter absoluteShifter
-  where (_, absoluteShifter)
-          = Map.mapAccum accumulate noShift relativeShifter
+  where (_, absoluteShifter) = Map.mapAccum accumulate noShift relativeShifter
         accumulate absoluteShift relativeShift
           = (absoluteShift', absoluteShift')
           where absoluteShift' = absoluteShift + relativeShift
@@ -25,8 +24,7 @@ noShift = 0
 
 shiftCode :: Shifter -> Code.LocatableCode -> Code.LocatableCode
 shiftCode shifter = fmap $ shiftNestedPortion shifter
-  where shiftNestedPortion
-          = Location.replaceNestedPortionLines . shiftLine
+  where shiftNestedPortion = Location.replaceNestedPortionLines . shiftLine
 
 shiftLine :: Shifter -> Location.Line -> Location.Line
 shiftLine shifter line = Location.plus shift line

@@ -1,27 +1,21 @@
-module Language.Haskell.Formatter.Process.DetachComments
-       (detachComments) where
+module Language.Haskell.Formatter.Process.DetachComments (detachComments) where
 import qualified Data.Foldable as Foldable
 import qualified Data.List as List
 import qualified Data.Map.Strict as Map
 import qualified Data.Maybe as Maybe
 import qualified Data.Monoid as Monoid
-import qualified Language.Haskell.Formatter.CommentCore
-       as CommentCore
+import qualified Language.Haskell.Formatter.CommentCore as CommentCore
 import qualified Language.Haskell.Formatter.ExactCode as ExactCode
 import qualified Language.Haskell.Formatter.Location as Location
 import qualified Language.Haskell.Formatter.Process.Code as Code
-import qualified Language.Haskell.Formatter.Process.LineShifting
-       as LineShifting
+import qualified Language.Haskell.Formatter.Process.LineShifting as LineShifting
 import qualified Language.Haskell.Formatter.Process.Note as Note
 import qualified Language.Haskell.Formatter.Result as Result
 import qualified Language.Haskell.Formatter.Source as Source
-import qualified Language.Haskell.Formatter.Toolkit.ListTool
-       as ListTool
-import qualified Language.Haskell.Formatter.Toolkit.StreamName
-       as StreamName
+import qualified Language.Haskell.Formatter.Toolkit.ListTool as ListTool
+import qualified Language.Haskell.Formatter.Toolkit.StreamName as StreamName
 
-data Reservation = Reservation (Map.Map Location.Line
-                                  [Note.CommentBox])
+data Reservation = Reservation (Map.Map Location.Line [Note.CommentBox])
                  deriving (Eq, Ord, Show)
 
 instance Monoid.Monoid Reservation where
@@ -40,7 +34,8 @@ instance Monoid.Monoid Reservation where
                         Just Note.EmptyLine -> False
 
 detachComments ::
-               Code.LocatableCommentableCode -> Result.Result ExactCode.ExactCode
+               Code.LocatableCommentableCode ->
+                 Result.Result ExactCode.ExactCode
 detachComments locatableCommentable
   = return $ ExactCode.create locatable' comments
   where locatable' = LineShifting.shiftCode shifter locatable
@@ -67,8 +62,7 @@ reserveForCode = Foldable.foldMap reserveForNote
 
 reserveForNote :: Note.LocationCommentNote -> Reservation
 reserveForNote note = Monoid.mappend before after
-  where before
-          = singleton lineBefore $ Note.commentsBefore commentNote
+  where before = singleton lineBefore $ Note.commentsBefore commentNote
         singleton line = Reservation . Map.singleton line
         lineBefore = Location.getStartLine portion
         portion = Location.getPortion note
@@ -76,8 +70,7 @@ reserveForNote note = Monoid.mappend before after
         after = singleton lineAfter $ Note.commentsAfter commentNote
         lineAfter = succ $ Location.getEndLine portion
 
-createComments ::
-               StreamName.StreamName -> Reservation -> [Source.Comment]
+createComments :: StreamName.StreamName -> Reservation -> [Source.Comment]
 createComments stream = accumulateReservation create
   where create baseLine = snd . List.foldl' merge (baseLine, [])
         merge (startLine, comments) box = (followingLine, comments')
@@ -86,17 +79,17 @@ createComments stream = accumulateReservation create
                 comments' = Monoid.mappend comments commentsNow
                 commentsNow
                   = case box of
-                        Note.ActualComment comment -> [createComment stream startLine
+                        Note.ActualComment comment -> [createComment stream
+                                                         startLine
                                                          comment]
                         Note.EmptyLine -> []
 
 accumulateReservation ::
                         (Monoid.Monoid m) =>
-                        (Location.Line -> [Note.CommentBox] -> m) -> Reservation -> m
-accumulateReservation create (Reservation reservation)
-  = accumulation
-  where (_, accumulation)
-          = Map.foldlWithKey' accumulate base reservation
+                        (Location.Line -> [Note.CommentBox] -> m) ->
+                          Reservation -> m
+accumulateReservation create (Reservation reservation) = accumulation
+  where (_, accumulation) = Map.foldlWithKey' accumulate base reservation
         accumulate (absoluteShift, structure) line comments
           = (absoluteShift', structure')
           where absoluteShift' = absoluteShift + relativeShift
@@ -110,11 +103,9 @@ accumulateReservation create (Reservation reservation)
 createComment ::
               StreamName.StreamName ->
                 Location.Line -> Note.IndentedComment -> Source.Comment
-createComment stream startLine comment
-  = Source.createComment core portion
+createComment stream startLine comment = Source.createComment core portion
   where core = Note.commentCore comment
         portion = Location.stringPortion startPosition wrappedComment
-        startPosition
-          = Location.createPosition stream startLine startColumn
+        startPosition = Location.createPosition stream startLine startColumn
         startColumn = Note.commentStartColumn comment
         wrappedComment = show core

@@ -3,15 +3,13 @@ Description : Handling Unicode newlines
 -}
 module Language.Haskell.Formatter.Toolkit.Newline
        (newlines, splitSeparatedLines) where
-import qualified Language.Haskell.Formatter.Toolkit.Splitter
-       as Splitter
+import qualified Language.Haskell.Formatter.Toolkit.Splitter as Splitter
 
 {-| Unicode newline strings ordered by descending length. This corresponds to
     the set of newlines from
     <http://www.unicode.org/standard/reports/tr13/tr13-5.html>. -}
 newlines :: [String]
-newlines
-  = ["\CR\LF", "\LF", "\VT", "\FF", "\CR", "\x85", "\x2028", "\x2029"]
+newlines = ["\CR\LF", "\LF", "\VT", "\FF", "\CR", "\x85", "\x2028", "\x2029"]
 
 {-| Breaks a string up into its lines at 'newlines'. The resulting strings do
     not contain 'newlines'.

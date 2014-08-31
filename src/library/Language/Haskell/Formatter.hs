@@ -8,5 +8,4 @@ module Language.Haskell.Formatter
        where
 import qualified Language.Haskell.Formatter.Error as Error
 import qualified Language.Haskell.Formatter.Main as Main
-import qualified Language.Haskell.Formatter.Toolkit.StreamName
-       as StreamName
+import qualified Language.Haskell.Formatter.Toolkit.StreamName as StreamName

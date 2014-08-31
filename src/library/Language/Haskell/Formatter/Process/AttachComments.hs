@@ -1,13 +1,11 @@
-module Language.Haskell.Formatter.Process.AttachComments
-       (attachComments) where
+module Language.Haskell.Formatter.Process.AttachComments (attachComments) where
 import qualified Data.Foldable as Foldable
 import qualified Data.Function as Function
 import qualified Data.List as List
 import qualified Data.Map.Strict as Map
 import qualified Data.Monoid as Monoid
 import qualified Data.Traversable as Traversable
-import qualified Language.Haskell.Formatter.CommentCore
-       as CommentCore
+import qualified Language.Haskell.Formatter.CommentCore as CommentCore
 import qualified Language.Haskell.Formatter.ExactCode as ExactCode
 import qualified Language.Haskell.Formatter.Location as Location
 import qualified Language.Haskell.Formatter.Process.Code as Code
@@ -15,8 +13,7 @@ import qualified Language.Haskell.Formatter.Process.Note as Note
 import qualified Language.Haskell.Formatter.Result as Result
 import qualified Language.Haskell.Formatter.Source as Source
 
-data Assignment = Assignment (Map.Map Location.SrcSpan
-                                Note.CommentNote)
+data Assignment = Assignment (Map.Map Location.SrcSpan Note.CommentNote)
                 deriving (Eq, Ord, Show)
 
 instance Monoid.Monoid Assignment where
@@ -24,27 +21,21 @@ instance Monoid.Monoid Assignment where
         mappend (Assignment left) (Assignment right) = Assignment merged
           where merged = Map.unionWith Monoid.mappend left right
 
-attachComments ::
-               ExactCode.ExactCode -> Result.Result Code.CommentableCode
+attachComments :: ExactCode.ExactCode -> Result.Result Code.CommentableCode
 attachComments exact
   = if Map.null unassigned then return commentable else
       Result.fatalAssertionError message
-  where (Assignment unassigned, commentable)
-          = spread assignment locatable
+  where (Assignment unassigned, commentable) = spread assignment locatable
         assignment = assignForCode exact
         locatable = ExactCode.actualCode exact
         message = "Attaching the comments failed with an unassigned rest."
 
-spread ::
-       Assignment ->
-         Code.LocatableCode -> (Assignment, Code.CommentableCode)
-spread (Assignment assignment) locatable
-  = (Assignment unassigned, commentable)
+spread :: Assignment -> Code.LocatableCode -> (Assignment, Code.CommentableCode)
+spread (Assignment assignment) locatable = (Assignment unassigned, commentable)
   where (unassigned, commentable)
           = Traversable.mapAccumL move assignment locatable
         move rest nestedPortion = (rest', note)
-          where (maybeNote, rest')
-                  = Map.updateLookupWithKey remove portion rest
+          where (maybeNote, rest') = Map.updateLookupWithKey remove portion rest
                 remove = const . const Nothing
                 portion = Location.getPortion nestedPortion
                 note = Foldable.fold maybeNote
@@ -55,8 +46,7 @@ assignForCode exact
   where ((maybeLast, afterLast), untilLast)
           = Traversable.mapAccumL move base orderedPortions
         move (maybeLower, rest) upper = ((Just upper, rest'), assignment)
-          where (comments, rest')
-                  = span ((<= upper) . Location.getPortion) rest
+          where (comments, rest') = span ((<= upper) . Location.getPortion) rest
                 assignment = assignComments maybeLower upper boxes
                 boxes = createComments comments
         base = (Nothing, orderedComments)
@@ -81,8 +71,7 @@ assignBefore portion = flip (assignSingleton portion) []
 assignSingleton ::
                 Location.SrcSpan ->
                   [Note.CommentBox] -> [Note.CommentBox] -> Assignment
-assignSingleton portion before after
-  = Assignment $ Map.singleton portion note
+assignSingleton portion before after = Assignment $ Map.singleton portion note
   where note = Note.createCommentNote before after
 
 assignAfter :: Location.SrcSpan -> [Note.CommentBox] -> Assignment
@@ -93,8 +82,7 @@ divideComments ::
                  ([Note.CommentBox], [Note.CommentBox], [Note.CommentBox])
 divideComments = divide [] []
   where divide after spaces [] = (after, spaces, [])
-        divide after spaces
-          rest@(box@(Note.ActualComment comment) : unwrapped)
+        divide after spaces rest@(box@(Note.ActualComment comment) : unwrapped)
           = case (after, spaces) of
                 (_ : _, []) -> ifAfter
                 _ -> case displacement of
@@ -109,8 +97,7 @@ divideComments = divide [] []
           = divide after (Monoid.mappend spaces [Note.EmptyLine]) unwrapped
 
 createComments :: [Source.Comment] -> [Note.CommentBox]
-createComments
-  = concat . snd . Traversable.mapAccumL create Nothing
+createComments = concat . snd . Traversable.mapAccumL create Nothing
   where create maybeEndLine comment = (Just endLine', comments)
           where endLine' = Location.getEndLine portion
                 portion = Location.getPortion comment
@@ -120,14 +107,14 @@ createComments
                         Nothing -> []
                         Just endLine -> replicate emptyLineCount Note.EmptyLine
                           where emptyLineCount = pred lineDistance
-                                lineDistance = Location.minus startLine endLine :: Int
+                                lineDistance
+                                  = Location.minus startLine endLine :: Int
                 startLine = Location.getStartLine portion
                 actualComments = [Note.ActualComment indentedComment]
                 indentedComment = Note.createIndentedComment core Location.base
                 core = Source.commentCore comment
 
-orderByStartEnd ::
-                ExactCode.ExactCode -> ([Location.SrcSpan], [Source.Comment])
+orderByStartEnd :: ExactCode.ExactCode -> ([Location.SrcSpan], [Source.Comment])
 orderByStartEnd exact = (orderedPortions, orderedComments)
   where orderedPortions = fmap Location.getPortion nestedPortions
         nestedPortions = List.sort $ Foldable.toList actualCode

@@ -2,14 +2,12 @@
 Description : Comments without location
 -}
 module Language.Haskell.Formatter.CommentCore
-       (CommentCore, kind, content, Kind(..),
-        DocumentationDisplacement(..), create, wrappedLineCount,
-        documentationDisplacement)
+       (CommentCore, kind, content, Kind(..), DocumentationDisplacement(..),
+        create, wrappedLineCount, documentationDisplacement)
        where
 import qualified Data.Char as Char
 import qualified Data.Monoid as Monoid
-import qualified Language.Haskell.Formatter.Toolkit.Newline
-       as Newline
+import qualified Language.Haskell.Formatter.Toolkit.Newline as Newline
 
 data CommentCore = CommentCore{kind :: Kind, content :: String}
                  deriving (Eq, Ord)
@@ -31,14 +29,12 @@ instance Show CommentCore where
           where rawContent = content comment
 
 create :: Kind -> String -> CommentCore
-create rawKind rawContent
-  = CommentCore{kind = rawKind, content = rawContent}
+create rawKind rawContent = CommentCore{kind = rawKind, content = rawContent}
 
 wrappedLineCount :: CommentCore -> Int
 wrappedLineCount = length . Newline.splitSeparatedLines . show
 
-documentationDisplacement ::
-                          CommentCore -> DocumentationDisplacement
+documentationDisplacement :: CommentCore -> DocumentationDisplacement
 documentationDisplacement comment
   = case unwrappedContent of
         ('|' : _) -> BeforeActualCode

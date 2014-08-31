@@ -1,15 +1,12 @@
 {-|
 Description : Test data based on file trees
 -}
-module Language.Haskell.Formatter.Toolkit.FileTesting
-       (fileTestForest) where
+module Language.Haskell.Formatter.Toolkit.FileTesting (fileTestForest) where
 import qualified Control.Exception as Exception
 import qualified Data.Map.Strict as Map
 import qualified Data.Monoid as Monoid
-import qualified Language.Haskell.Formatter.Toolkit.FileTree
-       as FileTree
-import qualified Language.Haskell.Formatter.Toolkit.MapTree
-       as MapTree
+import qualified Language.Haskell.Formatter.Toolkit.FileTree as FileTree
+import qualified Language.Haskell.Formatter.Toolkit.MapTree as MapTree
 import qualified Test.Tasty as Tasty
 
 fileTestForest ::

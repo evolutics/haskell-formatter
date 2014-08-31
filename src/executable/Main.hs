@@ -12,8 +12,8 @@ import qualified System.Exit as Exit
 import qualified System.FilePath as FilePath
 import qualified System.IO as IO
 
-data Arguments = Arguments{input :: Maybe FilePath,
-                           output :: Maybe FilePath, force :: Bool}
+data Arguments = Arguments{input :: Maybe FilePath, output :: Maybe FilePath,
+                           force :: Bool}
                deriving (Eq, Ord, Show)
 
 main :: IO ()
@@ -27,8 +27,7 @@ main
 
 utilityUsage :: Applicative.ParserInfo Arguments
 utilityUsage = Applicative.info parserWithHelp modifier
-  where parserWithHelp
-          = Applicative.helper Applicative.<*> argumentParser
+  where parserWithHelp = Applicative.helper Applicative.<*> argumentParser
         modifier
           = Monoid.mconcat
               [Applicative.fullDesc, oneLineDescription, description]
@@ -44,8 +43,7 @@ utilityUsage = Applicative.info parserWithHelp modifier
 
 argumentParser :: Applicative.Parser Arguments
 argumentParser
-  = Arguments Applicative.<$> inputOption Applicative.<*>
-      outputOption
+  = Arguments Applicative.<$> inputOption Applicative.<*> outputOption
       Applicative.<*> forceOption
   where inputOption
           = Applicative.optional . Applicative.strOption $
@@ -83,15 +81,19 @@ checkArguments arguments
   = case (maybeInput, maybeOutput) of
         (Just inputPath, Just outputPath) -> if forceOverwriting then
                                                return Nothing else
-                                               do same <- sameExistentPaths inputPath outputPath
+                                               do same <- sameExistentPaths
+                                                            inputPath
+                                                            outputPath
                                                   return $
-                                                    if same then Just overwritingError else Nothing
+                                                    if same then
+                                                      Just overwritingError else
+                                                      Nothing
           where overwritingError
                   = concat
                       ["The output path ", show outputPath,
                        " would overwrite the input path ", show inputPath, ". ",
-                       "Either use unequal paths or apply the ", show forceStandardName,
-                       " option, please."]
+                       "Either use unequal paths or apply the ",
+                       show forceStandardName, " option, please."]
         _ -> return Nothing
   where maybeInput = input arguments
         maybeOutput = output arguments
@@ -102,8 +104,7 @@ sameExistentPaths :: FilePath -> FilePath -> IO Bool
 sameExistentPaths left right
   = do exist <- bothPathsExist
        if exist then
-         liftedOn FilePath.equalFilePath Directory.canonicalizePath left
-           right
+         liftedOn FilePath.equalFilePath Directory.canonicalizePath left right
          else return False
   where bothPathsExist = liftedOn (&&) pathExists left right
         liftedOn = Function.on . Applicative.liftA2
@@ -120,15 +121,13 @@ internalFormat arguments
   where readInput = maybe getContents readFile maybeInput
         maybeInput = input arguments
         stream
-          = maybe Formatter.standardInput Formatter.createStreamName
-              maybeInput
+          = maybe Formatter.standardInput Formatter.createStreamName maybeInput
         writeOutput = maybe putStr writeFile maybeOutput
         maybeOutput = output arguments
 
 showError :: Formatter.Error -> String
 showError libraryError
-  = if Formatter.isAssertionError libraryError then assertionError
-      else rawError
+  = if Formatter.isAssertionError libraryError then assertionError else rawError
   where assertionError
           = unlines
               ["Oops, an error occurred.",

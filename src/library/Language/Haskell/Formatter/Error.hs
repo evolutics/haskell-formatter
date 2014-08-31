@@ -2,8 +2,7 @@
 Description : Errors for feedback to users
 -}
 module Language.Haskell.Formatter.Error
-       (Error, createParseError, createAssertionError, isAssertionError)
-       where
+       (Error, createParseError, createAssertionError, isAssertionError) where
 import qualified Language.Haskell.Formatter.Location as Location
 import qualified Language.Haskell.Formatter.Source as Source
 
