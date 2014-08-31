@@ -130,7 +130,9 @@ showError libraryError
   = if Formatter.isAssertionError libraryError then assertionError else rawError
   where assertionError
           = unlines
-              ["Oops, an error occurred.",
-               "Feel free to report this, because it appears to be a bug. Thanks!",
-               "The specific error message follows.", "", rawError]
+              [concat
+                 ["Oops, an error occurred. ", "Feel free to report this, ",
+                  "because it appears to be a bug. Thanks! ",
+                  "The specific error message follows."],
+               "", rawError]
         rawError = show libraryError
