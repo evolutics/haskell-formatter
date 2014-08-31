@@ -14,11 +14,12 @@ main :: IO ()
 main = sequence tests >>= Tasty.defaultMain . Tasty.testGroup "Root"
 
 tests :: [IO Tasty.TestTree]
-tests = [codeHintTests, documentationTests, Formatter.tests]
+tests = [standardSourceCodeTests, documentationTests, Formatter.tests]
 
-codeHintTests :: IO Tasty.TestTree
-codeHintTests
-  = createTestTree TestTool.codeHintTest Find.always "Code hint tests"
+standardSourceCodeTests :: IO Tasty.TestTree
+standardSourceCodeTests
+  = createTestTree TestTool.standardSourceCodeTest Find.always
+      "Standard source code tests"
 
 createTestTree ::
                (FilePath -> Tasty.TestTree) ->
