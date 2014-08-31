@@ -5,8 +5,8 @@ name:                haskell-formatter
 version:             0.1.0.0
 synopsis:            Haskell source code formatter
 -- description:         
-homepage:            http://www.evolutics.info
--- license:             
+homepage:            https://github.com/evolutics/haskell-formatter
+license:             GPL-3
 license-file:        LICENSE
 author:              Benjamin Fischer
 maintainer:          benjamin.fischer@evolutics.info
