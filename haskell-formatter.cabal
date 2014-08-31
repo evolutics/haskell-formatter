@@ -18,27 +18,28 @@ cabal-version:       >=1.8
 library
   exposed-modules:     Language.Haskell.Formatter
   other-modules:
-                       Language.Haskell.Formatter.Code.Abstract,
-                       Language.Haskell.Formatter.Code.Comment,
-                       Language.Haskell.Formatter.Code.Concrete,
-                       Language.Haskell.Formatter.Code.Location,
-                       Language.Haskell.Formatter.Code.Merged,
-                       Language.Haskell.Formatter.Code.Source,
-                       Language.Haskell.Formatter.Default.CommentAssignment,
-                       Language.Haskell.Formatter.Default.CommentFormatting,
-                       Language.Haskell.Formatter.Default.CommentIntegration,
-                       Language.Haskell.Formatter.Default.ElementArrangement,
-                       Language.Haskell.Formatter.Default.Formatter,
-                       Language.Haskell.Formatter.Default.Shifting,
+                       Language.Haskell.Formatter.CommentCore,
                        Language.Haskell.Formatter.Error,
-                       Language.Haskell.Formatter.Formatter,
-                       Language.Haskell.Formatter.Formatting,
+                       Language.Haskell.Formatter.ExactCode,
+                       Language.Haskell.Formatter.Location,
+                       Language.Haskell.Formatter.Main,
+                       Language.Haskell.Formatter.Process.AttachComments,
+                       Language.Haskell.Formatter.Process.Code,
+                       Language.Haskell.Formatter.Process.Control,
+                       Language.Haskell.Formatter.Process.DetachComments,
+                       Language.Haskell.Formatter.Process.FormatActualCode,
+                       Language.Haskell.Formatter.Process.FormatComments,
+                       Language.Haskell.Formatter.Process.Formatter,
+                       Language.Haskell.Formatter.Process.LineShifting,
+                       Language.Haskell.Formatter.Process.Note,
                        Language.Haskell.Formatter.Result,
+                       Language.Haskell.Formatter.Source,
                        Language.Haskell.Formatter.Toolkit.ListTool,
                        Language.Haskell.Formatter.Toolkit.Newline,
                        Language.Haskell.Formatter.Toolkit.Splitter,
                        Language.Haskell.Formatter.Toolkit.StreamName,
                        Language.Haskell.Formatter.Toolkit.Visit
+
   build-depends:       base, containers, haskell-src-exts
   hs-source-dirs:      src/library
   ghc-options:         -Wall -Werror

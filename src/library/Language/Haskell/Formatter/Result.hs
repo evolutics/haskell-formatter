@@ -1,8 +1,8 @@
+{-|
+Description : Result with possible errors
+-}
 module Language.Haskell.Formatter.Result
-       (Result, toEither, fatalError, check, checkMaybe,
-        fatalAssertionError)
-       where
-import Prelude hiding (error)
+       (Result, toEither, fatalError, fatalAssertionError) where
 import qualified Control.Applicative as Applicative
 import qualified Control.Monad as Monad
 import qualified Language.Haskell.Formatter.Error as Error
@@ -27,15 +27,5 @@ toEither (Result result) = result
 fatalError :: Error.Error -> Result a
 fatalError = Result . Left
 
-check :: Error.Error -> a -> Bool -> Result a
-check error success isSuccess
-  = checkMaybe error $ if isSuccess then Just success else Nothing
-
-checkMaybe :: Error.Error -> Maybe a -> Result a
-checkMaybe error maybeSuccess
-  = case maybeSuccess of
-        Nothing -> fatalError error
-        Just success -> return success
-
 fatalAssertionError :: String -> Result a
-fatalAssertionError = fatalError . Error.AssertionError
+fatalAssertionError = fatalError . Error.createAssertionError

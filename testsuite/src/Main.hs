@@ -1,3 +1,6 @@
+{-|
+Description : Root of test suite
+-}
 module Main (main) where
 import qualified Control.Applicative as Applicative
 import qualified Data.Set as Set

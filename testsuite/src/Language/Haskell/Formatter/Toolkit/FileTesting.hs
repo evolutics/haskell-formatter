@@ -1,3 +1,6 @@
+{-|
+Description : Test data based on file trees
+-}
 module Language.Haskell.Formatter.Toolkit.FileTesting
        (fileTestForest) where
 import qualified Control.Exception as Exception
@@ -21,9 +24,10 @@ folderTestForest ::
                      (Either Exception.IOException (Map.Map FilePath a) ->
                         [Tasty.TestTree])
                        -> FilePath -> IO [Tasty.TestTree]
-folderTestForest create createTests
-  = fmap (testForest createTests . MapTree.summarizeLeaves) .
-      FileTree.collectFiles create
+folderTestForest create createTests rootFolder
+  = do fileForest <- FileTree.collectFiles create rootFolder
+       return . createTestForest $ MapTree.summarizeLeaves fileForest
+  where createTestForest = testForest createTests
 
 testForest ::
            (a -> [Tasty.TestTree]) ->

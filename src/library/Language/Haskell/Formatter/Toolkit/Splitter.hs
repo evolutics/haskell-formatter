@@ -30,8 +30,9 @@ data DelimiterPolicy = Drop
     ["0","apple1"] -}
 separate :: (Eq a) => [[a]] -> [a] -> [[a]]
 separate = split . createSplitter Drop
-  where createSplitter policy delimiters
-          = Splitter{delimiterPolicy = policy, delimiterQueue = delimiters}
+  where createSplitter rawDelimiterPolicy rawDelimiterQueue
+          = Splitter{delimiterPolicy = rawDelimiterPolicy,
+                     delimiterQueue = rawDelimiterQueue}
 
 {-| @split s l@ splits @l@ according to the strategy @s@. -}
 split :: (Eq a) => Splitter a -> [a] -> [[a]]

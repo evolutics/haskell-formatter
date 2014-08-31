@@ -1,8 +1,10 @@
+{-|
+Description : Tests for formatting based on source code files
+-}
 module Language.Haskell.Formatter.Tests (tests) where
 import qualified Control.Applicative as Applicative
 import qualified Control.Exception as Exception
 import qualified Data.Map.Strict as Map
-import qualified Data.Monoid as Monoid
 import qualified Data.Set as Set
 import qualified Language.Haskell.Formatter as Formatter
 import qualified Language.Haskell.Formatter.Toolkit.FileTesting
@@ -33,7 +35,7 @@ create (Right testMap)
         input = testMap Map.! inputKey
         expectedOutput = testMap Map.! outputKey
         message
-          = Monoid.mconcat
+          = concat
               ["The filenames are ", setString actualKeys, " instead of ",
                setString expectedKeys, "."]
         setString = show . Set.elems
@@ -54,7 +56,7 @@ fileTests input expectedOutput
 
 testFormatting :: FilePath -> String -> String -> HUnit.Assertion
 testFormatting inputFile input expectedOutput
-  = case
-      Formatter.format (Formatter.createStreamName inputFile) input of
+  = case Formatter.format inputStream input of
         Left unexpectedError -> HUnit.assertFailure $ show unexpectedError
         Right actualOutput -> actualOutput HUnit.@?= expectedOutput
+  where inputStream = Formatter.createStreamName inputFile

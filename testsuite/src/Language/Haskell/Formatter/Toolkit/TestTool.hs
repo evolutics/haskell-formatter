@@ -1,3 +1,6 @@
+{-|
+Description : Testing utilities
+-}
 module Language.Haskell.Formatter.Toolkit.TestTool
        (testingError, codeHintTest, documentationTest) where
 import qualified Data.List as List

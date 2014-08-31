@@ -1,5 +1,9 @@
+{-|
+Description : Creating trees from files and folders
+-}
 module Language.Haskell.Formatter.Toolkit.FileTree (collectFiles)
        where
+import qualified Control.Applicative as Applicative
 import qualified Control.Exception as Exception
 import qualified Data.Map.Strict as Map
 import qualified Language.Haskell.Formatter.Toolkit.MapTree
@@ -10,9 +14,10 @@ collectFiles ::
              (FilePath -> IO a) ->
                FilePath ->
                  IO (MapTree.MapForest FilePath (Either Exception.IOException a))
-collectFiles create
-  = fmap (transformRawTree . Tree.dirTree) .
-      Tree.readDirectoryWith create
+collectFiles create rootFolder
+  = do rawTree <- Tree.dirTree Applicative.<$>
+                    Tree.readDirectoryWith create rootFolder
+       return $ transformRawTree rawTree
 
 transformRawTree ::
                  Tree.DirTree a ->

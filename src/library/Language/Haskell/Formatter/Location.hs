@@ -1,9 +1,14 @@
-module Language.Haskell.Formatter.Code.Location
+{-|
+Description : Facade for the location handling of HSE
+
+See also "Language.Haskell.Formatter.Source".
+-}
+module Language.Haskell.Formatter.Location
        (SrcLoc.SrcLoc, SrcLoc.SrcSpan, SrcLoc.SrcSpanInfo, base, plus,
-        minus, Portioned, getPortion, Line, Column, streamName, getLine,
-        getColumn, createPosition, SrcLoc.getPointLoc, getEndPosition,
-        mapNestedPortion, stringPortion, getStartLine, getStartColumn,
-        getEndLine, getEndColumn)
+        minus, Portioned(..), Line, Column, streamName, getLine, getColumn,
+        createPosition, SrcLoc.getPointLoc, getEndPosition,
+        replaceNestedPortionLines, stringPortion, getStartLine,
+        getStartColumn, getEndLine, getEndColumn)
        where
 import Prelude hiding (getLine)
 import qualified Data.Function as Function
@@ -82,19 +87,20 @@ getEndPosition portion = createPosition stream line column
         line = Line $ SrcLoc.srcSpanEndLine portion
         column = Column $ SrcLoc.srcSpanEndColumn portion
 
-mapNestedPortion ::
-                 (Line -> Line) -> SrcLoc.SrcSpanInfo -> SrcLoc.SrcSpanInfo
-mapNestedPortion function nestedPortion
+replaceNestedPortionLines ::
+                          (Line -> Line) -> SrcLoc.SrcSpanInfo -> SrcLoc.SrcSpanInfo
+replaceNestedPortionLines function nestedPortion
   = nestedPortion{SrcLoc.srcInfoSpan = parent',
                   SrcLoc.srcInfoPoints = children'}
-  where parent' = mapPortionFunction parent
-        mapPortionFunction = mapPortion function
+  where parent' = replace parent
+        replace = replacePortionLines function
         parent = SrcLoc.srcInfoSpan nestedPortion
-        children' = fmap mapPortionFunction children
+        children' = fmap replace children
         children = SrcLoc.srcInfoPoints nestedPortion
 
-mapPortion :: (Line -> Line) -> SrcLoc.SrcSpan -> SrcLoc.SrcSpan
-mapPortion function portion
+replacePortionLines ::
+                    (Line -> Line) -> SrcLoc.SrcSpan -> SrcLoc.SrcSpan
+replacePortionLines function portion
   = portion{SrcLoc.srcSpanStartLine = start,
             SrcLoc.srcSpanEndLine = end}
   where Line start = function $ getStartLine portion
@@ -105,12 +111,12 @@ stringPortion startPosition string
   = SrcLoc.mkSrcSpan startPosition endPosition
   where endPosition = createPosition stream endLine endColumn
         stream = streamName startPosition
-        endLine = sumPredecessor lineCount startLine
-        sumPredecessor difference = pred . plus difference
+        endLine = lastIndex lineCount startLine
+        lastIndex difference = pred . plus difference
         lineCount = length stringLines
         stringLines = Newline.splitSeparatedLines string
         startLine = getStartLine startPosition
-        endColumn = sumPredecessor lastLineLength lastLineStartColumn
+        endColumn = lastIndex lastLineLength lastLineStartColumn
         lastLineLength = maybe 0 length $ ListTool.maybeLast stringLines
         lastLineStartColumn = if hasSingleLine then startColumn else base
         hasSingleLine = lineCount == 1

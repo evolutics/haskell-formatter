@@ -1,3 +1,6 @@
+{-|
+Description : Trees with unique labels
+-}
 module Language.Haskell.Formatter.Toolkit.MapTree
        (MapTree(..), MapForest(..), summarizeLeaves) where
 import qualified Data.Map.Strict as Map

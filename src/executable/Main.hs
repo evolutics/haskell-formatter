@@ -1,7 +1,10 @@
+{-|
+Description : Root of executable
+-}
 module Main (main) where
-import Prelude hiding (error)
 import qualified Data.Foldable as Foldable
 import qualified Data.Function as Function
+import qualified Data.Monoid as Monoid
 import qualified Language.Haskell.Formatter as Formatter
 import qualified Options.Applicative as Applicative
 import qualified System.Directory as Directory
@@ -15,44 +18,55 @@ data Arguments = Arguments{input :: Maybe FilePath,
 
 main :: IO ()
 main
-  = do arguments <- Applicative.execParser usage
+  = do arguments <- Applicative.execParser utilityUsage
        maybeError <- externalFormat arguments
        Foldable.mapM_ exitWithError maybeError
-  where exitWithError error
-          = IO.hPutStrLn IO.stderr error >> Exit.exitFailure
+  where exitWithError errorMessage
+          = putErrorLine errorMessage >> Exit.exitFailure
+        putErrorLine = IO.hPutStrLn IO.stderr
 
-usage :: Applicative.ParserInfo Arguments
-usage
-  = Applicative.info
-      (Applicative.helper Applicative.<*> argumentParser)
-      (Applicative.fullDesc Applicative.<>
-         Applicative.header "A Haskell source code formatter")
+utilityUsage :: Applicative.ParserInfo Arguments
+utilityUsage = Applicative.info parserWithHelp modifier
+  where parserWithHelp
+          = Applicative.helper Applicative.<*> argumentParser
+        modifier
+          = Monoid.mconcat
+              [Applicative.fullDesc, oneLineDescription, description]
+        oneLineDescription
+          = Applicative.header
+              "Haskell Formatter – A Haskell source code formatter"
+        description
+          = Applicative.progDesc $
+              concat
+                ["The Haskell Formatter formats Haskell source code ",
+                 "in a strict way. The source code is read from INPUT, ",
+                 "formatted, and written to OUTPUT."]
 
 argumentParser :: Applicative.Parser Arguments
 argumentParser
-  = Arguments Applicative.<$>
-      Applicative.optional
-        (Applicative.strOption $
-           Applicative.long "input" Applicative.<> Applicative.short 'i'
-             Applicative.<> Applicative.metavar "FILE"
-             Applicative.<>
-             Applicative.help
-               "Input source code file (default: standard input)")
-      Applicative.<*>
-      Applicative.optional
-        (Applicative.strOption $
-           Applicative.long "output" Applicative.<> Applicative.short 'o'
-             Applicative.<> Applicative.metavar "FILE"
-             Applicative.<>
-             Applicative.help
-               "Output source code file (default: standard output)")
-      Applicative.<*>
-      Applicative.switch
-        (Applicative.long "force" Applicative.<>
-           Applicative.short forceStandardName
-           Applicative.<>
-           Applicative.help
-             "Allows the output file to overwrite the input file")
+  = Arguments Applicative.<$> inputOption Applicative.<*>
+      outputOption
+      Applicative.<*> forceOption
+  where inputOption
+          = Applicative.optional . Applicative.strOption $
+              Monoid.mconcat
+                [Applicative.short 'i', Applicative.long "input",
+                 Applicative.metavar "INPUT",
+                 Applicative.help
+                   "Input source code file (default: standard input)"]
+        outputOption
+          = Applicative.optional . Applicative.strOption $
+              Monoid.mconcat
+                [Applicative.short 'o', Applicative.long "output",
+                 Applicative.metavar "OUTPUT",
+                 Applicative.help
+                   "Output source code file (default: standard output)"]
+        forceOption
+          = Applicative.switch $
+              Monoid.mconcat
+                [Applicative.short forceStandardName, Applicative.long "force",
+                 Applicative.help
+                   "Allows the output file to overwrite the input file"]
 
 forceStandardName :: Char
 forceStandardName = 'f'
@@ -62,7 +76,7 @@ externalFormat arguments
   = do maybeError <- checkArguments arguments
        case maybeError of
            Nothing -> internalFormat arguments
-           Just error -> return $ Just error
+           Just errorMessage -> return $ Just errorMessage
 
 checkArguments :: Arguments -> IO (Maybe String)
 checkArguments arguments
@@ -77,23 +91,22 @@ checkArguments arguments
                       ["The output path ", show outputPath,
                        " would overwrite the input path ", show inputPath, ". ",
                        "Either use unequal paths or apply the ", show forceStandardName,
-                       " option."]
+                       " option, please."]
         _ -> return Nothing
   where maybeInput = input arguments
         maybeOutput = output arguments
         forceOverwriting = force arguments
 
+{-| Do both file paths exist and refer to the same file or folder? -}
 sameExistentPaths :: FilePath -> FilePath -> IO Bool
 sameExistentPaths left right
   = do exist <- bothPathsExist
        if exist then
-         Function.on (Applicative.liftA2 FilePath.equalFilePath)
-           Directory.canonicalizePath
-           left
+         liftedOn FilePath.equalFilePath Directory.canonicalizePath left
            right
          else return False
-  where bothPathsExist
-          = Function.on (Applicative.liftA2 (&&)) pathExists left right
+  where bothPathsExist = liftedOn (&&) pathExists left right
+        liftedOn = Function.on . Applicative.liftA2
         pathExists path
           = Applicative.liftA2 (||) (Directory.doesFileExist path) $
               Directory.doesDirectoryExist path
@@ -102,7 +115,7 @@ internalFormat :: Arguments -> IO (Maybe String)
 internalFormat arguments
   = do inputString <- readInput
        case Formatter.format stream inputString of
-           Left error -> return . Just $ prepareError error
+           Left libraryError -> return . Just $ showError libraryError
            Right outputString -> writeOutput outputString >> return Nothing
   where readInput = maybe getContents readFile maybeInput
         maybeInput = input arguments
@@ -112,11 +125,13 @@ internalFormat arguments
         writeOutput = maybe putStr writeFile maybeOutput
         maybeOutput = output arguments
 
-prepareError :: Formatter.Error -> String
-prepareError parseError@(Formatter.ParseError _ _)
-  = show parseError
-prepareError assertionError@(Formatter.AssertionError _)
-  = unlines
-      ["Oops, an error occurred.",
-       "Feel free to report this, because it appears to be a bug. Thanks!",
-       "The exact error message follows.", "", show assertionError]
+showError :: Formatter.Error -> String
+showError libraryError
+  = if Formatter.isAssertionError libraryError then assertionError
+      else rawError
+  where assertionError
+          = unlines
+              ["Oops, an error occurred.",
+               "Feel free to report this, because it appears to be a bug. Thanks!",
+               "The specific error message follows.", "", rawError]
+        rawError = show libraryError
