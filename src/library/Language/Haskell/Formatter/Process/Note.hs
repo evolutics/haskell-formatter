@@ -6,9 +6,8 @@ module Language.Haskell.Formatter.Process.Note
         IndentedComment, commentCore, commentStartColumn,
         LocationCommentNote, locationNote, commentNote, createCommentNote,
         createIndentedComment, createLocationCommentNote,
-        replaceCommentStartColumns)
+        replaceCommentBoxes, replaceCommentStartColumn, replaceCommentNote)
        where
-import qualified Control.Applicative as Applicative
 import qualified Data.Function as Function
 import qualified Data.Monoid as Monoid
 import qualified Language.Haskell.Formatter.CommentCore
@@ -61,24 +60,33 @@ createLocationCommentNote rawLocationNote rawCommentNote
                         commentNote = rawCommentNote}
 
 replaceCommentBoxes ::
-                    (CommentBox -> CommentBox) -> CommentNote -> CommentNote
+                    ([CommentBox] -> [CommentBox]) -> CommentNote -> CommentNote
 replaceCommentBoxes function note
   = note{commentsBefore = replace commentsBefore,
          commentsAfter = replace commentsAfter}
-  where replace getComments
-          = function Applicative.<$> getComments note
+  where replace getComments = function $ getComments note
 
-replaceIndentedComments ::
-                        (IndentedComment -> IndentedComment) -> CommentNote -> CommentNote
-replaceIndentedComments function = replaceCommentBoxes partFunction
+replaceCommentBox ::
+                  (CommentBox -> CommentBox) -> CommentNote -> CommentNote
+replaceCommentBox function = replaceCommentBoxes $ fmap function
+
+replaceIndentedComment ::
+                       (IndentedComment -> IndentedComment) -> CommentNote -> CommentNote
+replaceIndentedComment function = replaceCommentBox partFunction
   where partFunction (ActualComment comment)
           = ActualComment $ function comment
         partFunction EmptyLine = EmptyLine
 
-replaceCommentStartColumns ::
-                           (Location.Column -> Location.Column) -> CommentNote -> CommentNote
-replaceCommentStartColumns function
-  = replaceIndentedComments partFunction
+replaceCommentStartColumn ::
+                          (Location.Column -> Location.Column) -> CommentNote -> CommentNote
+replaceCommentStartColumn function
+  = replaceIndentedComment partFunction
   where partFunction comment
           = comment{commentStartColumn =
                       function $ commentStartColumn comment}
+
+replaceCommentNote ::
+                   (CommentNote -> CommentNote) ->
+                     LocationCommentNote -> LocationCommentNote
+replaceCommentNote function note
+  = note{commentNote = function $ commentNote note}

@@ -118,8 +118,9 @@ createComments
                 emptyLines
                   = case maybeEndLine of
                         Nothing -> []
-                        Just endLine -> [Note.EmptyLine | lineDistance > 1]
-                          where lineDistance = Location.minus startLine endLine :: Integer
+                        Just endLine -> replicate emptyLineCount Note.EmptyLine
+                          where emptyLineCount = pred lineDistance
+                                lineDistance = Location.minus startLine endLine :: Int
                 startLine = Location.getStartLine portion
                 actualComments = [Note.ActualComment indentedComment]
                 indentedComment = Note.createIndentedComment core Location.base

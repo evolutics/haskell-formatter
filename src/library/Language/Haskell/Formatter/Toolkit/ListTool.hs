@@ -2,9 +2,12 @@
 Description : List utilities
 -}
 module Language.Haskell.Formatter.Toolkit.ListTool
-       (maybeLast, takeEvery, concatenateRuns, concatenateShiftedRuns)
+       (maybeLast, mergeConsecutiveElements, takeEvery, concatenateRuns,
+        concatenateShiftedRuns)
        where
+import qualified Data.List as List
 import qualified Data.Maybe as Maybe
+import qualified Data.Monoid as Monoid
 import qualified Data.Word as Word
 
 {-| The last element, or 'Nothing' if there is none.
@@ -13,6 +16,20 @@ import qualified Data.Word as Word
     prop> maybeLast (l ++ [e]) == Just e -}
 maybeLast :: [a] -> Maybe a
 maybeLast = Maybe.listToMaybe . reverse
+
+{-| @mergeConsecutiveElements i l@ keeps only the first element of consecutive
+    elements of @l@ satisfying the predicate @i@.
+
+    >>> mergeConsecutiveElements Data.Char.isSpace " ab c  d\LF  e  "
+    " ab c d\ne "
+-}
+mergeConsecutiveElements :: (a -> Bool) -> [a] -> [a]
+mergeConsecutiveElements isMerged
+  = snd . List.foldl' merge (False, [])
+  where merge (isConsecutive, list) element = (isConsecutive', list')
+          where isConsecutive' = isMerged element
+                list' = Monoid.mappend list merged
+                merged = if isConsecutive' && isConsecutive then [] else [element]
 
 {-| @takeEvery p l@ takes every @p@th element of @l@ from the first one.
 
