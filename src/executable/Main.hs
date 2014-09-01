@@ -4,6 +4,7 @@ Description : Root of executable
 module Main (main) where
 import qualified Data.Foldable as Foldable
 import qualified Data.Function as Function
+import qualified Data.List as List
 import qualified Data.Monoid as Monoid
 import qualified Language.Haskell.Formatter as Formatter
 import qualified Options.Applicative as Applicative
@@ -36,10 +37,11 @@ utilityUsage = Applicative.info parserWithHelp modifier
               "Haskell Formatter – A Haskell source code formatter"
         description
           = Applicative.progDesc $
-              concat
-                ["The Haskell Formatter formats Haskell source code ",
-                 "in a strict way. The source code is read from INPUT, ",
-                 "formatted, and written to OUTPUT."]
+              createParagraphs
+                [["The Haskell Formatter formats Haskell source code. ",
+                  "It is strict in that it fundamentally rearranges code."],
+                 ["The source code is read from INPUT, ",
+                  "formatted, and written to OUTPUT."]]
 
 argumentParser :: Applicative.Parser Arguments
 argumentParser
@@ -68,6 +70,10 @@ argumentParser
 
 forceStandardName :: Char
 forceStandardName = 'f'
+
+createParagraphs :: [[String]] -> String
+createParagraphs = unlines . List.intersperse emptyLine . fmap concat
+  where emptyLine = ""
 
 externalFormat :: Arguments -> IO (Maybe String)
 externalFormat arguments
@@ -129,10 +135,9 @@ showError :: Formatter.Error -> String
 showError libraryError
   = if Formatter.isAssertionError libraryError then assertionError else rawError
   where assertionError
-          = unlines
-              [concat
-                 ["Oops, an error occurred. ", "Feel free to report this, ",
-                  "because it appears to be a bug. Thanks! ",
-                  "The specific error message follows."],
-               "", rawError]
+          = createParagraphs
+              [["Oops, an error occurred. ", "Feel free to report this, ",
+                "because it appears to be a bug. Thanks! ",
+                "The specific error message follows."],
+               [rawError]]
         rawError = show libraryError

@@ -1,7 +1,7 @@
 FORMATTED_FILES = Setup.hs src testsuite/src
 FORMATTER_UTILITY = dist/build/haskell-formatter/haskell-formatter
 FORMATTER_ARGUMENTS = --force --input {} --output {}
-GENERATED_FILES = dist
+GENERATED_FILES = dist README.xhtml
 
 all:
 	cabal configure --enable-tests
@@ -10,6 +10,7 @@ all:
 	cabal test
 
 	cabal haddock --internal
+	rst2html --strict README.rst README.xhtml
 
 #	Use "xargs" instead of "-exec", since
 #	1. the call should fail if any "-exec" fails and
