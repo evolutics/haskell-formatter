@@ -1,2 +1,0 @@
-predecessor = predecessor
-successor = successor

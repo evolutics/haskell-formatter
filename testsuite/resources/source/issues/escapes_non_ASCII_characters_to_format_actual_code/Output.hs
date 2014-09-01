@@ -1,1 +1,0 @@
-string = '☑'     : " same line"
