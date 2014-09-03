@@ -4,13 +4,15 @@ import qualified Language.Haskell.Formatter.Location as Location
 import qualified Language.Haskell.Formatter.Process.Code as Code
 import qualified Language.Haskell.Formatter.Process.Note as Note
 import qualified Language.Haskell.Formatter.Result as Result
+import qualified Language.Haskell.Formatter.Style as Style
 import qualified Language.Haskell.Formatter.Toolkit.ListTool as ListTool
 import qualified Language.Haskell.Formatter.Toolkit.Visit as Visit
 
 formatComments ::
-               Code.LocatableCommentableCode ->
-                 Result.Result Code.LocatableCommentableCode
-formatComments = return . indentToLineStart . mergeConsecutiveEmptyLines
+               Style.Style ->
+                 Code.LocatableCommentableCode ->
+                   Result.Result Code.LocatableCommentableCode
+formatComments _ = return . indentToLineStart . mergeConsecutiveEmptyLines
 
 indentToLineStart ::
                   Code.LocatableCommentableCode -> Code.LocatableCommentableCode

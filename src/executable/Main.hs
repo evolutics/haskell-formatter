@@ -121,11 +121,14 @@ sameExistentPaths left right
 internalFormat :: Arguments -> IO (Maybe String)
 internalFormat arguments
   = do inputString <- readInput
-       case Formatter.format stream inputString of
+       case Formatter.format configuration inputString of
            Left libraryError -> return . Just $ showError libraryError
            Right outputString -> writeOutput outputString >> return Nothing
   where readInput = maybe getContents readFile maybeInput
         maybeInput = input arguments
+        configuration
+          = Formatter.defaultConfiguration{Formatter.configurationStreamName =
+                                             stream}
         stream
           = maybe Formatter.standardInput Formatter.createStreamName maybeInput
         writeOutput = maybe putStr writeFile maybeOutput

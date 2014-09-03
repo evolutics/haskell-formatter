@@ -52,7 +52,10 @@ fileTests input expectedOutput
 
 testFormatting :: FilePath -> String -> String -> HUnit.Assertion
 testFormatting inputFile input expectedOutput
-  = case Formatter.format inputStream input of
+  = case Formatter.format configuration input of
         Left unexpectedError -> HUnit.assertFailure $ show unexpectedError
         Right actualOutput -> actualOutput HUnit.@?= expectedOutput
-  where inputStream = Formatter.createStreamName inputFile
+  where configuration
+          = Formatter.defaultConfiguration{Formatter.configurationStreamName =
+                                             inputStream}
+        inputStream = Formatter.createStreamName inputFile

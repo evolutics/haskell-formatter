@@ -13,17 +13,19 @@ import qualified Language.Haskell.Formatter.Process.FormatComments
        as FormatComments
 import qualified Language.Haskell.Formatter.Process.Formatter as Formatter
 import qualified Language.Haskell.Formatter.Result as Result
+import qualified Language.Haskell.Formatter.Style as Style
 
-format :: ExactCode.ExactCode -> Result.Result ExactCode.ExactCode
-format = Formatter.format createFormatter
+format ::
+       Style.Style -> ExactCode.ExactCode -> Result.Result ExactCode.ExactCode
+format style = Formatter.format $ createFormatter style
 
-createFormatter :: Formatter.Formatter
-createFormatter
+createFormatter :: Style.Style -> Formatter.Formatter
+createFormatter style
   = Formatter.Formatter{Formatter.attachComments =
-                          AttachComments.attachComments,
+                          AttachComments.attachComments style,
                         Formatter.formatActualCode =
-                          FormatActualCode.formatActualCode,
+                          FormatActualCode.formatActualCode style,
                         Formatter.formatComments =
-                          FormatComments.formatComments,
+                          FormatComments.formatComments style,
                         Formatter.detachComments =
-                          DetachComments.detachComments}
+                          DetachComments.detachComments style}

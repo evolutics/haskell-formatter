@@ -12,6 +12,7 @@ import qualified Language.Haskell.Formatter.Process.LineShifting as LineShifting
 import qualified Language.Haskell.Formatter.Process.Note as Note
 import qualified Language.Haskell.Formatter.Result as Result
 import qualified Language.Haskell.Formatter.Source as Source
+import qualified Language.Haskell.Formatter.Style as Style
 import qualified Language.Haskell.Formatter.Toolkit.ListTool as ListTool
 import qualified Language.Haskell.Formatter.Toolkit.StreamName as StreamName
 
@@ -34,9 +35,10 @@ instance Monoid.Monoid Reservation where
                         Just Note.EmptyLine -> False
 
 detachComments ::
-               Code.LocatableCommentableCode ->
-                 Result.Result ExactCode.ExactCode
-detachComments locatableCommentable
+               Style.Style ->
+                 Code.LocatableCommentableCode ->
+                   Result.Result ExactCode.ExactCode
+detachComments _ locatableCommentable
   = return $ ExactCode.create locatable' comments
   where locatable' = LineShifting.shiftCode shifter locatable
         shifter = reservationShifter reservation

@@ -1,7 +1,8 @@
 {-|
 Description : Root of formatting
 -}
-module Language.Haskell.Formatter.Main (format) where
+module Language.Haskell.Formatter.Main (defaultFormat, format) where
+import qualified Language.Haskell.Formatter.Configuration as Configuration
 import qualified Language.Haskell.Formatter.Error as Error
 import qualified Language.Haskell.Formatter.ExactCode as ExactCode
 import qualified Language.Haskell.Formatter.Process.Control as Control
@@ -9,14 +10,20 @@ import qualified Language.Haskell.Formatter.Result as Result
 import qualified Language.Haskell.Formatter.Source as Source
 import qualified Language.Haskell.Formatter.Toolkit.StreamName as StreamName
 
-format :: StreamName.StreamName -> String -> Either Error.Error String
-format stream = Result.toEither . tryFormat stream
+defaultFormat :: String -> Either Error.Error String
+defaultFormat = format Configuration.defaultConfiguration
 
-tryFormat :: StreamName.StreamName -> String -> Result.Result String
-tryFormat stream source
-  = do exact <- parse stream source
-       exact' <- Control.format exact
+format :: Configuration.Configuration -> String -> Either Error.Error String
+format configuration = Result.toEither . tryFormat configuration
+
+tryFormat :: Configuration.Configuration -> String -> Result.Result String
+tryFormat configuration source
+  = do Configuration.check configuration
+       exact <- parse stream source
+       exact' <- Control.format style exact
        return $ show exact'
+  where stream = Configuration.configurationStreamName configuration
+        style = Configuration.configurationStyle configuration
 
 parse :: StreamName.StreamName -> String -> Result.Result ExactCode.ExactCode
 parse stream source

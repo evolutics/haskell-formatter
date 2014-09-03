@@ -12,6 +12,7 @@ import qualified Language.Haskell.Formatter.Process.Code as Code
 import qualified Language.Haskell.Formatter.Process.Note as Note
 import qualified Language.Haskell.Formatter.Result as Result
 import qualified Language.Haskell.Formatter.Source as Source
+import qualified Language.Haskell.Formatter.Style as Style
 
 data Assignment = Assignment (Map.Map Location.SrcSpan Note.CommentNote)
                 deriving (Eq, Ord, Show)
@@ -21,8 +22,10 @@ instance Monoid.Monoid Assignment where
         mappend (Assignment left) (Assignment right) = Assignment merged
           where merged = Map.unionWith Monoid.mappend left right
 
-attachComments :: ExactCode.ExactCode -> Result.Result Code.CommentableCode
-attachComments exact
+attachComments ::
+               Style.Style ->
+                 ExactCode.ExactCode -> Result.Result Code.CommentableCode
+attachComments _ exact
   = if Map.null unassigned then return commentable else
       Result.fatalAssertionError message
   where (Assignment unassigned, commentable) = spread assignment locatable

@@ -19,6 +19,7 @@ library
   exposed-modules:     Language.Haskell.Formatter
   other-modules:
                        Language.Haskell.Formatter.CommentCore,
+                       Language.Haskell.Formatter.Configuration,
                        Language.Haskell.Formatter.Error,
                        Language.Haskell.Formatter.ExactCode,
                        Language.Haskell.Formatter.Location,
@@ -34,6 +35,7 @@ library
                        Language.Haskell.Formatter.Process.Note,
                        Language.Haskell.Formatter.Result,
                        Language.Haskell.Formatter.Source,
+                       Language.Haskell.Formatter.Style,
                        Language.Haskell.Formatter.Toolkit.ListTool,
                        Language.Haskell.Formatter.Toolkit.Newline,
                        Language.Haskell.Formatter.Toolkit.Splitter,
