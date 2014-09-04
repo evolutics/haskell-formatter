@@ -30,6 +30,7 @@ library
   exposed-modules:
     Language.Haskell.Formatter,
     Language.Haskell.Formatter.Internal.MapTree,
+    Language.Haskell.Formatter.Internal.Newline,
     Language.Haskell.Formatter.Internal.StyleFileFormat,
     Language.Haskell.Formatter.Internal.TreeFormat
 
@@ -53,7 +54,6 @@ library
     Language.Haskell.Formatter.Source,
     Language.Haskell.Formatter.Style,
     Language.Haskell.Formatter.Toolkit.ListTool,
-    Language.Haskell.Formatter.Toolkit.Newline,
     Language.Haskell.Formatter.Toolkit.Splitter,
     Language.Haskell.Formatter.Toolkit.StreamName,
     Language.Haskell.Formatter.Toolkit.Visit

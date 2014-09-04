@@ -15,8 +15,8 @@ import qualified Data.Function as Function
 import qualified Language.Haskell.Exts.Annotated.Syntax as Syntax
 import qualified Language.Haskell.Exts.Comments as Comments
 import qualified Language.Haskell.Exts.SrcLoc as SrcLoc
+import qualified Language.Haskell.Formatter.Internal.Newline as Newline
 import qualified Language.Haskell.Formatter.Toolkit.ListTool as ListTool
-import qualified Language.Haskell.Formatter.Toolkit.Newline as Newline
 import qualified Language.Haskell.Formatter.Toolkit.StreamName as StreamName
 
 class (Enum a) => Natural a where

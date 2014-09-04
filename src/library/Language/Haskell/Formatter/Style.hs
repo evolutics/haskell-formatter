@@ -5,6 +5,7 @@ module Language.Haskell.Formatter.Style
        (Style(..), Indentation, defaultStyle, check) where
 import qualified Data.Maybe as Maybe
 import qualified Language.Haskell.Formatter.Error as Error
+import qualified Language.Haskell.Formatter.Internal.Newline as Newline
 import qualified Language.Haskell.Formatter.Result as Result
 import qualified Language.Haskell.Formatter.Source as Source
 
@@ -41,7 +42,7 @@ check style
   where maybeError
           = case errorMessages of
                 [] -> Nothing
-                messages -> Just $ unlines messages
+                messages -> Just $ Newline.joinSeparatedLines messages
         errorMessages = Maybe.mapMaybe unwrap $ createChecks style
         unwrap (Check errorMessage) = errorMessage
 

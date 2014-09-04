@@ -7,7 +7,7 @@ module Language.Haskell.Formatter.CommentCore
        where
 import qualified Data.Char as Char
 import qualified Data.Monoid as Monoid
-import qualified Language.Haskell.Formatter.Toolkit.Newline as Newline
+import qualified Language.Haskell.Formatter.Internal.Newline as Newline
 
 data CommentCore = CommentCore{kind :: Kind, content :: String}
                  deriving (Eq, Ord)

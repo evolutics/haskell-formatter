@@ -7,6 +7,7 @@ import qualified Data.Function as Function
 import qualified Data.List as List
 import qualified Data.Monoid as Monoid
 import qualified Language.Haskell.Formatter as Formatter
+import qualified Language.Haskell.Formatter.Internal.Newline as Newline
 import qualified Language.Haskell.Formatter.Internal.StyleFileFormat
        as StyleFileFormat
 import qualified Language.Haskell.Formatter.Internal.TreeFormat as TreeFormat
@@ -82,7 +83,8 @@ forceStandardName :: Char
 forceStandardName = 'f'
 
 createParagraphs :: [[String]] -> String
-createParagraphs = unlines . List.intersperse emptyLine . fmap concat
+createParagraphs
+  = Newline.joinSeparatedLines . List.intersperse emptyLine . fmap concat
   where emptyLine = ""
 
 formatWithUncheckedArguments :: Arguments -> IO (Maybe String)

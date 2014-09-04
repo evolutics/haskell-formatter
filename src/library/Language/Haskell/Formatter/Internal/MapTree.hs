@@ -6,7 +6,7 @@ module Language.Haskell.Formatter.Internal.MapTree
 import qualified Control.Applicative as Applicative
 import qualified Data.Map.Strict as Map
 import qualified Data.Monoid as Monoid
-import qualified Language.Haskell.Formatter.Toolkit.Newline as Newline
+import qualified Language.Haskell.Formatter.Internal.Newline as Newline
 
 data MapTree k a = Leaf a
                  | Node (MapForest k a)

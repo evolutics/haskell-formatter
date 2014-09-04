@@ -1,3 +1,6 @@
+{-|
+Description : Tests for internal parts
+-}
 module Language.Haskell.Formatter.Internal.Tests (tests) where
 import qualified Language.Haskell.Formatter as Formatter
 import qualified Language.Haskell.Formatter.Internal.StyleFileFormat

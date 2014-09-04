@@ -1,7 +1,7 @@
 {-|
 Description : Handling Unicode newlines
 -}
-module Language.Haskell.Formatter.Toolkit.Newline
+module Language.Haskell.Formatter.Internal.Newline
        (newlines, joinSeparatedLines, splitSeparatedLines) where
 import qualified Data.List as List
 import qualified Language.Haskell.Formatter.Toolkit.Splitter as Splitter

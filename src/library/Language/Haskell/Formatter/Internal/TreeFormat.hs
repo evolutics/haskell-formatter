@@ -11,7 +11,7 @@ import qualified Data.Scientific as Scientific
 import qualified Data.Text as Text
 import qualified Data.Yaml as Yaml
 import qualified Language.Haskell.Formatter.Internal.MapTree as MapTree
-import qualified Language.Haskell.Formatter.Toolkit.Newline as Newline
+import qualified Language.Haskell.Formatter.Internal.Newline as Newline
 
 type TreeFormat a = MapTree.MapForest String (Leaf a)
 
