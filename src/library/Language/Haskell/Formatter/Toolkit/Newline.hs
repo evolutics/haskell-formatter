@@ -2,7 +2,8 @@
 Description : Handling Unicode newlines
 -}
 module Language.Haskell.Formatter.Toolkit.Newline
-       (newlines, splitSeparatedLines) where
+       (newlines, joinSeparatedLines, splitSeparatedLines) where
+import qualified Data.List as List
 import qualified Language.Haskell.Formatter.Toolkit.Splitter as Splitter
 
 {-| Unicode newline strings ordered by descending length. This corresponds to
@@ -10,6 +11,16 @@ import qualified Language.Haskell.Formatter.Toolkit.Splitter as Splitter
     <http://www.unicode.org/standard/reports/tr13/tr13-5.html>. -}
 newlines :: [String]
 newlines = ["\CR\LF", "\LF", "\VT", "\FF", "\CR", "\x85", "\x2028", "\x2029"]
+
+{-| Concatenates strings with default newlines @\"\\n\"@ between.
+
+    Unlike 'unlines', this does not append a newline to the last string.
+
+    >>> joinSeparatedLines ["apple", "pine"]
+    "apple\npine" -}
+joinSeparatedLines :: [String] -> String
+joinSeparatedLines = List.intercalate defaultNewline
+  where defaultNewline = "\LF"
 
 {-| Breaks a string up into its lines at 'newlines'. The resulting strings do
     not contain 'newlines'.

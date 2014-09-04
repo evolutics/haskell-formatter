@@ -27,7 +27,9 @@ extra-tmp-files:
 
 library
   exposed-modules:
-    Language.Haskell.Formatter
+    Language.Haskell.Formatter,
+    Language.Haskell.Formatter.Internal.MapTree,
+    Language.Haskell.Formatter.Internal.TreeFormat
 
   other-modules:
     Language.Haskell.Formatter.CommentCore,
@@ -57,7 +59,11 @@ library
   build-depends:
     base == 4.6.*,
     containers == 0.5.*,
-    haskell-src-exts == 1.15.*
+    haskell-src-exts == 1.15.*,
+    scientific == 0.3.*,
+    text == 1.1.*,
+    unordered-containers == 0.2.*,
+    yaml == 0.8.*
 
   hs-source-dirs:
     src/library
@@ -87,7 +93,6 @@ test-suite test
     Language.Haskell.Formatter.Tests,
     Language.Haskell.Formatter.Toolkit.FileTesting,
     Language.Haskell.Formatter.Toolkit.FileTree,
-    Language.Haskell.Formatter.Toolkit.MapTree,
     Language.Haskell.Formatter.Toolkit.TestTool
 
   build-depends:
