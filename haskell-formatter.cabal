@@ -92,6 +92,7 @@ test-suite test
   main-is:             Main.hs
 
   other-modules:
+    Language.Haskell.Formatter.Internal.Tests,
     Language.Haskell.Formatter.Tests,
     Language.Haskell.Formatter.Toolkit.FileTesting,
     Language.Haskell.Formatter.Toolkit.FileTree,
@@ -117,4 +118,3 @@ test-suite test
 source-repository head
   type:                git
   location:            https://github.com/evolutics/haskell-formatter.git
-

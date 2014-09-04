@@ -16,7 +16,7 @@ import qualified Test.Tasty.HUnit as HUnit
 tests :: IO Tasty.TestTree
 tests
   = Tasty.testGroup name Applicative.<$> FileTesting.fileTestForest create root
-  where name = "Tests based on files"
+  where name = "Formatting files"
         root = "testsuite" FilePath.</> "resources" FilePath.</> "source"
 
 create ::

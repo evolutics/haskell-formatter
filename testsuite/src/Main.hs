@@ -4,6 +4,7 @@ Description : Root of test suite
 module Main (main) where
 import qualified Control.Applicative as Applicative
 import qualified Data.Set as Set
+import qualified Language.Haskell.Formatter.Internal.Tests as Internal
 import qualified Language.Haskell.Formatter.Tests as Formatter
 import qualified Language.Haskell.Formatter.Toolkit.TestTool as TestTool
 import qualified System.FilePath as FilePath
@@ -14,12 +15,14 @@ main :: IO ()
 main = sequence tests >>= Tasty.defaultMain . Tasty.testGroup "Root"
 
 tests :: [IO Tasty.TestTree]
-tests = [standardSourceCodeTests, documentationTests, Formatter.tests]
+tests
+  = [sourceCodeStandardTests, documentationTests, Formatter.tests,
+     Internal.tests]
 
-standardSourceCodeTests :: IO Tasty.TestTree
-standardSourceCodeTests
+sourceCodeStandardTests :: IO Tasty.TestTree
+sourceCodeStandardTests
   = createTestTree TestTool.standardSourceCodeTest Find.always
-      "Standard source code tests"
+      "Source code standard"
 
 createTestTree ::
                (FilePath -> Tasty.TestTree) ->
@@ -43,6 +46,6 @@ roots
 documentationTests :: IO Tasty.TestTree
 documentationTests
   = createTestTree (TestTool.documentationTest roots) noRecursion
-      "Documentation tests"
+      "Documentation (doctest)"
   where noRecursion = Find.depth Find.==? rootDepth
         rootDepth = 0
