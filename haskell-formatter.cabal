@@ -17,6 +17,7 @@ description:
   fundamentally rearranges code.
 
 extra-source-files:
+  default_style.yaml
   .gitignore
   HLint.hs
   Makefile
@@ -29,6 +30,7 @@ library
   exposed-modules:
     Language.Haskell.Formatter,
     Language.Haskell.Formatter.Internal.MapTree,
+    Language.Haskell.Formatter.Internal.StyleFileFormat,
     Language.Haskell.Formatter.Internal.TreeFormat
 
   other-modules:
@@ -115,3 +117,4 @@ test-suite test
 source-repository head
   type:                git
   location:            https://github.com/evolutics/haskell-formatter.git
+

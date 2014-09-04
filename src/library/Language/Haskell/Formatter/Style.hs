@@ -81,7 +81,7 @@ createChecks style
               (and $ fmap (> rawOnsideIndentation) greaterOnsideIndentations)
               ["The ", onsideName,
                " indentation must be less than the other indentations, ",
-               "but it is ", show onsideName, "."]
+               "but it is ", show rawOnsideIndentation, "."]
         greaterOnsideIndentations
           = [rawClassIndentation, rawDoIndentation, rawCaseIndentation,
              rawLetIndentation, rawWhereIndentation]

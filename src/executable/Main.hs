@@ -7,6 +7,9 @@ import qualified Data.Function as Function
 import qualified Data.List as List
 import qualified Data.Monoid as Monoid
 import qualified Language.Haskell.Formatter as Formatter
+import qualified Language.Haskell.Formatter.Internal.StyleFileFormat
+       as StyleFileFormat
+import qualified Language.Haskell.Formatter.Internal.TreeFormat as TreeFormat
 import qualified Options.Applicative as Applicative
 import qualified System.Directory as Directory
 import qualified System.Exit as Exit
@@ -14,13 +17,13 @@ import qualified System.FilePath as FilePath
 import qualified System.IO as IO
 
 data Arguments = Arguments{input :: Maybe FilePath, output :: Maybe FilePath,
-                           force :: Bool}
+                           force :: Bool, styleFile :: Maybe FilePath}
                deriving (Eq, Ord, Show)
 
 main :: IO ()
 main
   = do arguments <- Applicative.execParser utilityUsage
-       maybeError <- externalFormat arguments
+       maybeError <- formatWithUncheckedArguments arguments
        Foldable.mapM_ exitWithError maybeError
   where exitWithError errorMessage
           = putErrorLine errorMessage >> Exit.exitFailure
@@ -47,6 +50,7 @@ argumentParser :: Applicative.Parser Arguments
 argumentParser
   = Arguments Applicative.<$> inputOption Applicative.<*> outputOption
       Applicative.<*> forceOption
+      Applicative.<*> styleOption
   where inputOption
           = Applicative.optional . Applicative.strOption $
               Monoid.mconcat
@@ -67,6 +71,12 @@ argumentParser
                 [Applicative.short forceStandardName, Applicative.long "force",
                  Applicative.help
                    "Allows the output file to overwrite the input file"]
+        styleOption
+          = Applicative.optional . Applicative.strOption $
+              Monoid.mconcat
+                [Applicative.short 's', Applicative.long "style",
+                 Applicative.metavar "STYLE",
+                 Applicative.help "Formatting style file"]
 
 forceStandardName :: Char
 forceStandardName = 'f'
@@ -75,11 +85,11 @@ createParagraphs :: [[String]] -> String
 createParagraphs = unlines . List.intersperse emptyLine . fmap concat
   where emptyLine = ""
 
-externalFormat :: Arguments -> IO (Maybe String)
-externalFormat arguments
+formatWithUncheckedArguments :: Arguments -> IO (Maybe String)
+formatWithUncheckedArguments arguments
   = do maybeError <- checkArguments arguments
        case maybeError of
-           Nothing -> internalFormat arguments
+           Nothing -> formatWithCheckedArguments arguments
            Just errorMessage -> return $ Just errorMessage
 
 checkArguments :: Arguments -> IO (Maybe String)
@@ -118,19 +128,50 @@ sameExistentPaths left right
           = Applicative.liftA2 (||) (Directory.doesFileExist path) $
               Directory.doesDirectoryExist path
 
-internalFormat :: Arguments -> IO (Maybe String)
-internalFormat arguments
+formatWithCheckedArguments :: Arguments -> IO (Maybe String)
+formatWithCheckedArguments arguments
+  = do maybeConfiguration <- getConfiguration arguments
+       case maybeConfiguration of
+           Left errorMessage -> return $ Just errorMessage
+           Right configuration -> formatWithConfiguration arguments
+                                    configuration
+
+getConfiguration :: Arguments -> IO (Either String Formatter.Configuration)
+getConfiguration arguments
+  = do maybeStyle <- getStyle arguments
+       return $
+         case maybeStyle of
+             Left message -> Left message
+             Right style -> Right configuration
+               where configuration
+                       = defaults{Formatter.configurationStyle = style}
+  where defaults
+          = Formatter.defaultConfiguration{Formatter.configurationStreamName =
+                                             stream}
+        stream
+          = maybe Formatter.standardInput Formatter.createStreamName maybeInput
+        maybeInput = input arguments
+
+getStyle :: Arguments -> IO (Either String Formatter.Style)
+getStyle arguments
+  = case styleFile arguments of
+        Nothing -> return $ Right defaultStyle
+        Just file -> TreeFormat.parseYamlFile StyleFileFormat.treeFormat
+                       defaultStyle
+                       file
+  where defaultStyle
+          = Formatter.configurationStyle Formatter.defaultConfiguration
+
+formatWithConfiguration ::
+                        Arguments ->
+                          Formatter.Configuration -> IO (Maybe String)
+formatWithConfiguration arguments configuration
   = do inputString <- readInput
        case Formatter.format configuration inputString of
            Left libraryError -> return . Just $ showError libraryError
            Right outputString -> writeOutput outputString >> return Nothing
   where readInput = maybe getContents readFile maybeInput
         maybeInput = input arguments
-        configuration
-          = Formatter.defaultConfiguration{Formatter.configurationStreamName =
-                                             stream}
-        stream
-          = maybe Formatter.standardInput Formatter.createStreamName maybeInput
         writeOutput = maybe putStr writeFile maybeOutput
         maybeOutput = output arguments
 

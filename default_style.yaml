@@ -1,0 +1,9 @@
+line_length_limit: 80
+ribbons_per_line: 1
+indentations:
+    class: 8
+    do: 3
+    case: 4
+    let: 4
+    where: 6
+    onside: 2
