@@ -17,11 +17,11 @@ description:
   fundamentally rearranges code.
 
 extra-source-files:
-  default_style.yaml
   .gitignore
   HLint.hs
   Makefile
   README.rst
+  testsuite/resources/examples/default_style.yaml
 
 extra-tmp-files:
   README.xhtml

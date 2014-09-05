@@ -12,7 +12,8 @@ import qualified System.FilePath.Find as Find
 import qualified Test.Tasty as Tasty
 
 main :: IO ()
-main = sequence tests >>= Tasty.defaultMain . Tasty.testGroup "Root"
+main = sequence tests >>= Tasty.defaultMain . Tasty.testGroup name
+  where name = "Root"
 
 tests :: [IO Tasty.TestTree]
 tests
@@ -21,8 +22,8 @@ tests
 
 sourceCodeStandardTests :: IO Tasty.TestTree
 sourceCodeStandardTests
-  = createTestTree TestTool.standardSourceCodeTest Find.always
-      "Source code standard"
+  = createTestTree TestTool.standardSourceCodeTest Find.always name
+  where name = "Source code standard"
 
 createTestTree ::
                (FilePath -> Tasty.TestTree) ->
@@ -45,7 +46,7 @@ roots
 
 documentationTests :: IO Tasty.TestTree
 documentationTests
-  = createTestTree (TestTool.documentationTest roots) noRecursion
-      "Documentation (doctest)"
+  = createTestTree (TestTool.documentationTest roots) noRecursion name
   where noRecursion = Find.depth Find.==? rootDepth
         rootDepth = 0
+        name = "Documentation (doctest)"

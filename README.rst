@@ -32,10 +32,23 @@ The formatting style can be configured with a file referred by the ``--style`` o
 
     $ haskell-formatter --style my_style.yaml --input Input.hs --output Output.hs
 
-uses ``my_style.yaml`` as a style file. Such a file generally follows the `YAML format <http://en.wikipedia.org/wiki/YAML>`_. The following is an `example style file <default_style.yaml>`_, which at the same time shows the available keys with their default values.
+uses ``my_style.yaml`` as a style file. Such a file generally follows the `YAML format <http://en.wikipedia.org/wiki/YAML>`_. The following is an `example style file <testsuite/resources/examples/default_style.yaml>`_, which at the same time shows the available keys with their default values.
 
-.. include:: default_style.yaml
-   :literal:
+.. GitHub does currently not allow to include files with the reST directive ``include`` (https://github.com/github/markup/issues/172).
+
+   Thus, the file content is replicated here. There is a test which checks that the strings of both sources are equal.
+
+.. code:: yaml
+
+    line_length_limit: 80
+    ribbons_per_line: 1
+    indentations:
+        class: 8
+        do: 3
+        case: 4
+        let: 4
+        where: 6
+        onside: 2
 
 Help
 ----

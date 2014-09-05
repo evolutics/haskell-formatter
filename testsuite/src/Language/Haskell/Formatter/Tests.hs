@@ -22,15 +22,16 @@ tests
 create ::
        Either Exception.IOException (Map.Map FilePath String) ->
          [Tasty.TestTree]
-create (Left exception)
-  = [TestTool.testingError "I/O exception" $ show exception]
+create (Left exception) = [TestTool.testingError name $ show exception]
+  where name = "I/O exception"
 create (Right testMap)
   = if actualKeys == expectedKeys then fileTests input expectedOutput else
-      [TestTool.testingError "Set of filenames" message]
+      [TestTool.testingError name message]
   where actualKeys = Map.keysSet testMap
         expectedKeys = Set.fromList [inputKey, outputKey]
         input = testMap Map.! inputKey
         expectedOutput = testMap Map.! outputKey
+        name = "Set of filenames"
         message
           = concat
               ["The filenames are ", setString actualKeys, " instead of ",
