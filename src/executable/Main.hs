@@ -171,9 +171,12 @@ formatWithConfiguration arguments configuration
   = do inputString <- readInput
        case Formatter.format configuration inputString of
            Left libraryError -> return . Just $ showError libraryError
-           Right outputString -> writeOutput outputString >> return Nothing
+           Right outputString -> do evaluateString outputString $
+                                      writeOutput outputString
+                                    return Nothing
   where readInput = maybe getContents readFile maybeInput
         maybeInput = input arguments
+        evaluateString string = seq $ length string
         writeOutput = maybe putStr writeFile maybeOutput
         maybeOutput = output arguments
 
