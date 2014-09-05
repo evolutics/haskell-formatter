@@ -40,9 +40,8 @@ defaultInterpret format value ball
 
 interpret ::
           TreeFormat a -> Yaml.Value -> a -> (MapTree.MapTree String String, a)
-interpret (MapTree.MapForest formatMap) (Yaml.Object rawValueMap) ball
-  = (errorNode, ball')
-  where errorNode = MapTree.Node . MapTree.MapForest $ Map.mapMaybe id errorTree
+interpret formatMap (Yaml.Object rawValueMap) ball = (errorNode, ball')
+  where errorNode = MapTree.Node $ Map.mapMaybe id errorTree
         (ball', errorTree) = Map.mapAccumWithKey move ball valueMap
         move ballPart key value = (ballPart', maybeErrors)
           where (maybeErrors, ballPart') = matchTree maybeFormat value ballPart

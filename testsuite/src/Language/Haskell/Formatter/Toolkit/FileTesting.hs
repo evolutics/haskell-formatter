@@ -30,7 +30,6 @@ testForest ::
            (a -> [Tasty.TestTree]) ->
              MapTree.MapTree Tasty.TestName a -> [Tasty.TestTree]
 testForest createTests (MapTree.Leaf value) = createTests value
-testForest createTests (MapTree.Node (MapTree.MapForest children))
-  = mapOrder testTree children
-  where mapOrder function = Map.elems . Map.mapWithKey function
-        testTree label = Tasty.testGroup label . testForest createTests
+testForest createTests (MapTree.Node forest)
+  = Map.elems $ Map.mapWithKey testTree forest
+  where testTree label = Tasty.testGroup label . testForest createTests
