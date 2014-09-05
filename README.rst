@@ -68,6 +68,14 @@ For more help about the usage, call
 
     $ haskell-formatter --help
 
+Related Projects
+================
+
+The following interesting projects aim at formatting Haskell code, too.
+
+* `hindent <https://github.com/chrisdone/hindent>`_
+* `stylish-haskell <https://github.com/jaspervdj/stylish-haskell>`_
+
 License
 =======
 
