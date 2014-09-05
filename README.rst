@@ -7,7 +7,7 @@ Introduction
 
 The Haskell Formatter formats Haskell source code. It is strict in that it fundamentally rearranges code.
 
-By invoking ``make``, the utility is created as `<dist/build/haskell-formatter/haskell-formatter>`_.
+By invoking ``make``, the utility is created as ``dist/build/haskell-formatter/haskell-formatter``.
 
 Usage
 =====
@@ -40,15 +40,24 @@ uses ``my_style.yaml`` as a style file. Such a file generally follows the `YAML 
 
 .. code:: yaml
 
+    # Lines should be no longer than this length in characters.
     line_length_limit: 80
+    
+    # How much to spread code over multiple lines instead of trying to fill a single
+    # line. More precisely, this is the ratio of the ribbon (number of characters
+    # on a line without leading and trailing whitespace) to "line_length_limit".
+    # Only the lowest value of 1 forces "line_length_limit" to be applied strictly.
+    # Reference: http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.38.8777
     ribbons_per_line: 1
+    
+    # Indentation lengths in characters.
     indentations:
-        class: 8
-        do: 3
-        case: 4
-        let: 4
-        where: 6
-        onside: 2
+        class: 8     # "class" and "instance" declarations.
+        do: 3        # "do" notation. 
+        case: 4      # Body of "case" expressions.
+        let: 4       # Declarations in "let" expressions.
+        where: 6     # Declarations in "where" clauses.
+        onside: 2    # Continuation lines which would otherwise be offside.
 
 Help
 ----
