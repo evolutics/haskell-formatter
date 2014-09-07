@@ -7,7 +7,12 @@ Introduction
 
 The Haskell Formatter formats Haskell source code. It is strict in that it fundamentally rearranges code.
 
-By invoking ``make``, the utility is created as ``dist/build/haskell-formatter/haskell-formatter``.
+Installation
+============
+
+::
+
+    $ cabal install haskell-formatter
 
 Usage
 =====
