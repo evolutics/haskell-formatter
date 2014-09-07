@@ -23,6 +23,12 @@ For example, source code is read from ``Input.hs``, formatted, and written to ``
 
 If the input or output file is not given, it defaults to the corresponding standard stream.
 
+For more help about the usage, call
+
+::
+
+    $ haskell-formatter --help
+
 Style Configuration
 -------------------
 
@@ -58,15 +64,6 @@ uses ``my_style.yaml`` as a style file. Such a file generally follows the `YAML 
         let: 4       # Declarations in "let" expressions.
         where: 6     # Declarations in "where" clauses.
         onside: 2    # Continuation lines which would otherwise be offside.
-
-Help
-----
-
-For more help about the usage, call
-
-::
-
-    $ haskell-formatter --help
 
 Related Projects
 ================
