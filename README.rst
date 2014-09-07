@@ -40,7 +40,7 @@ The formatting style can be configured with a file referred by the ``--style`` o
 
 uses ``my_style.yaml`` as a style file. Such a file generally follows the `YAML format <http://en.wikipedia.org/wiki/YAML>`_. The following is an `example style file <testsuite/resources/examples/default_style.yaml>`_, which at the same time shows the available keys with their default values.
 
-.. GitHub does currently not allow to include files with the reST directive ``include`` (https://github.com/github/markup/issues/172).
+.. GitHub does currently not allow to include files with the reStructuredText directive ``include`` (https://github.com/github/markup/issues/172).
 
    Thus, the file content is replicated here. There is a test which checks that the strings of both sources are equal.
 
@@ -50,9 +50,10 @@ uses ``my_style.yaml`` as a style file. Such a file generally follows the `YAML 
     line_length_limit: 80
     
     # How much to spread code over multiple lines instead of trying to fill a single
-    # line. More precisely, this is the ratio of the ribbon (number of characters
-    # on a line without leading and trailing whitespace) to "line_length_limit".
-    # Only the lowest value of 1 forces "line_length_limit" to be applied strictly.
+    # line. More precisely, this guides the ratio of "line_length_limit" to the
+    # ribbon length (the number of characters on a line without leading and trailing
+    # whitespace). Only the lowest value of 1 forces "line_length_limit" to be
+    # applied strictly.
     # Reference: http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.38.8777
     ribbons_per_line: 1
     
