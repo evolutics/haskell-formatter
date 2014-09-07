@@ -1,3 +1,6 @@
+{-|
+Description : Rearranging the actual code (not the comments)
+-}
 module Language.Haskell.Formatter.Process.FormatActualCode (formatActualCode)
        where
 import qualified Control.Applicative as Applicative

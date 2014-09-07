@@ -1,3 +1,8 @@
+{-|
+Description : Detaching comments from the annotations of the syntax tree
+
+This is the last part of the process.
+-}
 module Language.Haskell.Formatter.Process.DetachComments (detachComments) where
 import qualified Data.Foldable as Foldable
 import qualified Data.List as List

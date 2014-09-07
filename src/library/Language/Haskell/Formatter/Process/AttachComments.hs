@@ -1,3 +1,8 @@
+{-|
+Description : Attaching comments to the annotations of the syntax tree
+
+This is the first part of the process.
+-}
 module Language.Haskell.Formatter.Process.AttachComments (attachComments) where
 import qualified Data.Foldable as Foldable
 import qualified Data.Function as Function

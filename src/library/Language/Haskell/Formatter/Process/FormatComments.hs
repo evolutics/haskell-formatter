@@ -1,3 +1,6 @@
+{-|
+Description : Rearranging the comments
+-}
 module Language.Haskell.Formatter.Process.FormatComments (formatComments) where
 import qualified Data.Function as Function
 import qualified Language.Haskell.Formatter.Location as Location
