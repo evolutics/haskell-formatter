@@ -19,7 +19,7 @@ data Formatter = Formatter{attachComments ::
                              Result.Result Code.CommentableCode,
                            formatActualCode ::
                            Code.LocatableCommentableCode ->
-                             Result.Result Code.LocatableCode,
+                             Result.Result Code.LocatableCommentableCode,
                            formatComments ::
                            Code.LocatableCommentableCode ->
                              Result.Result Code.LocatableCommentableCode,
@@ -36,9 +36,10 @@ instance Coded ExactCode.ExactCode where
 format :: Formatter -> ExactCode.ExactCode -> Result.Result ExactCode.ExactCode
 format formatter exact
   = do commentable <- checkedAttachComments formatter exact
-       locatableCommentable <- tryZipLocationsComments locatable commentable
-       locatable' <- checkedFormatActualCode formatter locatableCommentable
-       locatableCommentable' <- tryZipLocationsComments locatable' commentable
+       locatableCommentable <- Code.tryZipLocationsComments locatable
+                                 commentable
+       {- Formatting the actual code is allowed to change the code itself. -}
+       locatableCommentable' <- formatActualCode formatter locatableCommentable
        locatableCommentable'' <- checkedFormatComments formatter
                                    locatableCommentable'
        exact' <- checkedDetachComments formatter locatableCommentable''
@@ -66,25 +67,6 @@ transformWithCheck transform assert errorMessage input
   = do output <- transform input
        if assert input output then return output else
          Result.fatalAssertionError errorMessage
-
-tryZipLocationsComments ::
-                        Code.LocatableCode ->
-                          Code.CommentableCode ->
-                            Result.Result Code.LocatableCommentableCode
-tryZipLocationsComments locatable commentable
-  = case maybeZipped of
-        Nothing -> Result.fatalAssertionError message
-          where message = "The code notes could not be zipped."
-        Just zipped -> return zipped
-  where maybeZipped = Code.tryZipLocationsComments locatable commentable
-
-checkedFormatActualCode ::
-                        Formatter ->
-                          Code.LocatableCommentableCode ->
-                            Result.Result Code.LocatableCode
-checkedFormatActualCode formatter
-  = transformNotes (formatActualCode formatter) message
-  where message = "Formatting the actual code changed the code itself."
 
 checkedFormatComments ::
                       Formatter ->
