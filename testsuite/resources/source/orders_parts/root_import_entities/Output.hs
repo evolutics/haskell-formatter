@@ -1,0 +1,1 @@
+import Tree (fringe, isLeaf)
