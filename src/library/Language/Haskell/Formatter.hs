@@ -5,7 +5,7 @@ module Language.Haskell.Formatter
        (Configuration.Configuration(..), Configuration.defaultConfiguration,
         Error.Error, Error.isAssertionError, Main.defaultFormat, Main.format,
         StreamName.createStreamName, StreamName.standardInput,
-        StreamName.StreamName, Style.Style(..))
+        StreamName.StreamName, Style.Indentation, Style.Style(..))
        where
 import qualified Language.Haskell.Formatter.Configuration as Configuration
 import qualified Language.Haskell.Formatter.Error as Error
