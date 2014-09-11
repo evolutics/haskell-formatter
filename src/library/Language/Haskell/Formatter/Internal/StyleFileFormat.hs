@@ -36,4 +36,15 @@ treeFormat
                 \ value style -> style{Formatter.whereIndentation = value}),
              ("onside",
               MapTree.Leaf . TreeFormat.LimitedInteger $
-                \ value style -> style{Formatter.onsideIndentation = value})])]
+                \ value style -> style{Formatter.onsideIndentation = value})]),
+       ("order",
+        MapTree.Node $
+          Map.fromList
+            [("import_declarations",
+              MapTree.Leaf . TreeFormat.Boolean $
+                \ value style ->
+                  style{Formatter.orderImportDeclarations = value}),
+             ("import_entities",
+              MapTree.Leaf . TreeFormat.Boolean $
+                \ value style ->
+                  style{Formatter.orderImportEntities = value})])]

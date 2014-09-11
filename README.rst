@@ -70,6 +70,14 @@ uses ``my_style.yaml`` as a style file. Such a file generally follows the `YAML 
         let: 4       # Declarations in "let" expressions.
         where: 6     # Declarations in "where" clauses.
         onside: 2    # Continuation lines which would otherwise be offside.
+    
+    # Decides which parts of the code to sort.
+    order:
+        # Sequence of import declarations.
+        import_declarations: true
+    
+        # Entities of import lists.
+        import_entities: true
 
 Related Projects
 ================
