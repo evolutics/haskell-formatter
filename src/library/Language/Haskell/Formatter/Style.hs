@@ -15,7 +15,7 @@ data Style = Style{lineLengthLimit :: Int, ribbonsPerLine :: Float,
                    letIndentation :: Indentation,
                    whereIndentation :: Indentation,
                    onsideIndentation :: Indentation,
-                   orderImportDeclarations :: Bool}
+                   orderImportDeclarations :: Bool, orderImportEntities :: Bool}
            deriving (Eq, Ord, Show)
 
 data Check = Check (Maybe String)
@@ -33,7 +33,7 @@ defaultStyle
           letIndentation = Source.letIndent mode,
           whereIndentation = Source.whereIndent mode,
           onsideIndentation = Source.onsideIndent mode,
-          orderImportDeclarations = True}
+          orderImportDeclarations = True, orderImportEntities = True}
   where mode = Source.defaultMode
 
 check :: Style -> Result.Result ()

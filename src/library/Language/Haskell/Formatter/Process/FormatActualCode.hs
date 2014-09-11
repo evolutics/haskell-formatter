@@ -4,8 +4,8 @@ Description : Rearranging the actual code (not the comments)
 module Language.Haskell.Formatter.Process.FormatActualCode (formatActualCode)
        where
 import qualified Control.Applicative as Applicative
-import qualified Language.Haskell.Exts.Annotated.Syntax as Syntax
 import qualified Language.Haskell.Formatter.Process.Code as Code
+import qualified Language.Haskell.Formatter.Process.CodeOrdering as CodeOrdering
 import qualified Language.Haskell.Formatter.Result as Result
 import qualified Language.Haskell.Formatter.Source as Source
 import qualified Language.Haskell.Formatter.Style as Style
@@ -29,51 +29,16 @@ prepare style = Visit.compose preparations
           = [preparation | (isApplied, preparation) <- applications,
              isApplied style]
         applications
-          = [(Style.orderImportDeclarations, orderImportDeclarations)]
+          = [(Style.orderImportDeclarations,
+              CodeOrdering.orderImportDeclarations),
+             (Style.orderImportEntities, orderImportEntities)]
 
-orderImportDeclarations ::
-                        Code.LocatableCommentableCode ->
-                          Code.LocatableCommentableCode
-orderImportDeclarations = replaceImportDeclarations replace
-  where replace = Visit.orderByKey key
-        key
-          (Syntax.ImportDecl _ moduleName isQualified isWithSource package alias
-             entitiesList)
-          = (moduleNameKey moduleName, isQualified, isWithSource, package,
-             fmap moduleNameKey alias, fmap entitiesListKey entitiesList)
-        moduleNameKey (Syntax.ModuleName _ name) = name
-        entitiesListKey (Syntax.ImportSpecList _ isHiding entities)
-          = (isHiding, fmap entityKey entities)
-
-replaceImportDeclarations ::
-                          ([Syntax.ImportDecl a] -> [Syntax.ImportDecl a]) ->
-                            Source.Module a -> Source.Module a
-replaceImportDeclarations function (Syntax.Module a h p importDeclarations d)
-  = Syntax.Module a h p importDeclarations' d
-  where importDeclarations' = function importDeclarations
-replaceImportDeclarations _ xmlPage@(Syntax.XmlPage _ _ _ _ _ _ _) = xmlPage
-replaceImportDeclarations function
-  (Syntax.XmlHybrid a h p importDeclarations d xn xa me e)
-  = Syntax.XmlHybrid a h p importDeclarations' d xn xa me e
-  where importDeclarations' = function importDeclarations
-
-entityKey :: Syntax.ImportSpec a -> [String]
-entityKey (Syntax.IVar _ name) = rootNameKey name
-entityKey (Syntax.IAbs _ name) = rootNameKey name
-entityKey (Syntax.IThingAll _ name) = rootNameKey name
-entityKey (Syntax.IThingWith _ name nestedEntities)
-  = nameKey name : fmap nestedEntityKey nestedEntities
-
-rootNameKey :: Syntax.Name a -> [String]
-rootNameKey name = [nameKey name]
-
-nameKey :: Syntax.Name a -> String
-nameKey (Syntax.Ident _ name) = name
-nameKey (Syntax.Symbol _ name) = name
-
-nestedEntityKey :: Syntax.CName a -> String
-nestedEntityKey (Syntax.VarName _ name) = nameKey name
-nestedEntityKey (Syntax.ConName _ name) = nameKey name
+orderImportEntities ::
+                    Code.LocatableCommentableCode ->
+                      Code.LocatableCommentableCode
+orderImportEntities
+  = CodeOrdering.orderRootImportEntities .
+      CodeOrdering.orderNestedImportEntities
 
 prettyPrint ::
             Style.Style ->

@@ -43,6 +43,7 @@ library
     Language.Haskell.Formatter.Main,
     Language.Haskell.Formatter.Process.AttachComments,
     Language.Haskell.Formatter.Process.Code,
+    Language.Haskell.Formatter.Process.CodeOrdering,
     Language.Haskell.Formatter.Process.Control,
     Language.Haskell.Formatter.Process.DetachComments,
     Language.Haskell.Formatter.Process.FormatActualCode,
