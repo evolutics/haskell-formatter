@@ -1,5 +1,5 @@
 name:                  haskell-formatter
-version:               0.1.0.0
+version:               0.1.0
 synopsis:              Haskell source code formatter
 homepage:              https://github.com/evolutics/haskell-formatter
 bug-reports:           https://github.com/evolutics/haskell-formatter/issues
