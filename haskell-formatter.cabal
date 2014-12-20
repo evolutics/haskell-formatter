@@ -62,7 +62,7 @@ library
   build-depends:
     base == 4.6.*,
     containers == 0.5.*,
-    haskell-src-exts == 1.15.*,
+    haskell-src-exts == 1.16.*,
     scientific == 0.3.*,
     text == 1.1.*,
     unordered-containers == 0.2.*,

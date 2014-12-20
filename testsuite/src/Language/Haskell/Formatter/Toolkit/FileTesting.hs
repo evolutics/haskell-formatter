@@ -16,7 +16,7 @@ fileTestForest ::
 fileTestForest = folderTestForest readFile
 
 folderTestForest ::
-                   (Monoid.Monoid a) =>
+                   Monoid.Monoid a =>
                    (FilePath -> IO a) ->
                      (Either Exception.IOException (Map.Map FilePath a) ->
                         [Tasty.TestTree])

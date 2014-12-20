@@ -92,7 +92,7 @@ createComments stream = accumulateReservation create
                         Note.EmptyLine -> []
 
 accumulateReservation ::
-                        (Monoid.Monoid m) =>
+                        Monoid.Monoid m =>
                         (Location.Line -> [Note.CommentBox] -> m) ->
                           Reservation -> m
 accumulateReservation create (Reservation reservation) = accumulation

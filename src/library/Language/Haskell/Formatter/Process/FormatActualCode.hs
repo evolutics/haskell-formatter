@@ -59,7 +59,7 @@ prettyPrint style locatableCommentable
                   where message = "Formatting the actual code failed to zip."
                 Just locatable' -> return locatable'
 
-defaultPrettyPrint :: (Source.Pretty a) => Style.Style -> a -> String
+defaultPrettyPrint :: Source.Pretty a => Style.Style -> a -> String
 defaultPrettyPrint
   = Applicative.liftA2 Source.prettyPrintStyleMode renderingStyle mode
 

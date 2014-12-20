@@ -15,10 +15,11 @@ orderImportDeclarations ::
                           Code.LocatableCommentableCode
 orderImportDeclarations = replaceImportDeclarations $ Visit.orderByKey key
   where key
-          (Syntax.ImportDecl _ moduleName isQualified isWithSource package alias
-             entitiesList)
-          = (moduleNameKey moduleName, isQualified, isWithSource, package,
-             fmap moduleNameKey alias, fmap entitiesListKey entitiesList)
+          (Syntax.ImportDecl _ moduleName isQualified isWithSource isSafe
+             package alias entitiesList)
+          = (moduleNameKey moduleName, isQualified, isWithSource, isSafe,
+             package, fmap moduleNameKey alias,
+             fmap entitiesListKey entitiesList)
         moduleNameKey (Syntax.ModuleName _ name) = name
         entitiesListKey (Syntax.ImportSpecList _ isHiding entities)
           = (isHiding, fmap importEntityKey entities)
@@ -36,7 +37,7 @@ replaceImportDeclarations function
   where importDeclarations' = function importDeclarations
 
 importEntityKey :: Syntax.ImportSpec a -> [String]
-importEntityKey (Syntax.IVar _ name) = rootNameKey name
+importEntityKey (Syntax.IVar _ _ name) = rootNameKey name
 importEntityKey (Syntax.IAbs _ name) = rootNameKey name
 importEntityKey (Syntax.IThingAll _ name) = rootNameKey name
 importEntityKey (Syntax.IThingWith _ name entities)

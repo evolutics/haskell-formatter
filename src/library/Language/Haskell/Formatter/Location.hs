@@ -19,15 +19,15 @@ import qualified Language.Haskell.Formatter.Toolkit.ListTool as ListTool
 import qualified Language.Haskell.Formatter.Toolkit.StreamName as StreamName
 import Prelude hiding (getLine)
 
-class (Enum a) => Natural a where
+class Enum a => Natural a where
 
         base :: a
 
-        plus :: (Integral b) => b -> a -> a
+        plus :: Integral b => b -> a -> a
         plus difference natural
           = toEnum $ fromIntegral difference + fromEnum natural
 
-        minus :: (Num b) => a -> a -> b
+        minus :: Num b => a -> a -> b
         minus minuend = fromIntegral . Function.on (-) fromEnum minuend
 
 class Portioned a where
@@ -57,13 +57,13 @@ instance Natural Column where
 instance Portioned SrcLoc.SrcSpanInfo where
         getPortion = SrcLoc.srcInfoSpan
 
-instance (Portioned a) => Portioned (Syntax.Module a) where
+instance Portioned a => Portioned (Syntax.Module a) where
         getPortion = getPortion . Syntax.ann
 
 instance Portioned Comments.Comment where
         getPortion (Comments.Comment _ commentPortion _) = commentPortion
 
-streamName :: (SrcLoc.SrcInfo a) => a -> StreamName.StreamName
+streamName :: SrcLoc.SrcInfo a => a -> StreamName.StreamName
 streamName = StreamName.createStreamName . SrcLoc.fileName
 
 getLine :: SrcLoc.SrcLoc -> Line
@@ -116,10 +116,10 @@ stringPortion startPosition string = SrcLoc.mkSrcSpan startPosition endPosition
         hasSingleLine = lineCount == 1
         startColumn = getStartColumn startPosition
 
-getStartLine :: (SrcLoc.SrcInfo a) => a -> Line
+getStartLine :: SrcLoc.SrcInfo a => a -> Line
 getStartLine = getLine . SrcLoc.getPointLoc
 
-getStartColumn :: (SrcLoc.SrcInfo a) => a -> Column
+getStartColumn :: SrcLoc.SrcInfo a => a -> Column
 getStartColumn = getColumn . SrcLoc.getPointLoc
 
 getEndLine :: SrcLoc.SrcSpan -> Line
