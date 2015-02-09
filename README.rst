@@ -62,13 +62,16 @@ uses ``my_style.yaml`` as a style file. Such a file generally follows the `YAML 
     # Reference: http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.38.8777
     ribbons_per_line: 1
     
+    # More than this number of empty lines in succession are merged.
+    successive_empty_lines_limit: 1
+    
     # Indentation lengths in characters.
     indentations:
-        class: 8     # "class" and "instance" declarations.
-        do: 3        # "do" notation. 
-        case: 4      # Body of "case" expressions.
-        let: 4       # Declarations in "let" expressions.
-        where: 6     # Declarations in "where" clauses.
+        class:  8    # "class" and "instance" declarations.
+        do:     3    # "do" notation. 
+        case:   4    # Body of "case" expressions.
+        let:    4    # Declarations in "let" expressions.
+        where:  6    # Declarations in "where" clauses.
         onside: 2    # Continuation lines which would otherwise be offside.
     
     # Decides which parts of the code to sort.

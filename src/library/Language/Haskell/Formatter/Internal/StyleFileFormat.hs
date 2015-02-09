@@ -16,6 +16,9 @@ treeFormat
        ("ribbons_per_line",
         MapTree.Leaf . TreeFormat.SingleFloating $
           \ value style -> style{Formatter.ribbonsPerLine = value}),
+       ("successive_empty_lines_limit",
+        MapTree.Leaf . TreeFormat.LimitedInteger $
+          \ value style -> style{Formatter.successiveEmptyLinesLimit = value}),
        ("indentations",
         MapTree.Node $
           Map.fromList
