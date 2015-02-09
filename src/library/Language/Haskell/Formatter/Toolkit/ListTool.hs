@@ -2,8 +2,8 @@
 Description : List utilities
 -}
 module Language.Haskell.Formatter.Toolkit.ListTool
-       (maybeLast, mergeConsecutiveElements, takeEvery, concatenateRuns,
-        concatenateShiftedRuns)
+       (maybeLast, dropWhileAtMost, mergeLongerSuccessions, takeEvery,
+        concatenateRuns, concatenateShiftedRuns)
        where
 import qualified Data.List as List
 import qualified Data.Maybe as Maybe
@@ -17,19 +17,28 @@ import qualified Data.Word as Word
 maybeLast :: [a] -> Maybe a
 maybeLast = Maybe.listToMaybe . reverse
 
-{-| @mergeConsecutiveElements i l@ keeps only the first element of consecutive
-    elements of @l@ satisfying the predicate @i@.
+{-| @dropWhileAtMost p l@ is like @dropWhile p@, but drops at most @l@ elements.
 
-    >>> mergeConsecutiveElements Data.Char.isSpace " ab c  d\LF  e  "
-    " ab c d\ne "
--}
-mergeConsecutiveElements :: (a -> Bool) -> [a] -> [a]
-mergeConsecutiveElements isMerged = snd . List.foldl' merge (False, [])
-  where merge (isConsecutive, list) element = (isConsecutive', list')
-          where isConsecutive' = isMerged element
-                list' = Monoid.mappend list merged
-                merged
-                  = if isConsecutive' && isConsecutive then [] else [element]
+    >>> dropWhileAtMost (== ' ') 2 "   a bc "
+    " a bc " -}
+dropWhileAtMost :: (a -> Bool) -> Int -> [a] -> [a]
+dropWhileAtMost predicate limit list
+  = Monoid.mappend (dropWhile predicate deformable) rigid
+  where (deformable, rigid) = splitAt limit list
+
+{-| @mergeLongerSuccessions p c l@ keeps only the first @c@ elements of
+    successive elements of @l@ satisfying the predicate @p@.
+
+    >>> mergeLongerSuccessions Data.Char.isSpace 2 "  ab c  d\LF  e   "
+    "  ab c  d\n e  " -}
+mergeLongerSuccessions :: (a -> Bool) -> Int -> [a] -> [a]
+mergeLongerSuccessions predicate count = snd . List.foldl' merge (0, [])
+  where merge (successionLength, list) element
+          = if predicate element then
+              if successionLength < count then (succ successionLength, extended)
+                else (count, list)
+              else (0, extended)
+          where extended = Monoid.mappend list [element]
 
 {-| @takeEvery p l@ takes every @p@th element of @l@ from the first one.
 

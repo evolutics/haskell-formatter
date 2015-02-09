@@ -21,25 +21,6 @@ formatActualCode style locatableCommentable
   where locatableCommentable' = prepare style locatableCommentable
         commentable = Code.dropLocations locatableCommentable'
 
-prepare ::
-        Style.Style ->
-          Code.LocatableCommentableCode -> Code.LocatableCommentableCode
-prepare style = Visit.compose preparations
-  where preparations
-          = [preparation | (isApplied, preparation) <- applications,
-             isApplied style]
-        applications
-          = [(Style.orderImportDeclarations,
-              CodeOrdering.orderImportDeclarations),
-             (Style.orderImportEntities, orderImportEntities)]
-
-orderImportEntities ::
-                    Code.LocatableCommentableCode ->
-                      Code.LocatableCommentableCode
-orderImportEntities
-  = CodeOrdering.orderRootImportEntities .
-      CodeOrdering.orderNestedImportEntities
-
 prettyPrint ::
             Style.Style ->
               Code.LocatableCommentableCode -> Result.Result Code.LocatableCode
@@ -76,3 +57,22 @@ mode style
                        Source.letIndent = Style.letIndentation style,
                        Source.whereIndent = Style.whereIndentation style,
                        Source.onsideIndent = Style.onsideIndentation style}
+
+prepare ::
+        Style.Style ->
+          Code.LocatableCommentableCode -> Code.LocatableCommentableCode
+prepare style = Visit.compose preparations
+  where preparations
+          = [preparation | (isApplied, preparation) <- applications,
+             isApplied style]
+        applications
+          = [(Style.orderImportDeclarations,
+              CodeOrdering.orderImportDeclarations),
+             (Style.orderImportEntities, orderImportEntities)]
+
+orderImportEntities ::
+                    Code.LocatableCommentableCode ->
+                      Code.LocatableCommentableCode
+orderImportEntities
+  = CodeOrdering.orderRootImportEntities .
+      CodeOrdering.orderNestedImportEntities

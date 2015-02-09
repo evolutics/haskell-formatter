@@ -10,6 +10,7 @@ import qualified Language.Haskell.Formatter.Result as Result
 import qualified Language.Haskell.Formatter.Source as Source
 
 data Style = Style{lineLengthLimit :: Int, ribbonsPerLine :: Float,
+                   successiveEmptyLinesLimit :: Int,
                    classIndentation :: Indentation,
                    doIndentation :: Indentation, caseIndentation :: Indentation,
                    letIndentation :: Indentation,
@@ -27,6 +28,7 @@ type Indentation = Int
 defaultStyle :: Style
 defaultStyle
   = Style{lineLengthLimit = 80, ribbonsPerLine = 1,
+          successiveEmptyLinesLimit = 1,
           classIndentation = Source.classIndent mode,
           doIndentation = Source.doIndent mode,
           caseIndentation = Source.caseIndent mode,
@@ -51,8 +53,9 @@ check style
 createChecks :: Style -> [Check]
 createChecks style
   = concat
-      [[lineLengthLimitCheck, ribbonsPerLineCheck], indentationChecks,
-       [onsideLessCheck]]
+      [[lineLengthLimitCheck, ribbonsPerLineCheck,
+        successiveEmptyLinesLimitCheck],
+       indentationChecks, [onsideLessCheck]]
   where lineLengthLimitCheck
           = createCheck (rawLineLengthLimit > 0)
               ["The line length limit must be positive, but it is ",
@@ -63,6 +66,12 @@ createChecks style
               ["The ribbons per line ratio must be at least 1, but it is ",
                show rawRibbonsPerLine, "."]
         rawRibbonsPerLine = ribbonsPerLine style
+        successiveEmptyLinesLimitCheck
+          = createCheck (rawSuccessiveEmptyLinesLimit >= 0)
+              ["The successive empty lines limit must not be negative, ",
+               "but it is ", show rawSuccessiveEmptyLinesLimit, "."]
+        rawSuccessiveEmptyLinesLimit = successiveEmptyLinesLimit style
+
         indentationChecks = fmap checkIndentation indentations
         checkIndentation (indentation, name)
           = createCheck (indentation > 0)

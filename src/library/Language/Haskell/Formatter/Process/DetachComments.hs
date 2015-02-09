@@ -13,7 +13,7 @@ import qualified Language.Haskell.Formatter.CommentCore as CommentCore
 import qualified Language.Haskell.Formatter.ExactCode as ExactCode
 import qualified Language.Haskell.Formatter.Location as Location
 import qualified Language.Haskell.Formatter.Process.Code as Code
-import qualified Language.Haskell.Formatter.Process.LineShifting as LineShifting
+import qualified Language.Haskell.Formatter.Process.LineTool as LineTool
 import qualified Language.Haskell.Formatter.Process.Note as Note
 import qualified Language.Haskell.Formatter.Result as Result
 import qualified Language.Haskell.Formatter.Source as Source
@@ -45,21 +45,21 @@ detachComments ::
                    Result.Result ExactCode.ExactCode
 detachComments _ locatableCommentable
   = return $ ExactCode.create locatable' comments
-  where locatable' = LineShifting.shiftCode shifter locatable
+  where locatable' = LineTool.shiftCode shifter locatable
         shifter = reservationShifter reservation
         reservation = reserveForCode locatableCommentable
         locatable = Code.dropComments locatableCommentable
         comments = createComments stream reservation
         stream = Location.streamName $ Location.getPortion locatable'
 
-reservationShifter :: Reservation -> LineShifting.Shifter
+reservationShifter :: Reservation -> LineTool.Shifter
 reservationShifter (Reservation reservation)
-  = LineShifting.createShifter $ fmap commentsShift reservation
+  = LineTool.createShifter $ fmap commentsShift reservation
 
-commentsShift :: [Note.CommentBox] -> LineShifting.Shift
+commentsShift :: [Note.CommentBox] -> LineTool.Shift
 commentsShift = sum . fmap commentShift
 
-commentShift :: Note.CommentBox -> LineShifting.Shift
+commentShift :: Note.CommentBox -> LineTool.Shift
 commentShift (Note.ActualComment comment)
   = CommentCore.wrappedLineCount $ Note.commentCore comment
 commentShift Note.EmptyLine = 1

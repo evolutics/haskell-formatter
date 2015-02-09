@@ -8,6 +8,7 @@ module Language.Haskell.Formatter.CommentCore
 import qualified Data.Char as Char
 import qualified Data.Monoid as Monoid
 import qualified Language.Haskell.Formatter.Internal.Newline as Newline
+import qualified Language.Haskell.Formatter.Toolkit.ListTool as ListTool
 
 data CommentCore = CommentCore{kind :: Kind, content :: String}
                  deriving (Eq, Ord)
@@ -41,6 +42,5 @@ documentationDisplacement comment
         ('^' : _) -> AfterActualCode
         _ -> None
   where unwrappedContent
-          = Monoid.mappend (dropWhile Char.isSpace deformable) rigid
-        (deformable, rigid) = splitAt spaceLimit $ content comment
+          = ListTool.dropWhileAtMost Char.isSpace spaceLimit $ content comment
         spaceLimit = 1

@@ -14,6 +14,9 @@ instance Show ExactCode where
           where rawActualCode = actualCode exact
                 rawComments = comments exact
 
+instance Location.Portioned ExactCode where
+        getPortion = Location.getPortion . actualCode
+
 create :: Source.Module Location.SrcSpanInfo -> [Source.Comment] -> ExactCode
 create rawActualCode rawComments
   = ExactCode{actualCode = rawActualCode, comments = rawComments}

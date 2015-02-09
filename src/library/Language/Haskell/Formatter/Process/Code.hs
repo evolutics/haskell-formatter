@@ -2,7 +2,7 @@
 Description : Syntax tree types
 -}
 module Language.Haskell.Formatter.Process.Code
-       (LocatableCode, CommentableCode, LocatableCommentableCode,
+       (LocatableCode, CommentableCode, LocatableCommentableCode, tryZipCode,
         tryZipLocationsComments, dropComments, dropLocations)
        where
 import qualified Language.Haskell.Formatter.Location as Location
@@ -17,21 +17,25 @@ type CommentableCode = Source.Module Note.CommentNote
 
 type LocatableCommentableCode = Source.Module Note.LocationCommentNote
 
-tryZipLocationsComments ::
-                        LocatableCode ->
-                          CommentableCode ->
-                            Result.Result LocatableCommentableCode
-tryZipLocationsComments locatable commentable
+tryZipCode ::
+           (a -> b -> c) ->
+             Source.Module a ->
+               Source.Module b -> Result.Result (Source.Module c)
+tryZipCode merge left right
   = case maybeZipped of
         Nothing -> Result.fatalAssertionError message
           where message = "The code notes could not be zipped."
         Just zipped -> return zipped
   where maybeZipped
-          = if isActualCodeSame then maybeLocatableCommentable else Nothing
-        isActualCodeSame = locatable Source.=~= commentable
-        maybeLocatableCommentable
-          = Visit.halfZipWith Note.createLocationCommentNote locatable
-              commentable
+          = if isActualCodeSame then Visit.halfZipWith merge left right else
+              Nothing
+        isActualCodeSame = left Source.=~= right
+
+tryZipLocationsComments ::
+                        LocatableCode ->
+                          CommentableCode ->
+                            Result.Result LocatableCommentableCode
+tryZipLocationsComments = tryZipCode Note.createLocationCommentNote
 
 dropComments :: LocatableCommentableCode -> LocatableCode
 dropComments = fmap Note.locationNote

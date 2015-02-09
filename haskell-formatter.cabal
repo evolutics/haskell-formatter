@@ -49,7 +49,7 @@ library
     Language.Haskell.Formatter.Process.FormatActualCode,
     Language.Haskell.Formatter.Process.FormatComments,
     Language.Haskell.Formatter.Process.Formatter,
-    Language.Haskell.Formatter.Process.LineShifting,
+    Language.Haskell.Formatter.Process.LineTool,
     Language.Haskell.Formatter.Process.Note,
     Language.Haskell.Formatter.Result,
     Language.Haskell.Formatter.Source,
