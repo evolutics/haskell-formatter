@@ -8,7 +8,6 @@ module Language.Haskell.Formatter.Toolkit.ListTool
 import qualified Data.List as List
 import qualified Data.Maybe as Maybe
 import qualified Data.Monoid as Monoid
-import qualified Data.Word as Word
 
 {-| The last element, or 'Nothing' if there is none.
 
@@ -46,19 +45,18 @@ mergeLongerSuccessions predicate count = snd . List.foldl' merge (0, [])
     "ape"
 
     prop> takeEvery 1 l == l -}
-takeEvery :: Word.Word -> [a] -> [a]
+takeEvery :: Int -> [a] -> [a]
 takeEvery _ [] = []
-takeEvery period list@(first : _)
-  = first : takeEvery period (drop (fromIntegral period) list)
+takeEvery period list@(first : _) = first : takeEvery period (drop period list)
 
 {-| @concatenateRuns p l@ repeatedly concatenates @p@ lists of @l@.
 
     >>> concatenateRuns 2 ["a", "b", "c", "d", "e"]
     ["ab","cd","e"] -}
-concatenateRuns :: Word.Word -> [[a]] -> [[a]]
+concatenateRuns :: Int -> [[a]] -> [[a]]
 concatenateRuns _ [] = []
 concatenateRuns period lists = concat run : concatenateRuns period rest
-  where (run, rest) = splitAt (fromIntegral period) lists
+  where (run, rest) = splitAt period lists
 
 {-| @concatenateShiftedRuns p s l@ first takes @s@ lists of @l@, followed by
     repeatedly concatenating @p@ lists.
@@ -66,11 +64,11 @@ concatenateRuns period lists = concat run : concatenateRuns period rest
     >>> concatenateShiftedRuns 2 1 ["a", "b", "c", "d", "e"]
     ["a","bc","de"]
 
-    prop> p == 0 || concatenateShiftedRuns p 0 l == concatenateRuns p l -}
-concatenateShiftedRuns :: Word.Word -> Word.Word -> [[a]] -> [[a]]
+    prop> p <= 0 || concatenateShiftedRuns p 0 l == concatenateRuns p l -}
+concatenateShiftedRuns :: Int -> Int -> [[a]] -> [[a]]
 concatenateShiftedRuns period shift lists
   = case shift of
         0 -> concatenateUnshifted lists
         _ -> concat shifted : concatenateUnshifted unshifted
-          where (shifted, unshifted) = splitAt (fromIntegral shift) lists
+          where (shifted, unshifted) = splitAt shift lists
   where concatenateUnshifted = concatenateRuns period
