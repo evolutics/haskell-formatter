@@ -2,7 +2,9 @@
 Description : Overall configuration
 -}
 module Language.Haskell.Formatter.Configuration
-       (Configuration(..), defaultConfiguration, check) where
+       (Configuration, configurationStyle, configurationStreamName,
+        defaultConfiguration, check)
+       where
 import qualified Language.Haskell.Formatter.Result as Result
 import qualified Language.Haskell.Formatter.Source as Source
 import qualified Language.Haskell.Formatter.Style as Style

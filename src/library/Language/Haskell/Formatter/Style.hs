@@ -2,7 +2,11 @@
 Description : Parametrization of formatting
 -}
 module Language.Haskell.Formatter.Style
-       (Style(..), Indentation, defaultStyle, check) where
+       (Style, lineLengthLimit, ribbonsPerLine, successiveEmptyLinesLimit,
+        classIndentation, doIndentation, caseIndentation, letIndentation,
+        whereIndentation, onsideIndentation, orderImportDeclarations,
+        orderImportEntities, Indentation, defaultStyle, check)
+       where
 import qualified Data.Maybe as Maybe
 import qualified Language.Haskell.Formatter.Error as Error
 import qualified Language.Haskell.Formatter.Internal.Newline as Newline
