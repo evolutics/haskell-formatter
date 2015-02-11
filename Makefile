@@ -8,12 +8,12 @@ GENERATED_FILES = dist README.xhtml
 all : build test document format
 
 build :
-	cabal install --only-dependencies --enable-tests
+	cabal install --only-dependencies --enable-tests -j
 	cabal configure --enable-tests
-	cabal build
+	cabal build -j
 
 test : build
-	cabal test
+	cabal test -j
 
 document : build README.xhtml
 	cabal haddock --internal
