@@ -1,5 +1,5 @@
 name:                  haskell-formatter
-version:               0.1.0
+version:               1.0.0
 synopsis:              Haskell source code formatter
 homepage:              https://github.com/evolutics/haskell-formatter
 bug-reports:           https://github.com/evolutics/haskell-formatter/issues
@@ -7,7 +7,7 @@ license:               GPL-3
 license-file:          LICENSE
 author:                Benjamin Fischer
 maintainer:            Benjamin Fischer <benjamin.fischer@evolutics.info>
-copyright:             (C) 2014 Benjamin Fischer
+copyright:             (C) 2014–2015 Benjamin Fischer
 category:              Development
 build-type:            Simple
 cabal-version:         >= 1.8
