@@ -2,17 +2,28 @@
 Haskell Formatter
 =================
 
-Introduction
-============
-
 The Haskell Formatter formats Haskell source code. It is strict in that it fundamentally rearranges code.
 
 Installation
 ============
 
+Run
+
 ::
 
     $ cabal install haskell-formatter
+
+to create an executable, which is referred to as ``haskell-formatter`` in the following. On Linux, for example, you should now be able to call it as
+
+::
+
+    $ ~/.cabal/bin/haskell-formatter --help
+
+In case of issues with dependencies, try to use a Cabal sandbox. For convenience, this can be done by
+
+::
+
+    $ make sandbox
 
 Usage
 =====
@@ -20,13 +31,17 @@ Usage
 Basics
 ------
 
-For example, source code is read from ``Input.hs``, formatted, and written to ``Output.hs`` by
+Read source code from ``Input.hs``, format it, and write it to ``Output.hs`` by
 
 ::
 
     $ haskell-formatter --input Input.hs --output Output.hs
 
-If the input or output file is not given, it defaults to the corresponding standard stream.
+If the input or output file is not given, it defaults to the corresponding standard stream. This allows commands like
+
+::
+
+    $ haskell-formatter < Input.hs
 
 For more help about the usage, call
 
@@ -43,7 +58,7 @@ The formatting style can be configured with a file referred by the ``--style`` o
 
     $ haskell-formatter --style my_style.yaml --input Input.hs --output Output.hs
 
-uses ``my_style.yaml`` as a style file. Such a file generally follows the `YAML format <http://en.wikipedia.org/wiki/YAML>`_. The following is an `example style file <testsuite/resources/examples/default_style.yaml>`_, which at the same time shows the available keys with their default values.
+uses ``my_style.yaml`` as a style file. Such files are in the `YAML format <http://en.wikipedia.org/wiki/YAML>`_. The following is an `example style file <testsuite/resources/examples/default_style.yaml>`_, which at the same time shows the available keys with their default values.
 
 .. GitHub does currently not allow to include files with the reStructuredText directive ``include`` (https://github.com/github/markup/issues/172).
 
@@ -85,7 +100,7 @@ uses ``my_style.yaml`` as a style file. Such a file generally follows the `YAML 
 Related Projects
 ================
 
-The following interesting projects aim at formatting Haskell code, too.
+You may like to have a look at the following projects, which aim at formatting Haskell code, too.
 
 * `hindent <https://github.com/chrisdone/hindent>`_
 * `stylish-haskell <https://github.com/jaspervdj/stylish-haskell>`_
