@@ -3,11 +3,12 @@ FORMATTER_UTILITY = dist/build/haskell-formatter/haskell-formatter
 FORMATTER_ARGUMENTS = --force --input {} --output {}
 GENERATED_FILES = dist README.xhtml
 
-.PHONY : all build test document format clean
+.PHONY : all build test document format sandbox clean
 
 all : build test document format
 
 build :
+	cabal install --only-dependencies --enable-tests
 	cabal configure --enable-tests
 	cabal build
 
@@ -27,5 +28,10 @@ format : build
 	find $(FORMATTED_FILES) -type f -name '*.hs' -print0 | \
 		xargs -n 1 -0 -I {} $(FORMATTER_UTILITY) $(FORMATTER_ARGUMENTS)
 
+sandbox :
+	cabal sandbox init
+	$(MAKE) build
+
 clean :
 	$(RM) -r $(GENERATED_FILES)
+	cabal sandbox delete
