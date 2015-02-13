@@ -1,7 +1,6 @@
 FORMATTED_FILES = Setup.hs src testsuite/src
-FORMATTER_UTILITY = dist/build/haskell-formatter/haskell-formatter
+FORMATTER_UTILITY = cabal run --
 FORMATTER_ARGUMENTS = --force --input {} --output {}
-GENERATED_FILES = dist README.xhtml
 
 .PHONY : all build test document format sandbox clean
 
@@ -14,6 +13,7 @@ build :
 
 test : build
 	cabal test -j
+	cabal check
 
 document : build README.xhtml
 	cabal haddock --internal
@@ -33,5 +33,5 @@ sandbox :
 	$(MAKE) build
 
 clean :
-	$(RM) -r $(GENERATED_FILES)
+	cabal clean
 	cabal sandbox delete
