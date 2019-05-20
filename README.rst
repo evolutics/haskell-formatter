@@ -19,11 +19,11 @@ to create an executable, which is referred to as ``haskell-formatter`` in the fo
 
     $ ~/.cabal/bin/haskell-formatter --help
 
-In case of issues with dependencies, try to use a Cabal sandbox. For convenience, this can be done by
+Alternatively, you can use Stack to build from source with
 
 ::
 
-    $ make sandbox
+    $ stack build
 
 Usage
 =====
