@@ -102,6 +102,8 @@ Related Projects
 
 You may like to have a look at the following projects, which aim at formatting Haskell code, too.
 
+* `brittany <https://github.com/lspitzner/brittany>`_
+* `hfmt <https://github.com/danstiner/hfmt>`_
 * `hindent <https://github.com/chrisdone/hindent>`_
 * `stylish-haskell <https://github.com/jaspervdj/stylish-haskell>`_
 
