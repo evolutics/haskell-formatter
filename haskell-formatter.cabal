@@ -23,9 +23,6 @@ extra-source-files:
   README.rst
   testsuite/resources/examples/default_style.yaml
 
-extra-tmp-files:
-  README.xhtml
-
 library
   exposed-modules:
     Language.Haskell.Formatter,

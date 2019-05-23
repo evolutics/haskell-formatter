@@ -4,9 +4,6 @@ FORMATTER_ARGUMENTS = --force --input {} --output {}
 
 .PHONY : format
 
-%.xhtml : %.rst
-	rst2html --strict $< $@
-
 format :
 #	Use "xargs" instead of "-exec", since
 #	1. the call should fail if any "-exec" fails and
