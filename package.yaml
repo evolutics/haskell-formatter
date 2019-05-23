@@ -28,35 +28,35 @@ library:
     - Language.Haskell.Formatter.Internal.StyleFileFormat
     - Language.Haskell.Formatter.Internal.TreeFormat
   dependencies:
-    - containers >= 0.5
-    - haskell-src-exts == 1.16.*
-    - scientific >= 0.3
-    - text >= 1.0
-    - unordered-containers >= 0.2
-    - yaml >= 0.8
+    - containers
+    - haskell-src-exts
+    - scientific
+    - text
+    - unordered-containers
+    - yaml
 executables:
   haskell-formatter:
     main: Main.hs
     source-dirs: src/executable
     ghc-options: -Wall
     dependencies:
-      - directory >= 1.2
-      - filepath >= 1.3
+      - directory
+      - filepath
       - haskell-formatter
-      - optparse-applicative >= 0.10
+      - optparse-applicative
 tests:
   test:
     main: Main.hs
     source-dirs: testsuite/src
     ghc-options: -Wall
     dependencies:
-      - containers >= 0.5
-      - directory-tree >= 0.11
-      - doctest >= 0.9
-      - filemanip >= 0.3
-      - filepath >= 1.3
+      - containers
+      - directory-tree
+      - doctest
+      - filemanip
+      - filepath
       - haskell-formatter
-      - hlint >= 1.9
-      - QuickCheck == 2.8.1
-      - tasty >= 0.9
-      - tasty-hunit >= 0.8
+      - hlint
+      - QuickCheck
+      - tasty
+      - tasty-hunit
