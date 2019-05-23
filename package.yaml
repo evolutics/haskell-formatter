@@ -17,7 +17,7 @@ extra-source-files:
   - README.rst
   - testsuite/resources/examples/default_style.yaml
 dependencies:
-  - base >= 4.6
+  - base >= 4.6 && < 5
 library:
   source-dirs: src/library
   ghc-options: -Wall
