@@ -11,9 +11,9 @@ copyright: (C) 2014–2019 Benjamin Fischer
 license: GPL-3
 github: evolutics/haskell-formatter.git
 extra-source-files:
+  - format.sh
   - .gitignore
   - HLint.hs
-  - Makefile
   - README.rst
   - testsuite/resources/examples/default_style.yaml
 dependencies:
