@@ -46,16 +46,10 @@ testReadmeContainsDefaultStyleFile = HUnit.testCase name assertion
         assertion
           = do styleString <- readFile defaultStyleFile
                readme <- readFile readmeFile
-               let isContained = isContainedInReadme styleString readme
+               let isContained = styleString `List.isInfixOf` readme
                HUnit.assertBool message isContained
-        readmeFile = "README.rst"
+        readmeFile = "README.md"
         message
           = concat
               [show readmeFile, " must contain ", show defaultStyleFile,
                ", but it does not."]
-
-isContainedInReadme :: String -> String -> Bool
-isContainedInReadme file = List.isInfixOf preparedFile
-  where preparedFile = indent file
-        indent = unlines . fmap (indentation ++) . lines
-        indentation = "    "

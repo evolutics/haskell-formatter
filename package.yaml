@@ -14,7 +14,7 @@ extra-source-files:
   - format.sh
   - .gitignore
   - .hlint.yaml
-  - README.rst
+  - README.md
   - testsuite/resources/examples/default_style.yaml
 dependencies:
   - base >= 4.6 && < 5
