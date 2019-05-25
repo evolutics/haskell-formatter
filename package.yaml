@@ -13,7 +13,7 @@ github: evolutics/haskell-formatter.git
 extra-source-files:
   - format.sh
   - .gitignore
-  - HLint.hs
+  - .hlint.yaml
   - README.rst
   - testsuite/resources/examples/default_style.yaml
 dependencies:
