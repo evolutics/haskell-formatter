@@ -10,7 +10,7 @@ import qualified Language.Haskell.Formatter.Internal.Newline as Newline
 
 data MapTree k a = Leaf a
                  | Node (MapForest k a)
-                 deriving (Eq, Ord, Show)
+                     deriving (Eq, Ord, Show)
 
 type MapForest k a = Map.Map k (MapTree k a)
 

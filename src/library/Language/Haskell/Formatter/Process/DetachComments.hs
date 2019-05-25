@@ -22,7 +22,7 @@ import qualified Language.Haskell.Formatter.Toolkit.ListTool as ListTool
 import qualified Language.Haskell.Formatter.Toolkit.StreamName as StreamName
 
 newtype Reservation = Reservation (Map.Map Location.Line [Note.CommentBox])
-                    deriving (Eq, Ord, Show)
+                        deriving (Eq, Ord, Show)
 
 instance Monoid.Monoid Reservation where
         mempty = Reservation Map.empty

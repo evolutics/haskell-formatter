@@ -15,20 +15,20 @@ import qualified Language.Haskell.Formatter.Location as Location
 
 data CommentNote = CommentNote{commentsBefore :: [CommentBox],
                                commentsAfter :: [CommentBox]}
-                 deriving (Eq, Ord, Show)
+                     deriving (Eq, Ord, Show)
 
 data CommentBox = ActualComment IndentedComment
                 | EmptyLine
-                deriving (Eq, Ord, Show)
+                    deriving (Eq, Ord, Show)
 
 data IndentedComment = IndentedComment{commentCore :: CommentCore.CommentCore,
                                        commentStartColumn :: Location.Column}
-                     deriving (Eq, Ord, Show)
+                         deriving (Eq, Ord, Show)
 
 data LocationCommentNote = LocationCommentNote{locationNote ::
                                                Location.SrcSpanInfo,
                                                commentNote :: CommentNote}
-                         deriving (Eq, Ord, Show)
+                             deriving (Eq, Ord, Show)
 
 instance Monoid.Monoid CommentNote where
         mempty = createCommentNote [] []

@@ -13,7 +13,7 @@ import qualified Language.Haskell.Formatter.Toolkit.StreamName as StreamName
 data Configuration = Configuration{configurationStyle :: Style.Style,
                                    configurationStreamName ::
                                    StreamName.StreamName}
-                   deriving (Eq, Ord, Show)
+                       deriving (Eq, Ord, Show)
 
 defaultConfiguration :: Configuration
 defaultConfiguration

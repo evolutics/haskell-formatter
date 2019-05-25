@@ -21,12 +21,12 @@ import qualified Language.Haskell.Formatter.Source as Source
 import qualified Language.Haskell.Formatter.Style as Style
 
 newtype Assignment = Assignment (Map.Map Location.SrcSpan Note.CommentNote)
-                   deriving (Eq, Ord, Show)
+                       deriving (Eq, Ord, Show)
 
 data CodeGap = InfiniteLower Location.SrcSpan
              | FiniteGap Location.SrcSpan Location.SrcSpan
              | InfiniteUpper Location.SrcSpan
-             deriving (Eq, Ord, Show)
+                 deriving (Eq, Ord, Show)
 
 instance Monoid.Monoid Assignment where
         mempty = Assignment Map.empty

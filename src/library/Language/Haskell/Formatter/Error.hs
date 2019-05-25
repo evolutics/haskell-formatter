@@ -11,7 +11,7 @@ import qualified Language.Haskell.Formatter.Source as Source
 data Error = StyleFormatError String
            | ParseError Location.SrcLoc String
            | AssertionError String
-           deriving (Eq, Ord)
+               deriving (Eq, Ord)
 
 instance Show Error where
         show (StyleFormatError message) = message

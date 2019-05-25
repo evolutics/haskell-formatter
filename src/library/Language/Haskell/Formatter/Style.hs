@@ -21,10 +21,10 @@ data Style = Style{lineLengthLimit :: Int, ribbonsPerLine :: Float,
                    whereIndentation :: Indentation,
                    onsideIndentation :: Indentation,
                    orderImportDeclarations :: Bool, orderImportEntities :: Bool}
-           deriving (Eq, Ord, Show)
+               deriving (Eq, Ord, Show)
 
 newtype Check = Check (Maybe String)
-              deriving (Eq, Ord, Show)
+                  deriving (Eq, Ord, Show)
 
 {-| Number of characters used to indent. -}
 type Indentation = Int

@@ -8,7 +8,7 @@ import qualified Control.Monad as Monad
 import qualified Language.Haskell.Formatter.Error as Error
 
 newtype Result a = Result (Either Error.Error a)
-                 deriving (Eq, Ord, Show)
+                     deriving (Eq, Ord, Show)
 
 instance Functor Result where
         fmap = Monad.liftM

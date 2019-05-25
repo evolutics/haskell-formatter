@@ -11,14 +11,14 @@ import qualified Language.Haskell.Formatter.Toolkit.Visit as Visit
 {-| Strategy to split a list on sublists. -}
 data Splitter a = Splitter{delimiterPolicy :: DelimiterPolicy,
                            delimiterQueue :: [[a]]}
-                deriving (Eq, Ord, Show)
+                    deriving (Eq, Ord, Show)
 
 {-| What to do with the delimiters? -}
 data DelimiterPolicy = Drop
                      | Separate
                      | MergeLeft
                      | MergeRight
-                     deriving (Eq, Ord, Show)
+                         deriving (Eq, Ord, Show)
 
 {-| @separate d l@ splits @l@ on the delimiters @d@, which are matched in the
     given order. The delimiters are not kept.

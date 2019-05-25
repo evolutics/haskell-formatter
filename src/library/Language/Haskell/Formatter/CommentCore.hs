@@ -11,16 +11,16 @@ import qualified Language.Haskell.Formatter.Internal.Newline as Newline
 import qualified Language.Haskell.Formatter.Toolkit.ListTool as ListTool
 
 data CommentCore = CommentCore{kind :: Kind, content :: String}
-                 deriving (Eq, Ord)
+                     deriving (Eq, Ord)
 
 data Kind = Ordinary
           | Nested
-          deriving (Eq, Ord, Show)
+              deriving (Eq, Ord, Show)
 
 data DocumentationDisplacement = BeforeActualCode
                                | AfterActualCode
                                | None
-                               deriving (Eq, Ord, Show)
+                                   deriving (Eq, Ord, Show)
 
 instance Show CommentCore where
         show comment

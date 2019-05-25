@@ -19,7 +19,7 @@ import qualified System.IO as IO
 
 data Arguments = Arguments{input :: Maybe FilePath, output :: Maybe FilePath,
                            force :: Bool, styleFile :: Maybe FilePath}
-               deriving (Eq, Ord, Show)
+                   deriving (Eq, Ord, Show)
 
 main :: IO ()
 main
