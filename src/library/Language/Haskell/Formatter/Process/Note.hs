@@ -10,6 +10,7 @@ module Language.Haskell.Formatter.Process.Note
        where
 import qualified Data.Function as Function
 import qualified Data.Monoid as Monoid
+import qualified Data.Semigroup as Semigroup
 import qualified Language.Haskell.Formatter.CommentCore as CommentCore
 import qualified Language.Haskell.Formatter.Location as Location
 
@@ -30,12 +31,14 @@ data LocationCommentNote = LocationCommentNote{locationNote ::
                                                commentNote :: CommentNote}
                              deriving (Eq, Ord, Show)
 
-instance Monoid.Monoid CommentNote where
-        mempty = createCommentNote [] []
-        mappend left right = createCommentNote before after
+instance Semigroup.Semigroup CommentNote where
+        left <> right = createCommentNote before after
           where before = merge commentsBefore
                 merge getComments = Function.on (++) getComments left right
                 after = merge commentsAfter
+
+instance Monoid.Monoid CommentNote where
+        mempty = createCommentNote [] []
 
 instance Location.Portioned LocationCommentNote where
         getPortion = Location.getPortion . locationNote

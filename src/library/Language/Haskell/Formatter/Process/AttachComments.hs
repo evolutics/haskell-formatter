@@ -9,6 +9,7 @@ import qualified Data.Function as Function
 import qualified Data.List as List
 import qualified Data.Map.Strict as Map
 import qualified Data.Monoid as Monoid
+import qualified Data.Semigroup as Semigroup
 import qualified Data.Traversable as Traversable
 import qualified Language.Haskell.Formatter.CommentCore as CommentCore
 import qualified Language.Haskell.Formatter.ExactCode as ExactCode
@@ -28,10 +29,12 @@ data CodeGap = InfiniteLower Location.SrcSpan
              | InfiniteUpper Location.SrcSpan
                  deriving (Eq, Ord, Show)
 
+instance Semigroup.Semigroup Assignment where
+        (Assignment left) <> (Assignment right) = Assignment merged
+          where merged = Map.unionWith Monoid.mappend left right
+
 instance Monoid.Monoid Assignment where
         mempty = Assignment Map.empty
-        mappend (Assignment left) (Assignment right) = Assignment merged
-          where merged = Map.unionWith Monoid.mappend left right
 
 attachComments ::
                Style.Style ->

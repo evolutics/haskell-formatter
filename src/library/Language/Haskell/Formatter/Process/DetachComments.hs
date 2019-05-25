@@ -9,6 +9,7 @@ import qualified Data.List as List
 import qualified Data.Map.Strict as Map
 import qualified Data.Maybe as Maybe
 import qualified Data.Monoid as Monoid
+import qualified Data.Semigroup as Semigroup
 import qualified Language.Haskell.Formatter.CommentCore as CommentCore
 import qualified Language.Haskell.Formatter.ExactCode as ExactCode
 import qualified Language.Haskell.Formatter.Location as Location
@@ -24,9 +25,8 @@ import qualified Language.Haskell.Formatter.Toolkit.StreamName as StreamName
 newtype Reservation = Reservation (Map.Map Location.Line [Note.CommentBox])
                         deriving (Eq, Ord, Show)
 
-instance Monoid.Monoid Reservation where
-        mempty = Reservation Map.empty
-        mappend (Reservation left) (Reservation right) = Reservation merged
+instance Semigroup.Semigroup Reservation where
+        (Reservation left) <> (Reservation right) = Reservation merged
           where merged = Map.unionWith merge left right
                 merge before after = concat [before, between, after]
                   where between
@@ -38,6 +38,9 @@ instance Monoid.Monoid Reservation where
                         Nothing -> False
                         Just (Note.ActualComment _) -> True
                         Just Note.EmptyLine -> False
+
+instance Monoid.Monoid Reservation where
+        mempty = Reservation Map.empty
 
 detachComments ::
                Style.Style ->
