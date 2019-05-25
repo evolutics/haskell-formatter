@@ -1,2 +1,2 @@
-haskell-formatter.cabal
-.stack-work/
+/haskell-formatter.cabal
+/.stack-work/
