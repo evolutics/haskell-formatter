@@ -5,7 +5,7 @@ module Language.Haskell.Formatter.Process.CodeOrdering
        (orderImportDeclarations, orderRootImportEntities,
         orderNestedImportEntities)
        where
-import qualified Language.Haskell.Exts.Annotated.Syntax as Syntax
+import qualified Language.Haskell.Exts.Syntax as Syntax
 import qualified Language.Haskell.Formatter.Process.Code as Code
 import qualified Language.Haskell.Formatter.Source as Source
 import qualified Language.Haskell.Formatter.Toolkit.Visit as Visit
