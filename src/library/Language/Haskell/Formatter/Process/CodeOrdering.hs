@@ -37,8 +37,8 @@ replaceImportDeclarations function
   where importDeclarations' = function importDeclarations
 
 importEntityKey :: Syntax.ImportSpec a -> [String]
-importEntityKey (Syntax.IVar _ _ name) = rootNameKey name
-importEntityKey (Syntax.IAbs _ name) = rootNameKey name
+importEntityKey (Syntax.IVar _ name) = rootNameKey name
+importEntityKey (Syntax.IAbs _ _ name) = rootNameKey name
 importEntityKey (Syntax.IThingAll _ name) = rootNameKey name
 importEntityKey (Syntax.IThingWith _ name entities)
   = nameKey name : fmap nestedImportEntityKey entities

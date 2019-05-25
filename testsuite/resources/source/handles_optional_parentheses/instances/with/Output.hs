@@ -1,4 +1,3 @@
-
 class Sized a where
 
         size :: a -> Int
