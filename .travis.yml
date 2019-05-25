@@ -10,4 +10,4 @@ install:
   - stack --version
 
 script:
-  - stack --system-ghc test
+  - ./build.sh
