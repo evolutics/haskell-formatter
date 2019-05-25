@@ -42,8 +42,7 @@ format formatter exact
        locatableCommentable' <- formatActualCode formatter locatableCommentable
        locatableCommentable'' <- checkedFormatComments formatter
                                    locatableCommentable'
-       exact' <- checkedDetachComments formatter locatableCommentable''
-       return exact'
+       checkedDetachComments formatter locatableCommentable''
   where locatable = ExactCode.actualCode exact
 
 checkedAttachComments ::

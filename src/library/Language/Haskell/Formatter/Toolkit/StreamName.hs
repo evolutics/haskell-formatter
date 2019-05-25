@@ -6,8 +6,8 @@ module Language.Haskell.Formatter.Toolkit.StreamName
 
 {-| An informal reference to a data stream. For example, this could be the name
     of a file stream to be used in error messages. -}
-data StreamName = StreamName String
-                deriving (Eq, Ord)
+newtype StreamName = StreamName String
+                   deriving (Eq, Ord)
 
 instance Show StreamName where
         show (StreamName string) = string

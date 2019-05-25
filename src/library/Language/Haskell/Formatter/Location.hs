@@ -34,11 +34,11 @@ class Portioned a where
 
         getPortion :: a -> SrcLoc.SrcSpan
 
-data Line = Line Int
-          deriving (Eq, Ord, Show)
+newtype Line = Line Int
+             deriving (Eq, Ord, Show)
 
-data Column = Column Int
-            deriving (Eq, Ord, Show)
+newtype Column = Column Int
+               deriving (Eq, Ord, Show)
 
 instance Enum Line where
         toEnum = Line

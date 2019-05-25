@@ -20,8 +20,8 @@ import qualified Language.Haskell.Formatter.Result as Result
 import qualified Language.Haskell.Formatter.Source as Source
 import qualified Language.Haskell.Formatter.Style as Style
 
-data Assignment = Assignment (Map.Map Location.SrcSpan Note.CommentNote)
-                deriving (Eq, Ord, Show)
+newtype Assignment = Assignment (Map.Map Location.SrcSpan Note.CommentNote)
+                   deriving (Eq, Ord, Show)
 
 data CodeGap = InfiniteLower Location.SrcSpan
              | FiniteGap Location.SrcSpan Location.SrcSpan

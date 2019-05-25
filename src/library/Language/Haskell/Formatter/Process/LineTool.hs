@@ -7,8 +7,8 @@ import qualified Data.Map.Strict as Map
 import qualified Language.Haskell.Formatter.Location as Location
 import qualified Language.Haskell.Formatter.Process.Code as Code
 
-data Shifter = Shifter (Map.Map Location.Line Shift)
-             deriving (Eq, Ord, Show)
+newtype Shifter = Shifter (Map.Map Location.Line Shift)
+                deriving (Eq, Ord, Show)
 
 type Shift = Int
 

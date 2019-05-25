@@ -30,7 +30,7 @@ replaceImportDeclarations ::
 replaceImportDeclarations function (Syntax.Module a h p importDeclarations d)
   = Syntax.Module a h p importDeclarations' d
   where importDeclarations' = function importDeclarations
-replaceImportDeclarations _ xmlPage@(Syntax.XmlPage _ _ _ _ _ _ _) = xmlPage
+replaceImportDeclarations _ xmlPage@Syntax.XmlPage{} = xmlPage
 replaceImportDeclarations function
   (Syntax.XmlHybrid a h p importDeclarations d xn xa me e)
   = Syntax.XmlHybrid a h p importDeclarations' d xn xa me e
