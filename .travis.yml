@@ -1,0 +1,13 @@
+language: haskell
+
+cache:
+  directories:
+    - $HOME/.stack
+    - $TRAVIS_BUILD_DIR/.stack-work
+
+install:
+  - curl --silent --show-error --location https://get.haskellstack.org | sh
+  - stack --version
+
+script:
+  - stack --system-ghc test
