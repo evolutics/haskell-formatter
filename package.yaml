@@ -8,7 +8,7 @@ category: Development
 author: Benjamin Fischer
 maintainer: Benjamin Fischer <benjamin.fischer@evolutics.info>
 copyright: (C) 2014–2019 Benjamin Fischer
-license: GPL-3
+license: MIT
 github: evolutics/haskell-formatter.git
 extra-source-files:
   - format.sh
