@@ -38,6 +38,13 @@ If the input or output file is not given, it defaults to the corresponding stand
 haskell-formatter < Input.hs
 ```
 
+To format a file in-place, use the `--force` option as in
+
+```
+# Warning: this overwrites the file `Code.hs`.
+haskell-formatter --force --input Code.hs --output Code.hs
+```
+
 For more help about the usage, call
 
 ```
