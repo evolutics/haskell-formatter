@@ -99,7 +99,3 @@ You may like to have a look at the following projects, which aim at formatting H
 - [hfmt](https://github.com/danstiner/hfmt)
 - [hindent](https://github.com/chrisdone/hindent)
 - [stylish-haskell](https://github.com/jaspervdj/stylish-haskell)
-
-## License
-
-See the [LICENSE file](LICENSE).
