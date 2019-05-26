@@ -10,19 +10,19 @@ The Haskell Formatter formats Haskell source code. It is strict in that it funda
 
 Install it by running
 
-```
+```bash
 stack install haskell-formatter
 ```
 
 or
 
-```
+```bash
 cabal new-install haskell-formatter
 ```
 
 You are ready when
 
-```
+```bash
 haskell-formatter --help
 ```
 
@@ -34,26 +34,26 @@ works.
 
 Read source code from `Input.hs`, format it, and write it to `Output.hs` by
 
-```
+```bash
 haskell-formatter --input Input.hs --output Output.hs
 ```
 
 If the input or output file is not given, it defaults to the corresponding standard stream. This allows commands like
 
-```
+```bash
 haskell-formatter < Input.hs
 ```
 
 To format a file in-place, use the `--force` option as in
 
-```
+```bash
 # Warning: this overwrites the file `Code.hs`.
 haskell-formatter --force --input Code.hs --output Code.hs
 ```
 
 For more help about the usage, call
 
-```
+```bash
 haskell-formatter --help
 ```
 
@@ -61,7 +61,7 @@ haskell-formatter --help
 
 For a diff of how code in the current folder would be formatted, without actually changing anything, run
 
-```
+```bash
 find . -name '*.hs' -type f -print0 \
   | xargs -0 -n 1 bash -c 'haskell-formatter < "$@" | diff -u "$@" -' --
 ```
@@ -70,7 +70,7 @@ The returned exit status is nonzero if there are unformatted files. This may be 
 
 To format any `*.hs` files in a folder `code/` or (recursively) in its subfolders, run
 
-```
+```bash
 # Warning: this overwrites files, so better back them up first.
 find code/ -name '*.hs' -type f -print0 \
   | xargs -0 -I {} -n 1 haskell-formatter --force --input {} --output {}
@@ -80,7 +80,7 @@ find code/ -name '*.hs' -type f -print0 \
 
 The formatting style can be configured with a file referred by the `--style` option. For instance, the call
 
-```
+```bash
 haskell-formatter --style my_style.yaml --input Input.hs --output Output.hs
 ```
 
