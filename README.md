@@ -7,19 +7,19 @@ The Haskell Formatter formats Haskell source code. It is strict in that it funda
 Run
 
 ```
-$ cabal install haskell-formatter
+cabal install haskell-formatter
 ```
 
 to create an executable, which is referred to as `haskell-formatter` in the following. On Linux, for example, you should now be able to call it as
 
 ```
-$ ~/.cabal/bin/haskell-formatter --help
+~/.cabal/bin/haskell-formatter --help
 ```
 
 Alternatively, you can use Stack to build from source with
 
 ```
-$ stack build
+stack build
 ```
 
 ## Usage
@@ -29,19 +29,19 @@ $ stack build
 Read source code from `Input.hs`, format it, and write it to `Output.hs` by
 
 ```
-$ haskell-formatter --input Input.hs --output Output.hs
+haskell-formatter --input Input.hs --output Output.hs
 ```
 
 If the input or output file is not given, it defaults to the corresponding standard stream. This allows commands like
 
 ```
-$ haskell-formatter < Input.hs
+haskell-formatter < Input.hs
 ```
 
 For more help about the usage, call
 
 ```
-$ haskell-formatter --help
+haskell-formatter --help
 ```
 
 ### Style Configuration
@@ -49,7 +49,7 @@ $ haskell-formatter --help
 The formatting style can be configured with a file referred by the `--style` option. For instance, the call
 
 ```
-$ haskell-formatter --style my_style.yaml --input Input.hs --output Output.hs
+haskell-formatter --style my_style.yaml --input Input.hs --output Output.hs
 ```
 
 uses `my_style.yaml` as a style file. Such files are in the [YAML format](http://en.wikipedia.org/wiki/YAML). The following is an [example style file](testsuite/resources/examples/default_style.yaml), which at the same time shows the available keys with their default values.
