@@ -1,5 +1,7 @@
 # Haskell Formatter
 
+[![Build](https://img.shields.io/travis/evolutics/haskell-formatter.svg)](https://travis-ci.org/evolutics/haskell-formatter)
+
 The Haskell Formatter formats Haskell source code. It is strict in that it fundamentally rearranges code.
 
 ## Installation
