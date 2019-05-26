@@ -51,6 +51,25 @@ For more help about the usage, call
 haskell-formatter --help
 ```
 
+### Formatting Many Files
+
+For a diff of how code in the current folder would be formatted, without actually changing anything, run
+
+```
+find . -name '*.hs' -type f -print0 \
+  | xargs -0 -n 1 bash -c 'haskell-formatter < "$@" | diff -u "$@" -' --
+```
+
+The returned exit status is nonzero if there are unformatted files. This may be useful for continuous integration.
+
+To format any `*.hs` files in a folder `code/` or (recursively) in its subfolders, run
+
+```
+# Warning: this overwrites files, so better back them up first.
+find code/ -name '*.hs' -type f -print0 \
+  | xargs -0 -I {} -n 1 haskell-formatter --force --input {} --output {}
+```
+
 ### Style Configuration
 
 The formatting style can be configured with a file referred by the `--style` option. For instance, the call
