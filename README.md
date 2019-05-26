@@ -4,23 +4,25 @@ The Haskell Formatter formats Haskell source code. It is strict in that it funda
 
 ## Installation
 
-Run
+Install it by running
 
 ```
-cabal install haskell-formatter
+stack install haskell-formatter
 ```
 
-to create an executable, which is referred to as `haskell-formatter` in the following. On Linux, for example, you should now be able to call it as
+or
 
 ```
-~/.cabal/bin/haskell-formatter --help
+cabal new-install haskell-formatter
 ```
 
-Alternatively, you can use Stack to build from source with
+You are ready when
 
 ```
-stack build
+haskell-formatter --help
 ```
+
+works.
 
 ## Usage
 
