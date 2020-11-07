@@ -1,6 +1,5 @@
 # Haskell Formatter
 
-[![Build](https://img.shields.io/travis/evolutics/haskell-formatter.svg)](https://travis-ci.org/evolutics/haskell-formatter)
 [![License](https://img.shields.io/github/license/evolutics/haskell-formatter.svg)](LICENSE)
 [![Package](https://img.shields.io/hackage/v/haskell-formatter.svg)](https://hackage.haskell.org/package/haskell-formatter)
 
