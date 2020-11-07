@@ -1,5 +1,5 @@
 name: haskell-formatter
-version: "2.0.2"
+version: "2.0.3"
 synopsis: Haskell source code formatter
 description: >
   The Haskell Formatter formats Haskell source code. It is strict in that it
