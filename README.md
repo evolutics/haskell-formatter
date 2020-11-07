@@ -4,7 +4,30 @@
 [![License](https://img.shields.io/github/license/evolutics/haskell-formatter.svg)](LICENSE)
 [![Package](https://img.shields.io/hackage/v/haskell-formatter.svg)](https://hackage.haskell.org/package/haskell-formatter)
 
+This is [**deprecated**](#deprecation-notice).
+
 The Haskell Formatter formats Haskell source code. It is strict in that it fundamentally rearranges code.
+
+## Deprecation notice
+
+The Haskell Formatter is deprecated. If you think it should still be maintained, please let me know.
+
+Take a look at the following projects, which aim at formatting Haskell code, too.
+
+- [brittany](https://github.com/lspitzner/brittany)
+- [hfmt](https://github.com/danstiner/hfmt)
+- [hindent](https://github.com/mihaimaruseac/hindent)
+- [stylish-haskell](https://github.com/jaspervdj/stylish-haskell)
+
+Personally, I like **hindent,** to which you can migrate as follows.
+
+| Use case                       | Haskell Formatter                                      | hindent                    |
+| ------------------------------ | ------------------------------------------------------ | -------------------------- |
+| Format file in-place           | `haskell-formatter --force --input a.hs --output a.hs` | `hindent a.hs`             |
+| Format multiple files in-place | [Not supported out-of-the-box](#formatting-many-files) | `hindent a.hs b.hs`        |
+| Format stdin to stdout         | `haskell-formatter`                                    | `hindent`                  |
+| Order imports                  | Done by [default](#style-configuration)                | `hindent --sort-imports …` |
+| Get help                       | `haskell-formatter --help`                             | `hindent --help`           |
 
 ## Installation
 
@@ -122,12 +145,3 @@ order:
   # Entities of import lists.
   import_entities: true
 ```
-
-## Related Projects
-
-You may like to have a look at the following projects, which aim at formatting Haskell code, too.
-
-- [brittany](https://github.com/lspitzner/brittany)
-- [hfmt](https://github.com/danstiner/hfmt)
-- [hindent](https://github.com/mihaimaruseac/hindent)
-- [stylish-haskell](https://github.com/jaspervdj/stylish-haskell)
