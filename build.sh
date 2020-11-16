@@ -5,9 +5,5 @@ set -o nounset
 set -o pipefail
 
 readonly SCRIPT_FOLDER="$(dirname "$(readlink --canonicalize "$0")")"
-
-pushd "${SCRIPT_FOLDER}"
-
+cd "${SCRIPT_FOLDER}"
 stack --system-ghc test
-
-popd
