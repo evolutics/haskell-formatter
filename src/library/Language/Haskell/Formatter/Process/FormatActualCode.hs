@@ -30,7 +30,7 @@ prettyPrint style locatableCommentable
           where message = "Formatting the actual code failed to parse."
         Source.ParseOk possiblyChanged -> tryUnwrap maybeLocatable'
           where maybeLocatable'
-                  = Visit.halfZipWith (flip const) locatable possiblyChanged
+                  = Visit.halfZipWith (const id) locatable possiblyChanged
   where parseResult
           = Source.parseFileContents $ defaultPrettyPrint style locatable
         locatable = Code.dropComments locatableCommentable

@@ -4,6 +4,7 @@ Description : Trees with unique labels
 module Language.Haskell.Formatter.Internal.MapTree
        (MapTree(..), MapForest, isEmpty, summarizeLeaves, indentTree) where
 import qualified Control.Applicative as Applicative
+import qualified Control.Monad as Monad
 import qualified Data.Map.Strict as Map
 import qualified Data.Monoid as Monoid
 import qualified Language.Haskell.Formatter.Internal.Newline as Newline
@@ -42,7 +43,7 @@ indentTree :: MapTree String String -> String
 indentTree = Newline.joinSeparatedLines . indentLines
   where indentLines (Leaf value) = Newline.splitSeparatedLines value
         indentLines (Node forest) = foldMapWithKey indentBinding forest
-        foldMapWithKey create = (>>= uncurry create) . Map.toAscList
+        foldMapWithKey create = uncurry create Monad.<=< Map.toAscList
         indentBinding label tree = Monoid.mappend labelLines treeLines
           where labelLines = Newline.splitSeparatedLines label
                 treeLines = indent Applicative.<$> indentLines tree
